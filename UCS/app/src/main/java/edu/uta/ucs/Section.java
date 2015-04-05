@@ -33,7 +33,7 @@ enum Day {
  * Created by arunk_000 on 4/5/2015.
  */
 public class Section {
-    private int sectionID;
+    private int sectionID;                                                                          // Class Number in UTA system
     private String instructors;
     private Date startTime;
     private Date endTime;
@@ -41,7 +41,7 @@ public class Section {
     private ClassStatus status;
 
     Section() {
-        this.setSectionNumber(0);
+        this.setSectionID(0);
         this.setInstructors(null);
         this.setStartTime(null);
         this.setEndTime(null);
@@ -50,16 +50,12 @@ public class Section {
     }
 
     Section(int number, String instructors, Date startTime, Date endTime, Set<Day> days, ClassStatus status) {
-        this.setSectionNumber(number);
+        this.setSectionID(number);
         this.setInstructors(instructors);
         this.setStartTime(startTime);
         this.setEndTime(endTime);
         this.setDays(days);
         this.setStatus(status);
-    }
-
-    public void setSectionNumber(int newSectionNumber) {
-        this.setSectionID(newSectionNumber);
     }
 
     public String getInstructors() {
@@ -111,19 +107,19 @@ public class Section {
     }
 
     public boolean conflictsWith(Section Other) {
-        if (!Collections.disjoint(this.getDays(), Other.getDays()))
+        if (!Collections.disjoint(this.getDays(), Other.getDays()))                                 //If there is overlap between the two sets
             return (
                     (this.getEndTime().after(Other.getStartTime()))
                             &&
-                            (this.getStartTime().before(Other.getEndTime())))
+                            (this.getStartTime().before(Other.getEndTime())))                       // this section intersects the end of other section
                     ||
                     ((Other.getEndTime().after(this.getStartTime()))
                             &&
-                            (Other.getStartTime().before(this.getEndTime()))
+                            (Other.getStartTime().before(this.getEndTime()))                        // this section intersects the beginning of other section
                             ||
-                            this.getStartTime().equals(Other.getStartTime())
+                            this.getStartTime().equals(Other.getStartTime())                        // start times match
                             ||
-                            this.getEndTime().equals(Other.getEndTime())
+                            this.getEndTime().equals(Other.getEndTime())                            // end times match
                     );
         else return false;
     }

@@ -29,6 +29,13 @@ public class Course {
         this.setCourseName(name);
     }
 
+    public boolean addSection(Section sectionToAdd) {
+        if (!sectionList.contains(sectionToAdd)) {
+            sectionList.add(sectionToAdd);
+            return false;
+        } else return true;
+    }
+
     public String getCourseDepartment() {
         return courseDepartment;
     }
