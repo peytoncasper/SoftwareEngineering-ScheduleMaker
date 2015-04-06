@@ -1,26 +1,31 @@
 package edu.uta.ucs;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 
 
 public class MainActivity extends ActionBarActivity {
 
-    TextView mainTest;
+    TextView mainText;
+    String[] desiredCourseList = {"3330", "2320"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        mainTest = (TextView) findViewById(R.id.mainText);
+        Intent intent = getIntent();
+        mainText = (TextView) findViewById(R.id.mainText);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        startMethod();
     }
 
     @Override
@@ -43,5 +48,15 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void startMethod(){
+        Intent i = new Intent(this, DatabaseService.class);
+        i.putExtra("url", "http://softengbackend.cloudapp.net/UTA/ClassStatus?classNumbers=");
+        startService(i);
+    }
+    public void stopMethod(){
+        Intent i = new Intent(this, DatabaseService.class);
+        stopService(i);
     }
 }
