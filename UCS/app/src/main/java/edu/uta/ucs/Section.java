@@ -107,7 +107,7 @@ public class Section {
     }
 
     public boolean conflictsWith(Section Other) {
-        if (!Collections.disjoint(this.getDays(), Other.getDays()))                                 //If there is overlap between the two sets
+        if (!Collections.disjoint(this.getDays(), Other.getDays()))                                 //If there is overlap between the two sets of days
             return (
                     (this.getEndTime().after(Other.getStartTime()))
                             &&
