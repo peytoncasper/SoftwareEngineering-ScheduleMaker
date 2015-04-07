@@ -98,6 +98,9 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         TimeShort testTime = new TimeShort("5:25PM");
         Log.d("TimeTest24", testTime.toString24h());
         Log.d("TimeTest12", testTime.toString12h());
+
+        Day day = Day.valueOf("M");
+        Log.d("DayTest", day.toString());
     }
     /**
      * Attempts to sign in or register the account specified by the login form.

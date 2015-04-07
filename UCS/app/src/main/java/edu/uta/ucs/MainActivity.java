@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import org.json.JSONArray;
@@ -20,11 +21,12 @@ import java.util.HashMap;
 
 public class MainActivity extends ActionBarActivity {
 
-    TextView mainText;
+    private TextView mainText;
+    private Switch spoofServerSwitch;
     String[] desiredCourseList = {"CSE-3330", "CSE-2320"};
     String baseURL = "http://ucs-scheduler.cloudapp.net/UTA/ClassStatus?classes=";
 
-    TextView resonseDisplay;
+    TextView responseDisplay;
 
     HTTPGetService HTTPGetService;
     boolean dbServiceStatus;
@@ -61,8 +63,11 @@ public class MainActivity extends ActionBarActivity {
         receiver = new ResponseReceiver();
         registerReceiver(receiver, filter);
 
-        resonseDisplay = (TextView)findViewById(R.id.textView);
-        resonseDisplay.setText("Test Display");
+        spoofServerSwitch = (Switch) findViewById(R.id.spoofServer);
+        spoofServerSwitch.setChecked(true);
+
+        responseDisplay = (TextView)findViewById(R.id.textView);
+        responseDisplay.setText("Fetch Data to Display the resulting JSON");
     }
 
     @Override
@@ -89,10 +94,10 @@ public class MainActivity extends ActionBarActivity {
         if (classTextField.length() > 0 ) urlBuilder.append(classTextField + ",");
         String url = urlBuilder.length() > 0 ? urlBuilder.substring( 0, urlBuilder.length() - 1 ): "";
 
-        Log.d("Request URL: ", url);
-
+        boolean switchStatus = spoofServerSwitch.isChecked();
         Intent intent = new Intent(this, HTTPGetService.class);
-        intent.putExtra("url", url);
+        intent.putExtra("edu.uta.ucs.URL_REQUEST", url);
+        intent.putExtra("edu.uta.ucs.SPOOF_SERVER_RESPONSE", switchStatus);
         startService(intent);
 }
 
@@ -107,13 +112,15 @@ public class MainActivity extends ActionBarActivity {
         public void onReceive(Context context, Intent intent) {
             String response = intent.getStringExtra("edu.uta.ucs.SERVER_RESPONSE");
             Log.d("Received: ",response);
-            resonseDisplay.setText("About to Show text!");
-            resonseDisplay.setText(response);
+            responseDisplay.setText("About to Show text!");
+            responseDisplay.setText(response);
 
 
             try {
                 JSONObject rawResult = new JSONObject(response);
                 JSONArray jsonCourses = rawResult.getJSONArray("Results");
+                float timeTaken = Float.parseFloat(rawResult.getString("TimeTaken"));
+                Log.d("New Request Time Taken:", Float.toString(timeTaken));
                 ArrayList<Course> courseList = new ArrayList<Course>(jsonCourses.length());
 
                 for(int index = jsonCourses.length(); index != 0;index--){
@@ -121,7 +128,7 @@ public class MainActivity extends ActionBarActivity {
                     courseList.add( new Course(jsonCourses.getJSONObject(index - 1)));
                 }
 
-                resonseDisplay.setText(response);
+                responseDisplay.setText(response);
             } catch (JSONException e) {
                 e.printStackTrace();
             }

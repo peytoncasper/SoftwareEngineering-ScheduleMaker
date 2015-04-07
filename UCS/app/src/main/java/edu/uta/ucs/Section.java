@@ -6,6 +6,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
@@ -67,38 +68,33 @@ class TimeShort {
 }
 
 enum ClassStatus {
-    OPEN("Open"), CLOSE("Closed");
+    OPEN("OPEN"), CLOSED("CLOSED");
 
     private String value;
 
-    ClassStatus(String setValue) {
-        this.value = setValue;
+    ClassStatus(final String value){
+        this.value = value;
     }
 
-    String getValue() {
-        return value;
+    @Override
+    public String toString() {
+        return this.value;
     }
 }
 
 enum Day {
-    MONDAY("M"),
-    TUESDAY("TU"),
-    WEDNESDAY("W"),
-    THURSDAY("TH"),
-    FRIDAY("F"),
-    SATURDAY("S");
+    M("M"), TU("TU"), W("W"), TH("TH"), F("F"), SA("SA");
 
-    private String abbreviation;
+    private String value;
 
-    Day(String abbrev) {
-        this.abbreviation = abbrev;
+    Day(final String value){
+        this.value = value;
     }
 
-    String getAbbreviation() {
-        return abbreviation;
+    @Override
+    public String toString() {
+        return this.value;
     }
-
-
 }
 
 /**
@@ -111,7 +107,7 @@ public class Section {
     private String room;
     private TimeShort startTime;
     private TimeShort endTime;
-    private Set<Day> days;
+    private ArrayList<Day> days;
     private ClassStatus status;
     Section() {
         this.setSectionID(0);
@@ -123,7 +119,7 @@ public class Section {
         this.setStatus(null);
     }
 
-    Section(int number, String instructors, String room, TimeShort startTime, TimeShort endTime, Set<Day> days, ClassStatus status) {
+    Section(int number, String instructors, String room, TimeShort startTime, TimeShort endTime, ArrayList<Day> days, ClassStatus status) {
         this.setSectionID(number);
         this.setInstructors(instructors);
         this.setRoom(room);
@@ -134,18 +130,39 @@ public class Section {
     }
 
     Section(JSONObject jsonObject) throws JSONException {
+
         this.setSectionID(Integer.parseInt(jsonObject.getString("CourseNumber")));
         Log.d("New Section ID", ((Integer)getSectionID()).toString());
+
         this.setSectionNumber(Integer.parseInt(jsonObject.getString("Section")));
         Log.d("New Section Number", ((Integer)getSectionNumber()).toString());
+
         this.setRoom(jsonObject.getString("Room"));
         Log.d("New Section Room", getRoom());
+
         this.setInstructors(jsonObject.getString("Instructor"));
         Log.d("New Section Instructor", getInstructors());
+
         String times[] = jsonObject.getString("MeetingTime").split("-");
         this.setStartTime(new TimeShort(times[0]));
         this.setEndTime(new TimeShort(times[1]));
         Log.d("New Section MeetingTime", getStartTime().toString24h()+ "-" + getEndTime().toString24h());
+
+        JSONArray jsonDaysArray = jsonObject.getJSONArray("MeetingDays");
+        Log.d("New Section Days List:", jsonDaysArray.toString());
+
+        days = new ArrayList<Day>(jsonDaysArray.length());
+
+        for(int index = jsonDaysArray.length(); index != 0;index--){
+            Day temp = Day.valueOf(jsonDaysArray.getString(index -1));
+            days.add(temp);
+            Log.d("New Section Day: ", ((Day)days.get(days.size()-1)).toString());
+            Day temp2 = (Day)days.get(0);
+        }
+        Log.d("New Days in Section: ", ((Integer) days.size()).toString());
+
+        setStatus(ClassStatus.valueOf(jsonObject.getString("Status")));
+        Log.d("New Section Status: ", getStatus().toString());
     }
 
     public String getInstructors() {
@@ -172,11 +189,11 @@ public class Section {
         this.endTime = endTime;
     }
 
-    public Set<Day> getDays() {
+    public ArrayList<Day> getDays() {
         return days;
     }
 
-    public void setDays(Set<Day> days) {
+    public void setDays(ArrayList<Day> days) {
         this.days = days;
     }
 
@@ -207,11 +224,11 @@ public class Section {
     public boolean conflictsWith(Section Other) {
         if (!Collections.disjoint(this.getDays(), Other.getDays()))                                 //If there is overlap between the two sets of days
             return (
-                    (this.getEndTime().after(Other.getStartTime()))
+                            (this.getEndTime().after(Other.getStartTime()))
                             &&
                             (this.getStartTime().before(Other.getEndTime())))                       // this section intersects the end of other section
                     ||
-                    ((Other.getEndTime().after(this.getStartTime()))
+                            ((Other.getEndTime().after(this.getStartTime()))
                             &&
                             (Other.getStartTime().before(this.getEndTime()))                        // this section intersects the beginning of other section
                             ||
