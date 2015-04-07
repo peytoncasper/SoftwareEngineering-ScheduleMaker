@@ -1,11 +1,83 @@
 package edu.uta.ucs;
 
+import android.util.Log;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
 
+class TimeShort {
+    private byte hour;
+    private byte minute;
+
+     public TimeShort(){
+         this.hour = 0;
+         this.minute = 0;
+     }
+
+    public TimeShort(byte hour, byte minute){
+        this.hour = hour;
+        this.minute = minute;
+    }
+
+    public TimeShort(int hour, int minute){
+        this.hour = (byte) hour;
+        this.minute = (byte) minute;
+    }
+
+    public TimeShort(String timeAsString){
+        String[] times = timeAsString.split(":");
+        this.hour = Byte.parseByte(times[0]);
+        this.minute = Byte.parseByte(times[1].substring(0,2));
+        if (times[1].substring(2).equalsIgnoreCase("PM")){
+            this.hour += 12;
+        }
+
+    }
+
+    public boolean after(TimeShort other){
+        return this.getMinAfterMidnight() > other.getMinAfterMidnight();
+    }
+
+    public boolean before(TimeShort other){
+        return this.getMinAfterMidnight() < other.getMinAfterMidnight();
+    }
+
+    public boolean equals(TimeShort other){
+        return this.getMinAfterMidnight() == other.getMinAfterMidnight();
+    }
+
+    public String toString24h() {
+        String result = String.format("%d", this.hour) + ":" + String.format("%02d", this.minute);
+        return result;
+    }
+
+    public String toString12h() {
+        String result = String.format("%d", this.hour%12) + ":" + String.format("%02d", this.minute) + (this.hour > 12 ? "PM": "AM");
+        return result;
+    }
+
+    public int getMinAfterMidnight(){
+        return ((this.hour * 60) + this.minute);
+    }
+}
+
 enum ClassStatus {
-    OPEN, CLOSE
+    OPEN("Open"), CLOSE("Closed");
+
+    private String value;
+
+    ClassStatus(String setValue) {
+        this.value = setValue;
+    }
+
+    String getValue() {
+        return value;
+    }
 }
 
 enum Day {
@@ -36,27 +108,44 @@ public class Section {
     private int sectionID;                                                                          // Class Number in UTA system
     private int sectionNumber;                                                                      // Section number as part of class
     private String instructors;
-    private Date startTime;
-    private Date endTime;
+    private String room;
+    private TimeShort startTime;
+    private TimeShort endTime;
     private Set<Day> days;
     private ClassStatus status;
-
     Section() {
         this.setSectionID(0);
         this.setInstructors(null);
+        this.setRoom(null);
         this.setStartTime(null);
         this.setEndTime(null);
         this.setDays(null);
         this.setStatus(null);
     }
 
-    Section(int number, String instructors, Date startTime, Date endTime, Set<Day> days, ClassStatus status) {
+    Section(int number, String instructors, String room, TimeShort startTime, TimeShort endTime, Set<Day> days, ClassStatus status) {
         this.setSectionID(number);
         this.setInstructors(instructors);
+        this.setRoom(room);
         this.setStartTime(startTime);
         this.setEndTime(endTime);
         this.setDays(days);
         this.setStatus(status);
+    }
+
+    Section(JSONObject jsonObject) throws JSONException {
+        this.setSectionID(Integer.parseInt(jsonObject.getString("CourseNumber")));
+        Log.d("New Section ID", ((Integer)getSectionID()).toString());
+        this.setSectionNumber(Integer.parseInt(jsonObject.getString("Section")));
+        Log.d("New Section Number", ((Integer)getSectionNumber()).toString());
+        this.setRoom(jsonObject.getString("Room"));
+        Log.d("New Section Room", getRoom());
+        this.setInstructors(jsonObject.getString("Instructor"));
+        Log.d("New Section Instructor", getInstructors());
+        String times[] = jsonObject.getString("MeetingTime").split("-");
+        this.setStartTime(new TimeShort(times[0]));
+        this.setEndTime(new TimeShort(times[1]));
+        Log.d("New Section MeetingTime", getStartTime().toString24h()+ "-" + getEndTime().toString24h());
     }
 
     public String getInstructors() {
@@ -67,19 +156,19 @@ public class Section {
         this.instructors = instructors;
     }
 
-    public Date getStartTime() {
+    public TimeShort getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(Date startTime) {
+    public void setStartTime(TimeShort startTime) {
         this.startTime = startTime;
     }
 
-    public Date getEndTime() {
+    public TimeShort getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(Date endTime) {
+    public void setEndTime(TimeShort endTime) {
         this.endTime = endTime;
     }
 
@@ -107,6 +196,14 @@ public class Section {
         this.sectionID = sectionID;
     }
 
+    public int getSectionNumber() {
+        return sectionNumber;
+    }
+
+    public void setSectionNumber(int sectionNumber) {
+        this.sectionNumber = sectionNumber;
+    }
+
     public boolean conflictsWith(Section Other) {
         if (!Collections.disjoint(this.getDays(), Other.getDays()))                                 //If there is overlap between the two sets of days
             return (
@@ -125,11 +222,11 @@ public class Section {
         else return false;
     }
 
-    public int getSectionNumber() {
-        return sectionNumber;
+    public String getRoom() {
+        return room;
     }
 
-    public void setSectionNumber(int sectionNumber) {
-        this.sectionNumber = sectionNumber;
+    public void setRoom(String room) {
+        this.room = room;
     }
 }

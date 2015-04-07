@@ -77,13 +77,6 @@ public class HTTPGetService extends IntentService {
         Log.d("Service Test", "Service has been stopped");
 
     }
-
-    public String checkURL(){
-        String result = null;
-
-        return result;
-    }
-
     /**
      * Making service call
      * @url - url to make request
@@ -91,8 +84,8 @@ public class HTTPGetService extends IntentService {
     public String fetchJSON(String url) {
 
         Log.d("Service URL:",url);
-        String response = "";
-
+        String response = "{\"Results\":[{\"CourseId\":\"CSE-3330\",\"CourseName\":\"CSE 3330 - DATABASE SYSTEMS AND FILE STRUCTURES\",\"CourseResults\":[{\"MeetingDays\":[\"TU\",\"TH\"],\"CourseNumber\":\"89473\",\"Section\":\"001\",\"CourseName\":null,\"Room\":\"TBA\",\"Instructor\":\"Medhat M Saleh\",\"MeetingTime\":\"2:00PM-4:50PM\",\"Status\":\"Open\"}]},{\"CourseId\":\"CSE-2320\",\"CourseName\":null,\"CourseResults\":[]}],\"TimeTaken\":31.0528224}";
+        /*
         try {
             // http client
             DefaultHttpClient httpClient = new DefaultHttpClient();
@@ -117,6 +110,7 @@ public class HTTPGetService extends IntentService {
         }
 
         //Log.d("JSON reply:",response);
+        */
 
         return response;
     }

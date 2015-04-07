@@ -79,12 +79,14 @@ public class MainActivity extends ActionBarActivity {
     public void requestJSON(View view){
 
         StringBuilder urlBuilder = new StringBuilder(baseURL);
-        //String classTextField = ((TextView) findViewById(R.id.editText)).toString();
+        String classTextField = ((TextView) findViewById(R.id.editText)).getText().toString();
         for(String string: desiredCourseList){
             urlBuilder.append(string);
             urlBuilder.append(",");
         }
-        //if (classTextField.length() > 0 ) urlBuilder.append(classTextField.toUpperCase() + ",");
+
+        Log.d("classTextField",classTextField);
+        if (classTextField.length() > 0 ) urlBuilder.append(classTextField + ",");
         String url = urlBuilder.length() > 0 ? urlBuilder.substring( 0, urlBuilder.length() - 1 ): "";
 
         Log.d("Request URL: ", url);
@@ -107,6 +109,22 @@ public class MainActivity extends ActionBarActivity {
             Log.d("Received: ",response);
             resonseDisplay.setText("About to Show text!");
             resonseDisplay.setText(response);
+
+
+            try {
+                JSONObject rawResult = new JSONObject(response);
+                JSONArray jsonCourses = rawResult.getJSONArray("Results");
+                ArrayList<Course> courseList = new ArrayList<Course>(jsonCourses.length());
+
+                for(int index = jsonCourses.length(); index != 0;index--){
+                    Log.d("New Course: ", jsonCourses.getJSONObject(index - 1).toString());
+                    courseList.add( new Course(jsonCourses.getJSONObject(index - 1)));
+                }
+
+                resonseDisplay.setText(response);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
             /*  JSON Parsing Example from http://www.androidhive.info/2012/01/android-json-parsing-tutorial/
             if (response != null) {

@@ -17,6 +17,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -94,6 +95,9 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
     public void onResume(){
         super.onResume();
+        TimeShort testTime = new TimeShort("5:25PM");
+        Log.d("TimeTest24", testTime.toString24h());
+        Log.d("TimeTest12", testTime.toString12h());
     }
     /**
      * Attempts to sign in or register the account specified by the login form.

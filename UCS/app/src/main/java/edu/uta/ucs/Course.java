@@ -1,5 +1,11 @@
 package edu.uta.ucs;
 
+import android.util.Log;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 /**
@@ -27,6 +33,23 @@ public class Course {
         this.setCourseDepartment(courseDepartment);
         this.setCourseID(courseID);
         this.setCourseName(name);
+    }
+
+    Course(JSONObject jsonObject) throws JSONException {
+        this.setCourseName(jsonObject.getString("CourseName"));
+        Log.d("New Course Name", getCourseName());
+        String[] courseInfo = jsonObject.getString("CourseId").split("-");
+        this.setCourseDepartment(courseInfo[0]);
+        this.setCourseID(courseInfo[1]);
+        Log.d("New Course ID", getCourseDepartment() + " " + getCourseID());
+        JSONArray jsonSectionList = jsonObject.getJSONArray("CourseResults");
+        sectionList = new ArrayList<Section>(jsonSectionList.length());
+
+        for(int index = jsonSectionList.length(); index != 0;index--){
+            Log.d("New Course Section: ",jsonSectionList.getJSONObject( index-1 ).toString());
+            this.sectionList.add(new Section(jsonSectionList.getJSONObject(index - 1)));
+            Log.d("New Course Section: ", "Section Added");
+        }
     }
 
     public boolean addSection(Section sectionToAdd) {
