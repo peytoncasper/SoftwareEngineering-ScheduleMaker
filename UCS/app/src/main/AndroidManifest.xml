@@ -28,7 +28,7 @@
             android:label="@string/title_activity_main" />
 
         <service
-            android:name=".DatabaseService"
+            android:name=".HTTPGetService"
             android:exported="false" >
         </service>
     </application>

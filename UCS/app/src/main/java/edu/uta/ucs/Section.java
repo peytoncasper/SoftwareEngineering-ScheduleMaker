@@ -34,6 +34,7 @@ enum Day {
  */
 public class Section {
     private int sectionID;                                                                          // Class Number in UTA system
+    private int sectionNumber;                                                                      // Section number as part of class
     private String instructors;
     private Date startTime;
     private Date endTime;
@@ -124,4 +125,11 @@ public class Section {
         else return false;
     }
 
+    public int getSectionNumber() {
+        return sectionNumber;
+    }
+
+    public void setSectionNumber(int sectionNumber) {
+        this.sectionNumber = sectionNumber;
+    }
 }
