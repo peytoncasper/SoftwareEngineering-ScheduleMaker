@@ -241,7 +241,7 @@ public class Section {
         if(this.hasTimes()){
             return startTime.toString24h() + "-" + endTime.toString24h();
         }
-        return "TBA";
+        return "UNKNOWN/TBA";
     }
 
     public ArrayList<Day> getDays() {
@@ -333,19 +333,19 @@ public class Section {
     }
 
     /**
-     * Compares this section against all the courses in this arraylist of courses.
+     * Compares this section against all the sections in a provided arraylist of sections.
      * Gets each course in the arraylist and runs a conflictsWith against it.
      *
-     * @param courseArrayList  The arraylist of courses to compare this section against.
+     * @param sectionArrayList  The arraylist of courses to compare this section against.
      * @return boolean
      *          <ul>
      *          true - conflict detected
      *          <p>false - no conflict detected
      *          <ul/>
      */
-    public boolean conflictsWith(ArrayList<Course> courseArrayList) {
-        for(Course course : courseArrayList){
-            if(this.conflictsWith(course))
+    public boolean conflictsWith(ArrayList<Section> sectionArrayList) {
+        for(Section section : sectionArrayList){
+            if(this.conflictsWith(section))
                 return true;
         }
         return false;
