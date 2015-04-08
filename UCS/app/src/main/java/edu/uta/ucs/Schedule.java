@@ -38,3 +38,12 @@ public class Schedule {
         private ArrayList<Course> potentialCourses;
     }
 }
+
+class NoSchedulesPossibleException extends Exception {
+
+    public NoSchedulesPossibleException() {}
+
+    public NoSchedulesPossibleException(String message) {
+        super(message);
+    }
+}
