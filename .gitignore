@@ -212,3 +212,4 @@ FakesAssemblies/
 *.suo
 *.suo
 ArchosAPI/ArchosAPI.v12.suo
+*.db
