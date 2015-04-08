@@ -117,10 +117,14 @@ public class HTTPGetService extends IntentService {
 
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
+            Log.d("Service Test", "HTTP Request Failed - UnsupportedEncodingException");
         } catch (ClientProtocolException e) {
             e.printStackTrace();
+            Log.d("Service Test", "HTTP Request Failed - ClientProtocolException");
         } catch (IOException e) {
             e.printStackTrace();
+            Log.d("Service Test", "HTTP Request Failed - IOException");
+            response = "Server Request Timed-out";
         }
 
         Log.d("Server reply:", response);

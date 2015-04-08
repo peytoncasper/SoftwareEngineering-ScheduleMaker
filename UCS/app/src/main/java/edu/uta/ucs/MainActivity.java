@@ -21,17 +21,6 @@ import java.util.HashMap;
 
 public class MainActivity extends ActionBarActivity {
 
-    private TextView mainText;
-    private Switch spoofServerSwitch;
-    String[] desiredCourseList = {"CSE-3330", "CSE-2320"};
-    String baseURL = "http://ucs-scheduler.cloudapp.net/UTA/ClassStatus?classes=";
-
-    TextView responseDisplay;
-
-    HTTPGetService HTTPGetService;
-    boolean dbServiceStatus;
-    private ResponseReceiver receiver;
-
     // Variables from JSON Parsing Example at http://www.androidhive.info/2012/01/android-json-parsing-tutorial/
     // JSON Node names
     private static final String TAG_CONTACTS = "contacts";
@@ -44,13 +33,18 @@ public class MainActivity extends ActionBarActivity {
     private static final String TAG_PHONE_MOBILE = "mobile";
     private static final String TAG_PHONE_HOME = "home";
     private static final String TAG_PHONE_OFFICE = "office";
-
+    String[] desiredCourseList = {"CSE-3330", "CSE-2320"};
+    String baseURL = "http://ucs-scheduler.cloudapp.net/UTA/ClassStatus?classes=";
+    TextView responseDisplay;
+    HTTPGetService HTTPGetService;
+    boolean dbServiceStatus;
     // contacts JSONArray
     JSONArray contacts = null;
-
     // Hashmap for ListView
     ArrayList<HashMap<String, String>> contactList;
-
+    private TextView mainText;
+    private Switch spoofServerSwitch;
+    private ResponseReceiver receiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +61,7 @@ public class MainActivity extends ActionBarActivity {
         spoofServerSwitch.setChecked(true);
 
         responseDisplay = (TextView)findViewById(R.id.textView);
-        responseDisplay.setText("Fetch Data to Display the resulting JSON");
+        responseDisplay.setText("Press FETCH JSON to attempt a data fetch");
     }
 
     @Override
@@ -82,6 +76,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void requestJSON(View view){
+        responseDisplay.setText("Please wait, attempting to fetch data...");
 
         StringBuilder urlBuilder = new StringBuilder(baseURL);
         String classTextField = ((TextView) findViewById(R.id.editText)).getText().toString();
