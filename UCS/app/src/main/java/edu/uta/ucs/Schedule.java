@@ -34,7 +34,7 @@ public class Schedule {
         this.selectedSections = selectedSections;
     }
 
-    public ArrayList<Section> scheduleFactory(int index, ArrayList<Course> courseArrayList, ArrayList<Section> sectionArrayList){
+    public ArrayList<Section> scheduleFactory(int index, ArrayList<Course> courseArrayList, ArrayList<Section> sectionArrayList) throws NoSchedulesPossibleException{
 
         Course course = courseArrayList.get(index);
         ArrayList<Section> possibleSections = course.getSectionList();
@@ -49,7 +49,7 @@ public class Schedule {
                 }
             }
 
-        }//Throw NoSchedulesPossibleException
+        }throw new NoSchedulesPossibleException();
 
     }
 }
