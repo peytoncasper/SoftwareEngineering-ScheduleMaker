@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="listitem_text_course">Course</string>
+
+    <string name="listitem_text_days">Days</string>
+    <string name="listitem_text_room">Room</string>
+    <string name="listitem_text_instructors">Instructors</string>
+
+    <string name="listitem_text_times">Times</string>
+    <string name="listitem_text_id">Section ID</string>
+    <string name="listitem_text_full_designation">Full Name</string>
+
+</resources>

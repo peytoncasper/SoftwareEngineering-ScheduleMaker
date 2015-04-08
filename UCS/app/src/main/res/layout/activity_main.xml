@@ -43,7 +43,7 @@
 
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:id="@+id/scrollView"
             android:layout_gravity="center_horizontal"
             android:nestedScrollingEnabled="false">
@@ -59,6 +59,13 @@
                 android:longClickable="true"
                 android:linksClickable="true" />
         </ScrollView>
+
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/listView"
+            android:layout_gravity="center_horizontal"
+            android:choiceMode="singleChoice" />
 
     </LinearLayout>
 

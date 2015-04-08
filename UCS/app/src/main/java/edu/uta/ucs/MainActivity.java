@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -16,6 +18,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 
@@ -44,6 +47,7 @@ public class MainActivity extends ActionBarActivity {
     ArrayList<HashMap<String, String>> contactList;
     private TextView mainText;
     private Switch spoofServerSwitch;
+    private ListView sectionListView;
     private ResponseReceiver receiver;
 
     @Override
@@ -62,6 +66,9 @@ public class MainActivity extends ActionBarActivity {
 
         responseDisplay = (TextView)findViewById(R.id.textView);
         responseDisplay.setText("Press FETCH JSON to attempt a data fetch");
+
+        sectionListView = (ListView) findViewById(R.id.listView);
+
     }
 
     @Override
@@ -109,24 +116,37 @@ public class MainActivity extends ActionBarActivity {
             Log.d("Received: ",response);
             responseDisplay.setText("About to Show text!");
             responseDisplay.setText(response);
-
+            ArrayList<Course> courseList = new ArrayList<Course>();
+            int numberOfSectionsTotal = 0;
 
             try {
                 JSONObject rawResult = new JSONObject(response);
                 JSONArray jsonCourses = rawResult.getJSONArray("Results");
                 float timeTaken = Float.parseFloat(rawResult.getString("TimeTaken"));
                 Log.d("New Request Time Taken:", Float.toString(timeTaken));
-                ArrayList<Course> courseList = new ArrayList<Course>(jsonCourses.length());
+                courseList.ensureCapacity(jsonCourses.length());
 
                 for(int index = jsonCourses.length(); index != 0;index--){
                     Log.d("New Course: ", jsonCourses.getJSONObject(index - 1).toString());
                     courseList.add( new Course(jsonCourses.getJSONObject(index - 1)));
+                    numberOfSectionsTotal++;
                 }
+                Collections.reverse(courseList);
 
                 responseDisplay.setText(response);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+
+            ArrayList<Section> sectionArrayList = new ArrayList<Section>(numberOfSectionsTotal);
+            for (Course course : courseList){
+                sectionArrayList.addAll(course.getSectionList());
+            }
+
+            Log.d("New Section", "ArrayList Built");
+            ListAdapter adapter = new MySectionArrayAdapter(MainActivity.this, R.layout.list_item, sectionArrayList);
+            Log.d("New Section", "ListView Built");
+            sectionListView.setAdapter(adapter);
 
             /*  JSON Parsing Example from http://www.androidhive.info/2012/01/android-json-parsing-tutorial/
             if (response != null) {

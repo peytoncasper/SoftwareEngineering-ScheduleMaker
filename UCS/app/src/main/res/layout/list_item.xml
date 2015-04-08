@@ -5,35 +5,101 @@
     android:layout_height="wrap_content"
     android:padding="10dp"
     android:paddingLeft="10dp"
-    android:paddingRight="10dp" >
+    android:paddingRight="10dp"
+    android:background="#FFFFFF">
 
-    <!--Name Label-->
+    <!--Course Label-->
     <TextView
-        android:id="@+id/name"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="2dip"
-        android:paddingTop="6dip"
+        android:paddingBottom="1dip"
+        android:paddingTop="2dip"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:text="Name: "    />
+        android:text="@string/listitem_text_course"
+        android:id="@+id/courseName"    />
 
-    <!--Email Label-->
-       <TextView
-           android:id="@+id/email"
-           android:layout_width="fill_parent"
-           android:layout_height="wrap_content"
-           android:paddingBottom="2dip"
-           android:text="Email: "/>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
 
-    <!-- Mobile number label-->
-    <TextView
-        android:id="@+id/mobile"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="start"
-        android:text="Mobile: "
-        android:textStyle="bold" />
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight="1">
+
+            <!--Days Label-->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="1dip"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="@string/listitem_text_days"
+                android:id="@+id/sectionMeetingDays"
+                android:gravity="left" />
+
+            <!--Room Label-->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="1dip"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="@string/listitem_text_room"
+                android:id="@+id/sectionRoom"
+                android:gravity="right" />
+
+            <!--Instructors Label-->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="1dip"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="@string/listitem_text_instructors"
+                android:id="@+id/sectionInstructors"
+                android:gravity="left" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight="1">
+
+            <!--Times Label-->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="1dip"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="@string/listitem_text_times"
+                android:id="@+id/sectionMeetingTimes"
+                android:gravity="right" />
+
+            <!--ID Label-->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="1dip"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="@string/listitem_text_id"
+                android:id="@+id/sectionID"
+                android:gravity="right" />
+
+            <!--Status Label-->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="1dip"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="@string/listitem_text_full_designation"
+                android:id="@+id/sectionDesignation"
+                android:gravity="right" />
+
+        </LinearLayout>
+    </LinearLayout>
 
 
 </LinearLayout>

@@ -127,7 +127,7 @@ public class Section {
         this.setStatus(status);
     }
 
-    Section(JSONObject jsonObject) throws JSONException {
+    Section(JSONObject jsonObject, Course sourceCourse) throws JSONException {
 
         this.setSectionID(Integer.parseInt(jsonObject.getString("CourseNumber")));
         Log.d("New Section ID", ((Integer)getSectionID()).toString());
@@ -161,6 +161,8 @@ public class Section {
 
         setStatus(ClassStatus.valueOf(jsonObject.getString("Status")));
         Log.d("New Section Status: ", getStatus().toString());
+
+        this.setSourceCourse(sourceCourse);
     }
 
     public String getInstructors() {
@@ -185,6 +187,10 @@ public class Section {
 
     public void setEndTime(TimeShort endTime) {
         this.endTime = endTime;
+    }
+
+    public String getTimeString(){
+        return startTime.toString24h() + "-" + endTime.toString24h();
     }
 
     public ArrayList<Day> getDays() {
@@ -237,5 +243,13 @@ public class Section {
 
     public void setRoom(String room) {
         this.room = room;
+    }
+
+    public Course getSourceCourse() {
+        return sourceCourse;
+    }
+
+    public void setSourceCourse(Course sourceCourse) {
+        this.sourceCourse = sourceCourse;
     }
 }
