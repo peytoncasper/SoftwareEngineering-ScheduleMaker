@@ -33,7 +33,7 @@ public class HTTPGetService extends IntentService {
     public final String SPOOF_SERVER_RESPONSE = "edu.uta.ucs.SPOOF_SERVER_RESPONSE";
 
     private final String SPOOFED_RESPONSE ="" +
-            "{\"Results\":[{\"CourseId\":\"CSE-3330\",\"CourseName\":\"CSE 3330 - DATABASE SYSTEMS AND FILE STRUCTURES\",\"CourseResults\":[{\"MeetingDays\":[\"TU\",\"TH\"],\"CourseNumber\":\"89473\",\"Section\":\"001\",\"CourseName\":null,\"Room\":\"TBA\",\"Instructor\":\"Medhat M Saleh\",\"MeetingTime\":\"2:00PM-4:50PM\",\"Status\":\"Open\"}]},{\"CourseId\":\"CSE-2320\",\"CourseName\":\"CSE 2320 - ALGORITHMS \\u0026amp; DATA STRUCTURES\",\"CourseResults\":[{\"MeetingDays\":[\"M\",\"W\",\"F\"],\"CourseNumber\":\"87695\",\"Section\":\"001\",\"CourseName\":null,\"Room\":\"TBA\",\"Instructor\":\"Alexandra Stefan\",\"MeetingTime\":\"9:00AM-10:20AM\",\"Status\":\"Open\"},{\"MeetingDays\":[\"TU\",\"TH\"],\"CourseNumber\":\"85768\",\"Section\":\"002\",\"CourseName\":null,\"Room\":\"TBA\",\"Instructor\":\"Bob P Weems\",\"MeetingTime\":\"11:00AM-12:20PM\",\"Status\":\"Open\"}]}],\"TimeTaken\":6.5217624}"
+            "{\"Results\":[{\"CourseId\":\"CSE-3330\",\"CourseName\":\"CSE 3330 - DATABASE SYSTEMS AND FILE STRUCTURES\",\"CourseResults\":[{\"MeetingDays\":[\"TU\",\"TH\"],\"CourseNumber\":\"89473\",\"Section\":\"001\",\"CourseName\":null,\"Room\":\"TBA\",\"Instructor\":\"Medhat M Saleh\",\"MeetingTime\":\"2:00PM-4:50PM\",\"Status\":\"wait_list\"}]},{\"CourseId\":\"CSE-2320\",\"CourseName\":\"CSE 2320 - ALGORITHMS \\u0026amp; DATA STRUCTURES\",\"CourseResults\":[{\"MeetingDays\":[\"M\",\"W\",\"F\"],\"CourseNumber\":\"87695\",\"Section\":\"001\",\"CourseName\":null,\"Room\":\"TBA\",\"Instructor\":\"Alexandra Stefan\",\"MeetingTime\":\"9:00AM-10:20AM\",\"Status\":\"Open\"},{\"MeetingDays\":[\"TU\",\"TH\"],\"CourseNumber\":\"85768\",\"Section\":\"002\",\"CourseName\":null,\"Room\":\"TBA\",\"Instructor\":\"Bob P Weems\",\"MeetingTime\":\"11:00AM-12:20PM\",\"Status\":\"Closed\"}]}],\"TimeTaken\":6.5217624}"
              + "";
     private final IBinder mbinder = new LocalBinder();
     String url;
@@ -63,9 +63,6 @@ public class HTTPGetService extends IntentService {
         else
             response = fetchJSON(url);
 
-
-        response = response.replaceAll("Open", "OPEN");
-        response = response.replaceAll("Closed", "CLOSED");
         Intent broadcastIntent = new Intent();
         broadcastIntent.setAction(MainActivity.ResponseReceiver.ACTION_RESP);
         broadcastIntent.addCategory(Intent.CATEGORY_DEFAULT);
