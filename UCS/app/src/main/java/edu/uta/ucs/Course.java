@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Created by arunk_000 on 4/5/2015.
@@ -47,9 +48,10 @@ public class Course {
 
         for(int index = jsonSectionList.length(); index != 0;index--){
             Log.d("New Course Section: ",jsonSectionList.getJSONObject( index-1 ).toString());
-            this.sectionList.add(new Section(jsonSectionList.getJSONObject(index - 1)));
+            this.sectionList.add(new Section(jsonSectionList.getJSONObject(index - 1), this));
             Log.d("New Course Section: ", "Section Added");
         }
+        Collections.reverse(sectionList);
     }
 
     public boolean addSection(Section sectionToAdd) {

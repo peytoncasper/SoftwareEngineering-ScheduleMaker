@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 enum ClassStatus {
-    OPEN("OPEN"), CLOSED("CLOSED");
+    OPEN("OPEN"), CLOSED("CLOSED"), WAIT_LIST("WAIT_LIST");
 
     private String value;
 
@@ -107,6 +107,8 @@ public class Section {
     private TimeShort endTime;
     private ArrayList<Day> days;
     private ClassStatus status;
+    private Course sourceCourse;
+
     Section() {
         this.setSectionID(0);
         this.setInstructors(null);
@@ -115,9 +117,10 @@ public class Section {
         this.setEndTime(null);
         this.setDays(null);
         this.setStatus(null);
+        this.setSourceCourse(null);
     }
 
-    Section(int number, String instructors, String room, TimeShort startTime, TimeShort endTime, ArrayList<Day> days, ClassStatus status) {
+    Section(int number, String instructors, String room, TimeShort startTime, TimeShort endTime, ArrayList<Day> days, ClassStatus status, Course sourceCourse) {
         this.setSectionID(number);
         this.setInstructors(instructors);
         this.setRoom(room);
@@ -125,6 +128,7 @@ public class Section {
         this.setEndTime(endTime);
         this.setDays(days);
         this.setStatus(status);
+        this.setSourceCourse(sourceCourse);
     }
 
     Section(JSONObject jsonObject, Course sourceCourse) throws JSONException {
@@ -157,9 +161,10 @@ public class Section {
             Log.d("New Section Day: ", ((Day)days.get(days.size()-1)).toString());
             Day temp2 = (Day)days.get(0);
         }
+        Collections.reverse(days);
         Log.d("New Section #of Days: ", ((Integer) days.size()).toString());
 
-        setStatus(ClassStatus.valueOf(jsonObject.getString("Status")));
+        setStatus(ClassStatus.valueOf(jsonObject.getString("Status").toUpperCase()));
         Log.d("New Section Status: ", getStatus().toString());
 
         this.setSourceCourse(sourceCourse);
