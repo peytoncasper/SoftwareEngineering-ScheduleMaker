@@ -178,9 +178,16 @@ public class Section {
         Log.d("New Section Instructor", getInstructors());
 
         String times[] = jsonObject.getString("MeetingTime").split("-");
-        this.setStartTime(new TimeShort(times[0]));
-        this.setEndTime(new TimeShort(times[1]));
-        Log.d("New Section MeetingTime", getStartTime().toString24h()+ "-" + getEndTime().toString24h());
+        Log.d("New Start Time", times[0]);
+        if (!times[0].equalsIgnoreCase("TBA")) {
+            this.setStartTime(new TimeShort(times[0]));
+            this.setEndTime(new TimeShort(times[1]));
+            Log.d("New Section MeetingTime", getStartTime().toString24h() + "-" + getEndTime().toString24h());
+        }
+        else{
+            this.setStartTime(new TimeShort(0,0));
+            this.setEndTime(new TimeShort(0,0));
+        }
 
         JSONArray jsonDaysArray = jsonObject.getJSONArray("MeetingDays");
         Log.d("New Section Days List:", jsonDaysArray.toString());
@@ -226,8 +233,15 @@ public class Section {
         this.endTime = endTime;
     }
 
+    public boolean hasTimes(){
+        return (startTime.getMinAfterMidnight() - endTime.getMinAfterMidnight()) != 0;
+    }
+
     public String getTimeString(){
-        return startTime.toString24h() + "-" + endTime.toString24h();
+        if(this.hasTimes()){
+            return startTime.toString24h() + "-" + endTime.toString24h();
+        }
+        return "TBA";
     }
 
     public ArrayList<Day> getDays() {

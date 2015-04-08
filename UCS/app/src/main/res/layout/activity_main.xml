@@ -46,7 +46,8 @@
             android:layout_height="wrap_content"
             android:id="@+id/scrollView"
             android:layout_gravity="center_horizontal"
-            android:nestedScrollingEnabled="false">
+            android:nestedScrollingEnabled="false"
+            android:visibility="gone">
 
             <TextView
                 android:layout_width="match_parent"

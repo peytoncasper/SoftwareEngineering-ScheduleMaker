@@ -36,7 +36,7 @@ public class MainActivity extends ActionBarActivity {
     private static final String TAG_PHONE_MOBILE = "mobile";
     private static final String TAG_PHONE_HOME = "home";
     private static final String TAG_PHONE_OFFICE = "office";
-    String[] desiredCourseList = {"CSE-3330", "CSE-2320"};
+    String[] desiredCourseList = {"ENGL-1301","MATH-1426","PHYS-1441","CSE-1104","CSE-1105"};
     String baseURL = "http://ucs-scheduler.cloudapp.net/UTA/ClassStatus?classes=";
     TextView responseDisplay;
     HTTPGetService HTTPGetService;
@@ -93,7 +93,9 @@ public class MainActivity extends ActionBarActivity {
         }
 
         Log.d("classTextField",classTextField);
-        if (classTextField.length() > 0 ) urlBuilder.append(classTextField + ",");
+        if (classTextField.length() > 0 ){
+            urlBuilder.append(classTextField + ",");
+        }
         String url = urlBuilder.length() > 0 ? urlBuilder.substring( 0, urlBuilder.length() - 1 ): "";
 
         boolean switchStatus = spoofServerSwitch.isChecked();
