@@ -34,7 +34,22 @@ public class Schedule {
         this.selectedSections = selectedSections;
     }
 
-    public class ScheduleGenerator{
-        private ArrayList<Course> potentialCourses;
+    public ArrayList<Section> scheduleFactory(int index, ArrayList<Course> courseArrayList, ArrayList<Section> sectionArrayList){
+
+        Course course = courseArrayList.get(index);
+        ArrayList<Section> possibleSections = course.getSectionList();
+        // Shuffle sectionArrayList
+        for (Section section : possibleSections){
+            if (!section.conflictsWith(sectionArrayList)){
+                sectionArrayList.add(section);
+                try{
+                    return scheduleFactory(index+1, courseArrayList, sectionArrayList);
+                } catch (NoSchedulesPossibleException exception){
+                    sectionArrayList.remove(index);
+                }
+            }
+
+        }//Throw NoSchedulesPossibleException
+
     }
 }
