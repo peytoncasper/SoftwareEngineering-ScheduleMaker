@@ -36,7 +36,7 @@
         <Switch
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Spoof Server"
+            android:text="Server Spoofing"
             android:id="@+id/spoofServer"
             android:layout_gravity="center_horizontal"
             android:enabled="true" />

@@ -63,6 +63,8 @@ public class HTTPGetService extends IntentService {
         else
             response = fetchJSON(url);
 
+        response = response.replaceAll("amp;", "");
+        response = response.replaceAll("AND", "&");
         Intent broadcastIntent = new Intent();
         broadcastIntent.setAction(MainActivity.ResponseReceiver.ACTION_RESP);
         broadcastIntent.addCategory(Intent.CATEGORY_DEFAULT);
