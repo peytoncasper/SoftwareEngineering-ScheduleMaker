@@ -230,16 +230,51 @@ public class Section {
         this.sectionNumber = sectionNumber;
     }
 
-    public boolean conflictsWith(Section otherSection) {
-        if (!Collections.disjoint(this.getDays(), otherSection.getDays())) {        // If there is overlap between the two sets of days conflict is possible, run checks
+    /**
+     * Compares this section against another section for conflicts.
+     *
+     * @param section  The section to compare this section against.
+     * @return truth value of test
+     */
+    public boolean conflictsWith(Section section) {
+        if (!Collections.disjoint(this.getDays(), section.getDays())) {        // If there is overlap between the two sets of days conflict is possible, run checks
 
-            if (this.getStartTime().before(otherSection.getStartTime())) {          // If this section starts before the other section
-                return this.getEndTime().before(otherSection.getEndTime());         //  check to see if this section ends before other section begins
-            } else if (this.getStartTime().after(otherSection.getStartTime())) {      // If this section starts after the other section
-                return this.getEndTime().after(otherSection.getEndTime());          //  check to see if other section ends before this section begins
+            if (this.getStartTime().before(section.getStartTime())) {          // If this section starts before the other section
+                return this.getEndTime().before(section.getEndTime());         //  check to see if this section ends before other section begins
+            } else if (this.getStartTime().after(section.getStartTime())) {      // If this section starts after the other section
+                return this.getEndTime().after(section.getEndTime());          //  check to see if other section ends before this section begins
             } else
                 return true;                                                     // In this section starts neither before nor after the other section it starts at the same time, or there's some other issue
         } else return false;  // Days are disjoint, no conflict possible
+    }
+
+    /**
+     * Compares this section against all the sections in a course's arraylist of sections.
+     *
+     * @param course  The course to compare this section against.
+     * @return truth value of test
+     */
+    public boolean conflictsWith(Course course){
+        for(Section section : course.getSectionList()){
+            if (this.conflictsWith(section))
+                return true;
+        }
+        return false;
+    }
+
+    /**
+     * Compares this section against all the courses in this arraylist of courses.
+     * Gets each course in the arraylist and runs a conflictsWith against it.
+     *
+     * @param courseArrayList  The arraylist of courses to compare this section against.
+     * @return truth value of test
+     */
+    public boolean conflictsWith(ArrayList<Course> courseArrayList) {
+        for(Course course : courseArrayList){
+            if(this.conflictsWith(course))
+                return true;
+        }
+        return false;
     }
 
     public String getRoom() {
