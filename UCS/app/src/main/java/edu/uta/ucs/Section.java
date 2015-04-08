@@ -231,9 +231,9 @@ public class Section {
                             ((Other.getEndTime().after(this.getStartTime()))
                             &&
                             (Other.getStartTime().before(this.getEndTime()))                        // this section intersects the beginning of other section
-                            ||
+                    ||
                             this.getStartTime().equals(Other.getStartTime())                        // start times match
-                            ||
+                    ||
                             this.getEndTime().equals(Other.getEndTime())                            // end times match
                     );
         else return false;
