@@ -12,6 +12,9 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
@@ -72,39 +75,34 @@ public class HTTPGetService extends IntentService {
         //Log.d("Broadcasting Response: ",response);
     }
 
-    public class LocalBinder extends Binder{
-
-        public HTTPGetService getService(){
-            return HTTPGetService.this;
-        }
-
-    }
-
     @Override
     public void onCreate() {
         super.onCreate();
-        Toast.makeText(this,"Service has been created", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Service has been created", Toast.LENGTH_LONG).show();
         Log.d("Service Test", "Service has been created");
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Toast.makeText(this,"Service has been stopped", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Service has been stopped", Toast.LENGTH_LONG).show();
         Log.d("Service Test", "Service has been stopped");
-
     }
+
     /**
      * Making service call
      * @url - url to make request
      * */
     public String fetchJSON(String url) {
 
-        Log.d("Service URL:",url);
+        Log.d("Service URL:", url);
         String response = "";
         try {
             // http client
-            DefaultHttpClient httpClient = new DefaultHttpClient();
+            HttpParams httpParams = new BasicHttpParams();
+            HttpConnectionParams.setConnectionTimeout(httpParams, 5000);
+            HttpConnectionParams.setSoTimeout(httpParams, 45000);
+            DefaultHttpClient httpClient = new DefaultHttpClient(httpParams);
             HttpEntity httpEntity = null;
             HttpResponse httpResponse = null;
             Log.d("test:", "test1");
@@ -125,11 +123,14 @@ public class HTTPGetService extends IntentService {
             e.printStackTrace();
         }
 
-        Log.d("Server reply:",response);
-
-
+        Log.d("Server reply:", response);
         return response;
     }
 
+    public class LocalBinder extends Binder {
 
+        public HTTPGetService getService() {
+            return HTTPGetService.this;
+        }
+    }
 }

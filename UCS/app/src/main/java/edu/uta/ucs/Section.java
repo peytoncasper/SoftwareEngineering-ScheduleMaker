@@ -157,7 +157,7 @@ public class Section {
             Log.d("New Section Day: ", ((Day)days.get(days.size()-1)).toString());
             Day temp2 = (Day)days.get(0);
         }
-        Log.d("New Days in Section: ", ((Integer) days.size()).toString());
+        Log.d("New Section #of Days: ", ((Integer) days.size()).toString());
 
         setStatus(ClassStatus.valueOf(jsonObject.getString("Status")));
         Log.d("New Section Status: ", getStatus().toString());
