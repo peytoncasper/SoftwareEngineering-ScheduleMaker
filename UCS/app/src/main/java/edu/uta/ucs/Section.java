@@ -8,71 +8,13 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
-import java.util.Set;
-
-class TimeShort {
-    private byte hour;
-    private byte minute;
-
-     public TimeShort(){
-         this.hour = 0;
-         this.minute = 0;
-     }
-
-    public TimeShort(byte hour, byte minute){
-        this.hour = hour;
-        this.minute = minute;
-    }
-
-    public TimeShort(int hour, int minute){
-        this.hour = (byte) hour;
-        this.minute = (byte) minute;
-    }
-
-    public TimeShort(String timeAsString){
-        String[] times = timeAsString.split(":");
-        this.hour = Byte.parseByte(times[0]);
-        this.minute = Byte.parseByte(times[1].substring(0,2));
-        if (times[1].substring(2).equalsIgnoreCase("PM")){
-            this.hour += 12;
-        }
-
-    }
-
-    public boolean after(TimeShort other){
-        return this.getMinAfterMidnight() > other.getMinAfterMidnight();
-    }
-
-    public boolean before(TimeShort other){
-        return this.getMinAfterMidnight() < other.getMinAfterMidnight();
-    }
-
-    public boolean equals(TimeShort other){
-        return this.getMinAfterMidnight() == other.getMinAfterMidnight();
-    }
-
-    public String toString24h() {
-        String result = String.format("%d", this.hour) + ":" + String.format("%02d", this.minute);
-        return result;
-    }
-
-    public String toString12h() {
-        String result = String.format("%d", this.hour%12) + ":" + String.format("%02d", this.minute) + (this.hour > 12 ? "PM": "AM");
-        return result;
-    }
-
-    public int getMinAfterMidnight(){
-        return ((this.hour * 60) + this.minute);
-    }
-}
 
 enum ClassStatus {
     OPEN("OPEN"), CLOSED("CLOSED");
 
     private String value;
 
-    ClassStatus(final String value){
+    ClassStatus(final String value) {
         this.value = value;
     }
 
@@ -87,13 +29,69 @@ enum Day {
 
     private String value;
 
-    Day(final String value){
+    Day(final String value) {
         this.value = value;
     }
 
     @Override
     public String toString() {
         return this.value;
+    }
+}
+
+class TimeShort {
+    private byte hour;
+    private byte minute;
+
+    public TimeShort() {
+        this.hour = 0;
+        this.minute = 0;
+    }
+
+    public TimeShort(byte hour, byte minute) {
+        this.hour = hour;
+        this.minute = minute;
+    }
+
+    public TimeShort(int hour, int minute) {
+        this.hour = (byte) hour;
+        this.minute = (byte) minute;
+    }
+
+    public TimeShort(String timeAsString) {
+        String[] times = timeAsString.split(":");
+        this.hour = Byte.parseByte(times[0]);
+        this.minute = Byte.parseByte(times[1].substring(0, 2));
+        if (times[1].substring(2).equalsIgnoreCase("PM")) {
+            this.hour += 12;
+        }
+
+    }
+
+    public boolean after(TimeShort other) {
+        return this.getMinAfterMidnight() > other.getMinAfterMidnight();
+    }
+
+    public boolean before(TimeShort other) {
+        return this.getMinAfterMidnight() < other.getMinAfterMidnight();
+    }
+
+    public boolean equals(TimeShort other) {
+        return this.getMinAfterMidnight() == other.getMinAfterMidnight();
+    }
+
+    public String toString24h() {
+        String result = String.format("%d", this.hour) + ":" + String.format("%02d", this.minute);
+        return result;
+    }
+
+    public String toString12h() {
+        String result = String.format("%d", this.hour % 12) + ":" + String.format("%02d", this.minute) + (this.hour > 12 ? "PM" : "AM");
+        return result;
+    }
+
+    public int getMinAfterMidnight() {
+        return ((this.hour * 60) + this.minute);
     }
 }
 
@@ -221,22 +219,16 @@ public class Section {
         this.sectionNumber = sectionNumber;
     }
 
-    public boolean conflictsWith(Section Other) {
-        if (!Collections.disjoint(this.getDays(), Other.getDays()))                                 //If there is overlap between the two sets of days
-            return (
-                            (this.getEndTime().after(Other.getStartTime()))
-                            &&
-                            (this.getStartTime().before(Other.getEndTime())))                       // this section intersects the end of other section
-                    ||
-                            ((Other.getEndTime().after(this.getStartTime()))
-                            &&
-                            (Other.getStartTime().before(this.getEndTime()))                        // this section intersects the beginning of other section
-                    ||
-                            this.getStartTime().equals(Other.getStartTime())                        // start times match
-                    ||
-                            this.getEndTime().equals(Other.getEndTime())                            // end times match
-                    );
-        else return false;
+    public boolean conflictsWith(Section otherSection) {
+        if (!Collections.disjoint(this.getDays(), otherSection.getDays())) {        // If there is overlap between the two sets of days conflict is possible, run checks
+
+            if (this.getStartTime().before(otherSection.getStartTime())) {          // If this section starts before the other section
+                return this.getEndTime().before(otherSection.getEndTime());         //  check to see if this section ends before other section begins
+            } else if (this.getStartTime().after(otherSection.getStartTime())) {      // If this section starts after the other section
+                return this.getEndTime().after(otherSection.getEndTime());          //  check to see if other section ends before this section begins
+            } else
+                return true;                                                     // In this section starts neither before nor after the other section it starts at the same time, or there's some other issue
+        } else return false;  // Days are disjoint, no conflict possible
     }
 
     public String getRoom() {
