@@ -303,15 +303,20 @@ public class Section {
      *          <ul/>
      */
     public boolean conflictsWith(Section section) {
-        if (!Collections.disjoint(this.getDays(), section.getDays())) {        // If there is overlap between the two sets of days conflict is possible, run checks
+        if (!Collections.disjoint(this.getDays(), section.getDays())) {     // If there is overlap between the two sets of days conflict is possible, run checks
 
-            if (this.getStartTime().before(section.getStartTime())) {          // If this section starts before the other section
-                return this.getEndTime().before(section.getEndTime());         //  check to see if this section ends before other section begins
-            } else if (this.getStartTime().after(section.getStartTime())) {      // If this section starts after the other section
-                return this.getEndTime().after(section.getEndTime());          //  check to see if other section ends before this section begins
-            } else
-                return true;                                                     // In this section starts neither before nor after the other section it starts at the same time, or there's some other issue
-        } else return false;  // Days are disjoint, no conflict possible
+            if(this.getEndTime().equals(section.getEndTime()))                  // If this section's end time equals the other section's end time
+                return true;
+
+            if (this.getStartTime().before(section.getStartTime()))             // If this section starts before the other section
+                return section.getStartTime().before(this.getEndTime());            //  check to see if this section ends before other section begins
+
+            if (section.getStartTime().before(this.getStartTime()))             // If this section starts after the other section
+                return this.getStartTime().before(section.getEndTime());            //  check to see if other section ends before this section begins
+
+            return true;                                                        // In this section starts neither before nor after the other section it starts at the same time, or there's some other issue
+
+        } else return false;                                                // Days are disjoint, no conflict possible
     }
 
     /**
