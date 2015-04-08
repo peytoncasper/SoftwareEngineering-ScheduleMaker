@@ -45,20 +45,37 @@ public class Schedule {
                 try{
                     return scheduleFactory(index+1, courseArrayList, sectionArrayList);
                 } catch (NoSchedulesPossibleException exception){
+                    exception.printStackTrace();
                     sectionArrayList.remove(index);
                 }
             }
 
-        }throw new NoSchedulesPossibleException();
+        }throw new NoSchedulesPossibleException(course, sectionArrayList);
 
     }
 }
 
 class NoSchedulesPossibleException extends Exception {
 
+    String message;
+
     public NoSchedulesPossibleException() {}
 
     public NoSchedulesPossibleException(String message) {
         super(message);
     }
+
+    public NoSchedulesPossibleException(Course course, ArrayList<Section> sectionArrayList){
+        super();
+        StringBuilder message = new StringBuilder("Could not pick a section from " + course.getCourseName() + " which does not conflict with at least one of these courses: ");
+        for (Section section : sectionArrayList){
+            message.append("/n" + section.getSourceCourse().getCourseName());
+        }
+        this.message = message.toString();
+    }
+
+    public String getConflict(){
+        return message;
+    }
+
 }

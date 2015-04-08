@@ -36,7 +36,7 @@ public class MainActivity extends ActionBarActivity {
     private static final String TAG_PHONE_MOBILE = "mobile";
     private static final String TAG_PHONE_HOME = "home";
     private static final String TAG_PHONE_OFFICE = "office";
-    String[] desiredCourseList = {"ENGL-1301","MATH-1426","PHYS-1441","CSE-1104","CSE-1105"};
+    String[] desiredCourseList = {};//{"ENGL-1301","MATH-1426","PHYS-1443","CSE-1105"};
     String baseURL = "http://ucs-scheduler.cloudapp.net/UTA/ClassStatus?classes=";
     TextView responseDisplay;
     HTTPGetService HTTPGetService;
