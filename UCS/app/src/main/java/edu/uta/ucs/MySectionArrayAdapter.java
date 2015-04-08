@@ -68,17 +68,17 @@ public class MySectionArrayAdapter extends ArrayAdapter<Section> {
                 daysText.setText(p.getDays().toString().substring(1,p.getDays().toString().length()-1));
             }
             if (roomText != null) {
-                roomText.setText(p.getRoom());
+                roomText.setText("Room: "+p.getRoom());
             }
             if (instructorsText != null) {
                 instructorsText.setText(p.getInstructors());
             }
 
             if (timesText != null) {
-                timesText.setText(p.getTimeString());
+                timesText.setText("  "+p.getTimeString());
             }
             if (sectionIDText != null) {
-                sectionIDText.setText(((Integer) p.getSectionID()).toString());
+                sectionIDText.setText("UTA Class Number: "+((Integer) p.getSectionID()).toString());
             }
             if (designationText != null) {
                 designationText.setText(p.getSourceCourse().getCourseName().split("-")[0] + "- " + String.format("%03d", p.getSectionNumber()));

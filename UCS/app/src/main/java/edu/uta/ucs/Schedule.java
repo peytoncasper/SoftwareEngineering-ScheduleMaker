@@ -33,4 +33,8 @@ public class Schedule {
     public void setSelectedSections(ArrayList<Section> selectedSections) {
         this.selectedSections = selectedSections;
     }
+
+    public class ScheduleGenerator{
+        private ArrayList<Course> potentialCourses;
+    }
 }

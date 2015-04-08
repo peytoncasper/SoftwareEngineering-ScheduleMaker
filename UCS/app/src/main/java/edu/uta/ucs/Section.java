@@ -109,17 +109,34 @@ public class Section {
     private ClassStatus status;
     private Course sourceCourse;
 
+    /**
+     * Constructor
+     *
+     * Generates a new Section will all fields set to null
+     * @returns Section
+     */
     Section() {
         this.setSectionID(0);
         this.setInstructors(null);
         this.setRoom(null);
         this.setStartTime(null);
         this.setEndTime(null);
-        this.setDays(null);
+        this.setDays(new ArrayList<Day>(1));
         this.setStatus(null);
         this.setSourceCourse(null);
     }
 
+    /**
+     * Constructor which takes custom schedule information
+     * @param number UTA Section ID number
+     * @param instructors list of instructors for section
+     * @param room room the section will meet in
+     * @param startTime time the lecture period will begin
+     * @param endTime time the lecture period will end
+     * @param days arrayList of days class will be meeting
+     * @param status current class status (OPEN, CLOSED, WAIT_LIST)
+     * @param sourceCourse the course the section is of
+     */
     Section(int number, String instructors, String room, TimeShort startTime, TimeShort endTime, ArrayList<Day> days, ClassStatus status, Course sourceCourse) {
         this.setSectionID(number);
         this.setInstructors(instructors);
@@ -131,6 +148,21 @@ public class Section {
         this.setSourceCourse(sourceCourse);
     }
 
+    /**
+     * Constructor to build Section from JSON
+     * @param jsonObject JSON Object must have the following keys present:
+     *                   <ul>
+     *                   <li>"CourseNumber" - integer, unique to all classes, UTA Class ID Number
+     *                   <li>"Section" - integer, unique within course, UTA Section Number
+     *                   <li>"Room" - String, room the section will meet in
+     *                   <li>"Instructor" - String, list of instructors for section
+     *                   <li>"MeetingTime" - String, time the lecture period will begin to time the lecture period will end
+     *                   <li>"MeetingDays" - String, JSON Array of days class will be meeting
+     *                   <li>"Status" - String, current class status (OPEN, CLOSED, WAIT_LIST)
+     *                   <ul/>
+     * @param sourceCourse
+     * @throws JSONException
+     */
     Section(JSONObject jsonObject, Course sourceCourse) throws JSONException {
 
         this.setSectionID(Integer.parseInt(jsonObject.getString("CourseNumber")));
@@ -230,11 +262,31 @@ public class Section {
         this.sectionNumber = sectionNumber;
     }
 
+    public String getRoom() {
+        return room;
+    }
+
+    public void setRoom(String room) {
+        this.room = room;
+    }
+
+    public Course getSourceCourse() {
+        return sourceCourse;
+    }
+
+    public void setSourceCourse(Course sourceCourse) {
+        this.sourceCourse = sourceCourse;
+    }
+
     /**
      * Compares this section against another section for conflicts.
      *
      * @param section  The section to compare this section against.
-     * @return truth value of test
+     * @return boolean
+     *          <ul>
+     *          true - conflict detected
+     *          <p>false - no conflict detected
+     *          <ul/>
      */
     public boolean conflictsWith(Section section) {
         if (!Collections.disjoint(this.getDays(), section.getDays())) {        // If there is overlap between the two sets of days conflict is possible, run checks
@@ -252,7 +304,11 @@ public class Section {
      * Compares this section against all the sections in a course's arraylist of sections.
      *
      * @param course  The course to compare this section against.
-     * @return truth value of test
+     * @return boolean
+     *          <ul>
+     *          true - conflict detected
+     *          <p>false - no conflict detected
+     *          <ul/>
      */
     public boolean conflictsWith(Course course){
         for(Section section : course.getSectionList()){
@@ -267,7 +323,11 @@ public class Section {
      * Gets each course in the arraylist and runs a conflictsWith against it.
      *
      * @param courseArrayList  The arraylist of courses to compare this section against.
-     * @return truth value of test
+     * @return boolean
+     *          <ul>
+     *          true - conflict detected
+     *          <p>false - no conflict detected
+     *          <ul/>
      */
     public boolean conflictsWith(ArrayList<Course> courseArrayList) {
         for(Course course : courseArrayList){
@@ -277,19 +337,4 @@ public class Section {
         return false;
     }
 
-    public String getRoom() {
-        return room;
-    }
-
-    public void setRoom(String room) {
-        this.room = room;
-    }
-
-    public Course getSourceCourse() {
-        return sourceCourse;
-    }
-
-    public void setSourceCourse(Course sourceCourse) {
-        this.sourceCourse = sourceCourse;
-    }
 }
