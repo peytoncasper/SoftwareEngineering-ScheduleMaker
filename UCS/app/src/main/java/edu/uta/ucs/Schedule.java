@@ -67,7 +67,7 @@ class NoSchedulesPossibleException extends Exception {
 
     public NoSchedulesPossibleException(Course course, ArrayList<Section> sectionArrayList){
         super();
-        StringBuilder message = new StringBuilder("Could not pick a section from " + course.getCourseName() + " which does not conflict with at least one of these courses: ");
+        StringBuilder message = new StringBuilder("Could not build a schedule from this combination of courses:/n" + course.getCourseName());
         for (Section section : sectionArrayList){
             message.append("/n" + section.getSourceCourse().getCourseName());
         }

@@ -24,22 +24,47 @@
             android:layout_gravity="center"
             android:clickable="true" />
 
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <Switch
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/toggle_spoof_server"
+                    android:id="@+id/spoofServerSwitch"
+                    android:layout_gravity="center_horizontal"
+                    android:enabled="true" />
+
+                <Switch
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/toggle_use_default_coures"
+                    android:id="@+id/useDefaultCourseListSwitch" />
+            </LinearLayout>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/action_fetch_classes"
+                android:id="@+id/button3"
+                android:layout_gravity="center"
+                android:clickable="true"
+                android:onClick="requestJSON" />
+        </LinearLayout>
+
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="FETCH JSON"
-            android:id="@+id/button3"
-            android:layout_gravity="center"
-            android:clickable="true"
-            android:onClick="requestJSON" />
-
-        <Switch
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Server Spoofing"
-            android:id="@+id/spoofServer"
-            android:layout_gravity="center_horizontal"
-            android:enabled="true" />
+            android:text="@string/action_generate_schedule"
+            android:id="@+id/button"
+            android:layout_gravity="center_horizontal" />
 
         <ScrollView
             android:layout_width="match_parent"
@@ -62,7 +87,7 @@
         </ScrollView>
 
         <ListView
-            android:layout_width="match_parent"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:id="@+id/listView"
             android:layout_gravity="center_horizontal"
