@@ -18,7 +18,6 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
-import edu.uta.ucs.HTTPGetService.HTTPGetServiceBinder;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements Callback{
 
     String[] desiredCourseList = {};//{"ENGL-1301","MATH-1426","PHYS-1443","CSE-1105"};
     String baseURL = "http://ucs-scheduler.cloudapp.net/UTA/ClassStatus?classes=";
@@ -64,13 +63,14 @@ public class MainActivity extends ActionBarActivity {
         sectionListView = (ListView) findViewById(R.id.listView);
 
         Intent connectToHTTPGetService = new Intent(this, HTTPGetService.class);
-        bindService(connectToHTTPGetService, httpGetServiceConnection, Context.BIND_AUTO_CREATE);
+        //bindService(connectToHTTPGetService, httpGetServiceConnection, Context.BIND_AUTO_CREATE);
         httpGetServiceBound = true;
 
 
 
     }
 
+    /*
     @Override
     protected void onStart() {
         super.onStart();
@@ -84,7 +84,7 @@ public class MainActivity extends ActionBarActivity {
             httpGetServiceConnection = null;
             httpGetServiceBound = false;
         }
-    }
+    }*/
 
     public void requestJSON(View view){
 
@@ -99,7 +99,8 @@ public class MainActivity extends ActionBarActivity {
             urlBuilder.append(classTextField + ",");
         }
         String url = urlBuilder.length() > 0 ? urlBuilder.substring( 0, urlBuilder.length() - 1 ): "";
-
+        new HTTPGetService(this, url).execute(url);
+        /*
         Message message = Message.obtain(null,0,0,0,0);
         Bundle bundle = new Bundle();
         bundle.putString(HTTPGetService.URL_REQUEST, url);
@@ -113,6 +114,10 @@ public class MainActivity extends ActionBarActivity {
         */
     }
 
+    @Override
+    public void onResult(JSONObject result) throws JSONException {
+        Log.d("MainActivity JSON test", result.getString("Success"));
+    }
 
     public class ResponseReceiver extends BroadcastReceiver{
         public static final String ACTION_RESP =
@@ -159,7 +164,7 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
-    ServiceConnection httpGetServiceConnection = new ServiceConnection() {
+    /*ServiceConnection httpGetServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             HTTPGetServiceBinder binder = (HTTPGetServiceBinder) service;
@@ -172,5 +177,5 @@ public class MainActivity extends ActionBarActivity {
             httpGetServiceMessenger = null;
             httpGetServiceBound = false;
         }
-    };
+    };*/
 }
