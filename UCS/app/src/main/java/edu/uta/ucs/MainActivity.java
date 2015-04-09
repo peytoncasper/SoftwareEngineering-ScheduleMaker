@@ -4,10 +4,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Switch;
@@ -18,35 +21,23 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 
 
 public class MainActivity extends ActionBarActivity {
+    public static final String ACTION_RESP ="edu.uta.ucs.intent.action.MAIN_ACTIVITY";
 
-    // Variables from JSON Parsing Example at http://www.androidhive.info/2012/01/android-json-parsing-tutorial/
-    // JSON Node names
-    private static final String TAG_CONTACTS = "contacts";
-    private static final String TAG_ID = "id";
-    private static final String TAG_NAME = "name";
-    private static final String TAG_EMAIL = "email";
-    private static final String TAG_ADDRESS = "address";
-    private static final String TAG_GENDER = "gender";
-    private static final String TAG_PHONE = "phone";
-    private static final String TAG_PHONE_MOBILE = "mobile";
-    private static final String TAG_PHONE_HOME = "home";
-    private static final String TAG_PHONE_OFFICE = "office";
     String[] desiredCourseList = {};//{"ENGL-1301","MATH-1426","PHYS-1443","CSE-1105"};
     String baseURL = "http://ucs-scheduler.cloudapp.net/UTA/ClassStatus?classes=";
     TextView responseDisplay;
-    HTTPGetService HTTPGetService;
+
+    HTTPGetService httpGetService;
     boolean dbServiceStatus;
-    // contacts JSONArray
-    JSONArray contacts = null;
-    // Hashmap for ListView
-    ArrayList<HashMap<String, String>> contactList;
+
     private TextView mainText;
+    private EditText courseInput;
     private Switch spoofServerSwitch;
+    private Switch useDefaultCourseList;
     private ListView sectionListView;
     private ResponseReceiver receiver;
 
@@ -56,13 +47,22 @@ public class MainActivity extends ActionBarActivity {
         Intent intent = getIntent();
         setContentView(R.layout.activity_main);
 
-        IntentFilter filter = new IntentFilter(ResponseReceiver.ACTION_RESP);
-        filter.addCategory(Intent.CATEGORY_DEFAULT);
-        receiver = new ResponseReceiver();
-        registerReceiver(receiver, filter);
+        courseInput =((EditText) findViewById(R.id.editText));
 
-        spoofServerSwitch = (Switch) findViewById(R.id.spoofServer);
+        spoofServerSwitch = (Switch) findViewById(R.id.spoofServerSwitch);
         spoofServerSwitch.setChecked(true);
+
+        useDefaultCourseList = (Switch) findViewById(R.id.useDefaultCourseListSwitch);
+        useDefaultCourseList.setChecked(false);
+        useDefaultCourseList.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    courseInput.setText("ENGL-1301,MATH-1426,PHYS-1443,CSE-1105");
+                }
+                else courseInput.setText("");
+            }
+        });
 
         responseDisplay = (TextView)findViewById(R.id.textView);
         responseDisplay.setText("Press FETCH JSON to attempt a data fetch");
@@ -75,6 +75,19 @@ public class MainActivity extends ActionBarActivity {
     protected void onStart() {
         super.onStart();
 
+        IntentFilter filter = new IntentFilter(MainActivity.ACTION_RESP);
+        filter.addCategory(Intent.CATEGORY_DEFAULT);
+
+        receiver = new ResponseReceiver();
+
+        registerReceiver(receiver, filter);
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(receiver);
     }
 
     @Override
@@ -83,25 +96,27 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void requestJSON(View view){
+
         responseDisplay.setText("Please wait, attempting to fetch data...");
 
         StringBuilder urlBuilder = new StringBuilder(baseURL);
-        String classTextField = ((TextView) findViewById(R.id.editText)).getText().toString();
-        for(String string: desiredCourseList){
-            urlBuilder.append(string);
-            urlBuilder.append(",");
-        }
-
-        Log.d("classTextField",classTextField);
-        if (classTextField.length() > 0 ){
-            urlBuilder.append(classTextField + ",");
-        }
+        String classTextField = courseInput.getText().toString();
+        urlBuilder.append( ( classTextField.length() > 0 ? classTextField:"") + "," );
+        Log.d("URL BUILDING", urlBuilder.toString());
         String url = urlBuilder.length() > 0 ? urlBuilder.substring( 0, urlBuilder.length() - 1 ): "";
 
         boolean switchStatus = spoofServerSwitch.isChecked();
+
         Intent intent = new Intent(this, HTTPGetService.class);
-        intent.putExtra("edu.uta.ucs.URL_REQUEST", url);
-        intent.putExtra("edu.uta.ucs.SPOOF_SERVER_RESPONSE", switchStatus);
+        if(spoofServerSwitch.isChecked()) {
+            intent.putExtra(HTTPGetService.URL_REQUEST, HTTPGetService.SPOOF_SERVER);
+            intent.putExtra(HTTPGetService.SPOOFED_RESPONSE, HTTPGetService.SPOOFED_CLASSLIST_RESPONSE);
+        }
+        else
+            intent.putExtra(HTTPGetService.URL_REQUEST, url);
+
+        intent.putExtra(HTTPGetService.SOURCE_INTENT, this.ACTION_RESP);
+
         startService(intent);
 }
 
@@ -109,12 +124,11 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public class ResponseReceiver extends BroadcastReceiver{
-        public static final String ACTION_RESP =
-                "edu.uta.ucs.intent.action.MESSAGE_PROCESSED";
+
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            String response = intent.getStringExtra("edu.uta.ucs.SERVER_RESPONSE");
+            String response = intent.getStringExtra(HTTPGetService.SERVER_RESPONSE);
             Log.d("Received: ",response);
             responseDisplay.setText("About to Show text!");
             responseDisplay.setText(response);
@@ -124,16 +138,12 @@ public class MainActivity extends ActionBarActivity {
             try {
                 JSONObject rawResult = new JSONObject(response);
                 JSONArray jsonCourses = rawResult.getJSONArray("Results");
+                SharedPreferences.Editor editor = getSharedPreferences("SharedPrefs", MODE_PRIVATE).edit();
+                editor.putString("fetchedCourseListJSON",rawResult.getString("Results"));
+                editor.apply();
                 float timeTaken = Float.parseFloat(rawResult.getString("TimeTaken"));
                 Log.d("New Request Time Taken:", Float.toString(timeTaken));
-                courseList.ensureCapacity(jsonCourses.length());
-
-                for(int index = jsonCourses.length(); index != 0;index--){
-                    Log.d("New Course: ", jsonCourses.getJSONObject(index - 1).toString());
-                    courseList.add( new Course(jsonCourses.getJSONObject(index - 1)));
-                    numberOfSectionsTotal++;
-                }
-                Collections.reverse(courseList);
+                courseList = Course.buildCourseList(jsonCourses);
 
                 responseDisplay.setText(response);
             } catch (JSONException e) {
@@ -150,53 +160,6 @@ public class MainActivity extends ActionBarActivity {
             Log.d("New Section", "ListView Built");
             sectionListView.setAdapter(adapter);
 
-            /*  JSON Parsing Example from http://www.androidhive.info/2012/01/android-json-parsing-tutorial/
-            if (response != null) {
-                try {
-                    JSONObject jsonObj = new JSONObject(response);
-
-                    // Getting JSON Array node
-                    contacts = jsonObj.getJSONArray(TAG_CONTACTS);
-
-                    // looping through All Contacts
-                    for (int i = 0; i < contacts.length(); i++) {
-                        JSONObject c = contacts.getJSONObject(i);
-
-                        String id = c.getString(TAG_ID);
-                        String name = c.getString(TAG_NAME);
-                        String email = c.getString(TAG_EMAIL);
-                        String address = c.getString(TAG_ADDRESS);
-                        String gender = c.getString(TAG_GENDER);
-                        Log.d("JSON Parsed Contact", id+name);
-
-                        // Phone node is JSON Object
-                        JSONObject phone = c.getJSONObject(TAG_PHONE);
-                        String mobile = phone.getString(TAG_PHONE_MOBILE);
-                        String home = phone.getString(TAG_PHONE_HOME);
-                        String office = phone.getString(TAG_PHONE_OFFICE);
-
-                        // tmp hashmap for single contact
-                        HashMap<String, String> contact = new HashMap<String, String>();
-
-                        // adding each child node to HashMap key => value
-                        contact.put(TAG_ID, id);
-                        contact.put(TAG_NAME, name);
-                        contact.put(TAG_EMAIL, email);
-                        contact.put(TAG_PHONE_MOBILE, mobile);
-
-                        // adding contact to contact list
-                        contactList.add(contact);
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } catch (NullPointerException e){
-                    e.printStackTrace();
-                }
-            } else {
-                Log.e("ServiceHandler", "Couldn't get any data from the url");
-            }
-
-            */
         }
     }
 }

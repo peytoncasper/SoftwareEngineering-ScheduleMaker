@@ -61,6 +61,19 @@ public class Course {
         } else return true;
     }
 
+    public static ArrayList<Course> buildCourseList(JSONArray jsonCourses) throws JSONException {
+
+        ArrayList<Course> courseList = new ArrayList<Course>(jsonCourses.length());
+
+        for(int index = jsonCourses.length(); index != 0;index--){
+            Log.d("New Course: ", jsonCourses.getJSONObject(index - 1).toString());
+            courseList.add( new Course(jsonCourses.getJSONObject(index - 1)));
+        }
+        Collections.reverse(courseList);
+
+        return courseList;
+    }
+
     public String getCourseDepartment() {
         return courseDepartment;
     }

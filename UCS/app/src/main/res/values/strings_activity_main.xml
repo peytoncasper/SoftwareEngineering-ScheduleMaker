@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_fetch_classes">FETCH JSON</string>
+    <string name="action_generate_schedule">Generate Schedule</string>
+    <string name="toggle_spoof_server">Spoof Server</string>
+    <string name="toggle_use_default_coures">Use Default Request Classes</string>
+</resources>
