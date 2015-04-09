@@ -28,6 +28,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,6 +57,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    HTTPGetService HTTPGetService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,7 +127,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         boolean cancel = false;
         View focusView = null;
 
-/*
+
         // Check for a valid password, if the user entered one.
         if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
             mPasswordView.setError(getString(R.string.error_invalid_password));
@@ -136,12 +140,12 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             mEmailView.setError(getString(R.string.error_field_required));
             focusView = mEmailView;
             cancel = true;
-        } else if (!isEmailValid(email)) {
+        }/* else if (!isEmailValid(email)) {
             mEmailView.setError(getString(R.string.error_invalid_email));
             focusView = mEmailView;
             cancel = true;
-        }
-*/
+        }*/
+
         if (cancel) {
             // There was an error; don't attempt login and focus the first
             // form field with an error.
@@ -162,7 +166,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
     private boolean isPasswordValid(String password) {
         //TODO: Replace this with your own logic
-        return password.length() > 4;
+        return true;//password.length() > 4;
     }
 
     /**
@@ -272,12 +276,18 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         @Override
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
+            String url = "http://ucs-scheduler.cloudapp.net/UTA/ValidateLogin?username="+ mEmail + "&password="+ mPassword;
+
+            HTTPGetService = new HTTPGetService();
 
             try {
-                // Simulate network access.
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
+                JSONObject result = new JSONObject(HTTPGetService.fetchJSON(url));
+                if(result.getBoolean("Success")){
+                    return true;
+                }
                 return false;
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
 
             /*for (String credential : DUMMY_CREDENTIALS) {
