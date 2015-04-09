@@ -4,9 +4,11 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.ContentResolver;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
@@ -16,6 +18,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -27,6 +30,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -51,6 +55,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
      * Keep track of the login task to ensure we can cancel it if requested.
      */
     private UserLoginTask mAuthTask = null;
+    private EmailExistsTask mEmailTask = null;
 
     // UI references.
     private AutoCompleteTextView mEmailView;
@@ -58,6 +63,9 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     private View mProgressView;
     private View mLoginFormView;
     HTTPGetService HTTPGetService;
+
+    String m_Text;
+    private String rawServerResponse;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +98,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        HTTPGetService = new HTTPGetService();
     }
 
     private void populateAutoComplete() {
@@ -157,6 +167,39 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             mAuthTask = new UserLoginTask(email, password);
             mAuthTask.execute((Void) null);
         }
+    }
+
+    public void resetPasswordDialog(View view){
+        Log.d("Reset Dialog", "Attempting to show dialogue");
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Enter account email address");
+
+        // Set up the input
+        final EditText input = new EditText(this);
+        input.setText(mEmailView.getText().toString());
+        // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS);
+        builder.setView(input);
+
+        // Set up the buttons
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String email = input.getText().toString();
+                if (isEmailValid(email)){
+                    mEmailTask = new EmailExistsTask(email);
+                    mEmailTask.execute((Void) null);
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
     }
 
     private boolean isEmailValid(String email) {
@@ -259,6 +302,52 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         mEmailView.setAdapter(adapter);
     }
 
+    public class EmailExistsTask extends AsyncTask<Void,Void,Boolean>{
+
+        private final String mEmail;
+
+        EmailExistsTask(String email){
+            mEmail = email;
+        }
+        @Override
+        protected Boolean doInBackground(Void... params) {
+
+            String url = "http://ucs-scheduler.cloudapp.net/UTA/EmailExists?email="+ mEmail;
+
+            try {
+                String rawServerResponse = HTTPGetService.fetchJSON(url);Log.d("Server Response", rawServerResponse);
+                JSONObject jsonServerResponse = new JSONObject(rawServerResponse);
+
+                if(jsonServerResponse.getBoolean("Success"))
+                    return true;
+                else return false;
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            return false;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            mAuthTask = null;
+            showProgress(false);
+
+            if (success) {
+                Toast.makeText(LoginActivity.this, "Successfully reset password",Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(LoginActivity.this, "Failed to reset password",Toast.LENGTH_LONG).show();
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+            mAuthTask = null;
+            showProgress(false);
+        }
+    }
+
     /**
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
@@ -275,31 +364,21 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
+
             String url = "http://ucs-scheduler.cloudapp.net/UTA/ValidateLogin?username="+ mEmail + "&password="+ mPassword;
 
-            HTTPGetService = new HTTPGetService();
-
             try {
-                JSONObject result = new JSONObject(HTTPGetService.fetchJSON(url));
-                if(result.getBoolean("Success")){
+                String rawServerResponse = HTTPGetService.fetchJSON(url);Log.d("Server Response", rawServerResponse);
+                JSONObject jsonServerResponse = new JSONObject(rawServerResponse);
+
+                if(jsonServerResponse.getBoolean("Success"))
                     return true;
-                }
-                return false;
+                else return false;
             } catch (JSONException e) {
                 e.printStackTrace();
             }
 
-            /*for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }*/
-
-            // TODO: register the new account here.
-            return true;
+            return false;
         }
 
         @Override
@@ -308,6 +387,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             showProgress(false);
 
             if (success) {
+                mEmailView.setText("");
+                mPasswordView.setText("");
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                 LoginActivity.this.startActivity(intent);
             } else {

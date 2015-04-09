@@ -102,15 +102,15 @@ public class HTTPGetService extends IntentService {
             DefaultHttpClient httpClient = new DefaultHttpClient(httpParams);
             HttpEntity httpEntity = null;
             HttpResponse httpResponse = null;
-            Log.d("test:", "test1");
+            Log.d("test:", "fetchJSON HTTP parameters set");
 
             HttpGet httpGet = new HttpGet(url);
+            Log.d("test:", "HTTPGet setup");
             httpResponse = httpClient.execute(httpGet);
-            Log.d("test:", "test2");
+            Log.d("test:", "HTTPGet executed - response received");
 
             httpEntity = httpResponse.getEntity();
             response = EntityUtils.toString(httpEntity);
-            Log.d("test:", "test3");
 
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
