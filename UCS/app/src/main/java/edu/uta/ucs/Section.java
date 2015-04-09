@@ -166,23 +166,23 @@ public class Section {
     Section(JSONObject jsonObject, Course sourceCourse) throws JSONException {
 
         this.setSectionID(Integer.parseInt(jsonObject.getString("CourseNumber")));
-        Log.d("New Section ID", ((Integer)getSectionID()).toString());
+        Log.i("New Section ID", ((Integer)getSectionID()).toString());
 
         this.setSectionNumber(Integer.parseInt(jsonObject.getString("Section")));
-        Log.d("New Section Number", ((Integer)getSectionNumber()).toString());
+        Log.i("New Section Number", ((Integer)getSectionNumber()).toString());
 
         this.setRoom(jsonObject.getString("Room"));
-        Log.d("New Section Room", getRoom());
+        Log.i("New Section Room", getRoom());
 
         this.setInstructors(jsonObject.getString("Instructor"));
-        Log.d("New Section Instructor", getInstructors());
+        Log.i("New Section Instructor", getInstructors());
 
         String times[] = jsonObject.getString("MeetingTime").split("-");
-        Log.d("New Start Time", times[0]);
+        Log.i("New Start Time", times[0]);
         if (!times[0].equalsIgnoreCase("TBA")) {
             this.setStartTime(new TimeShort(times[0]));
             this.setEndTime(new TimeShort(times[1]));
-            Log.d("New Section MeetingTime", getStartTime().toString24h() + "-" + getEndTime().toString24h());
+            Log.i("New Section MeetingTime", getStartTime().toString24h() + "-" + getEndTime().toString24h());
         }
         else{
             this.setStartTime(new TimeShort(0,0));
@@ -190,21 +190,21 @@ public class Section {
         }
 
         JSONArray jsonDaysArray = jsonObject.getJSONArray("MeetingDays");
-        Log.d("New Section Days List:", jsonDaysArray.toString());
+        Log.i("New Section Days List:", jsonDaysArray.toString());
 
         days = new ArrayList<Day>(jsonDaysArray.length());
 
         for(int index = jsonDaysArray.length(); index != 0;index--){
             Day temp = Day.valueOf(jsonDaysArray.getString(index -1));
             days.add(temp);
-            Log.d("New Section Day: ", ((Day)days.get(days.size()-1)).toString());
+            Log.i("New Section Day: ", ((Day)days.get(days.size()-1)).toString());
             Day temp2 = (Day)days.get(0);
         }
         Collections.reverse(days);
-        Log.d("New Section #of Days: ", ((Integer) days.size()).toString());
+        Log.i("New Section #of Days: ", ((Integer) days.size()).toString());
 
         setStatus(ClassStatus.valueOf(jsonObject.getString("Status").toUpperCase()));
-        Log.d("New Section Status: ", getStatus().toString());
+        Log.i("New Section Status: ", getStatus().toString());
 
         this.setSourceCourse(sourceCourse);
     }
