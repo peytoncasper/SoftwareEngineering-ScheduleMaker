@@ -6,11 +6,15 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.LoaderManager.LoaderCallbacks;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -18,6 +22,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
@@ -29,9 +34,11 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -44,7 +51,11 @@ import java.util.List;
  */
 public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
-    public static final String ACTION_RESP ="edu.uta.ucs.intent.action.LOGIN_ACTIVITY";
+    public static final String ACTION_LOGIN ="edu.uta.ucs.intent.action.ACTION_LOGIN";
+    public static final String ACTION_RESET_PASSWORD ="edu.uta.ucs.intent.action.ACTION_RESET_PASSWORD";
+
+    private static final String SPOOFED_LOGIN = "{\"Success\":true,\"Email\":\"a@a.a\"}";
+    private static final String SPOOFED_RESET_PASSWORD = "{\"Success\":true}";
 
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
@@ -95,6 +106,9 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         mProgressView = findViewById(R.id.login_progress);
 
         HTTPGetService = new HTTPGetService();
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(new LoginReceiver(), new IntentFilter(ACTION_LOGIN));
+        LocalBroadcastManager.getInstance(this).registerReceiver(new ResetPasswordReceiver(), new IntentFilter(ACTION_RESET_PASSWORD));
     }
 
     private void populateAutoComplete() {
@@ -121,6 +135,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             return;
         }
 
+
+
         // Reset errors.
         mEmailView.setError(null);
         mPasswordView.setError(null);
@@ -128,6 +144,15 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         // Store values at the time of the login attempt.
         String email = mEmailView.getText().toString();
         String password = mPasswordView.getText().toString();
+
+
+        Intent intent = new Intent(this, HTTPGetService.class);
+
+        intent.putExtra(HTTPGetService.URL_REQUEST, HTTPGetService.SPOOF_SERVER);
+        intent.putExtra(HTTPGetService.SPOOFED_RESPONSE, SPOOFED_LOGIN);
+        intent.putExtra(HTTPGetService.SOURCE_INTENT, ACTION_LOGIN);
+
+        startService(intent);
 
         boolean cancel = false;
         View focusView = null;
@@ -159,9 +184,21 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
+
             mAuthTask = new UserLoginTask(email, password);
             mAuthTask.execute((Void) null);
         }
+    }
+
+    public void resetPasswordAttempt(String email){
+
+        Intent intent = new Intent(this, HTTPGetService.class);
+
+        intent.putExtra(HTTPGetService.URL_REQUEST, HTTPGetService.SPOOF_SERVER);
+        intent.putExtra(HTTPGetService.SPOOFED_RESPONSE, SPOOFED_RESET_PASSWORD);
+        intent.putExtra(HTTPGetService.SOURCE_INTENT, ACTION_RESET_PASSWORD);
+
+        startService(intent);
     }
 
     public void resetPasswordDialog(View view){
@@ -181,6 +218,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String email = input.getText().toString();
+                resetPasswordAttempt(email);
+
                 if (isEmailValid(email)){
                     mEmailTask = new EmailExistsTask(email);
                     mEmailTask.execute((Void) null);
@@ -396,6 +435,85 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         protected void onCancelled() {
             mAuthTask = null;
             showProgress(false);
+        }
+    }
+
+
+    private class ResetPasswordReceiver extends BroadcastReceiver{
+
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String response = intent.getStringExtra(HTTPGetService.SERVER_RESPONSE);
+            Log.d("Reset Password Receiver","Launched Receiver");
+            Log.d("Received: ", response);
+            /*
+            ArrayList<Course> courseList = new ArrayList<Course>();
+            int numberOfSectionsTotal = 0;
+
+            try {
+                JSONObject rawResult = new JSONObject(response);
+                JSONArray jsonCourses = rawResult.getJSONArray("Results");
+                SharedPreferences.Editor editor = getSharedPreferences("SharedPrefs", MODE_PRIVATE).edit();
+                editor.putString("fetchedCourseListJSON",rawResult.getString("Results"));
+                editor.apply();
+                float timeTaken = Float.parseFloat(rawResult.getString("TimeTaken"));
+                Log.d("New Request Time Taken:", Float.toString(timeTaken));
+                courseList = Course.buildCourseList(jsonCourses);
+
+                responseDisplay.setText(response);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            ArrayList<Section> sectionArrayList = new ArrayList<Section>(numberOfSectionsTotal);
+            for (Course course : courseList){
+                sectionArrayList.addAll(course.getSectionList());
+            }
+
+            Log.d("New Section", "ArrayList Built");
+            ListAdapter adapter = new MySectionArrayAdapter(MainActivity.this, R.layout.list_item, sectionArrayList);
+            Log.d("New Section", "ListView Built");
+            sectionListView.setAdapter(adapter);
+            */
+        }
+    }
+
+    private class LoginReceiver extends BroadcastReceiver {
+
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String response = intent.getStringExtra(HTTPGetService.SERVER_RESPONSE);
+            Log.d("Login Receiver","Launched Receiver");
+            Log.d("Received: ",response);
+            /*
+            ArrayList<Course> courseList = new ArrayList<Course>();
+            int numberOfSectionsTotal = 0;
+
+            try {
+                JSONObject rawResult = new JSONObject(response);
+                JSONArray jsonCourses = rawResult.getJSONArray("Results");
+                SharedPreferences.Editor editor = getSharedPreferences("SharedPrefs", MODE_PRIVATE).edit();
+                editor.putString("fetchedCourseListJSON",rawResult.getString("Results"));
+                editor.apply();
+                float timeTaken = Float.parseFloat(rawResult.getString("TimeTaken"));
+                Log.d("New Request Time Taken:", Float.toString(timeTaken));
+                courseList = Course.buildCourseList(jsonCourses);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            ArrayList<Section> sectionArrayList = new ArrayList<Section>(numberOfSectionsTotal);
+            for (Course course : courseList){
+                sectionArrayList.addAll(course.getSectionList());
+            }
+
+            Log.d("New Section", "ArrayList Built");
+            ListAdapter adapter = new MySectionArrayAdapter(MainActivity.this, R.layout.list_item, sectionArrayList);
+            Log.d("New Section", "ListView Built");
+            sectionListView.setAdapter(adapter);
+            */
         }
     }
 }
