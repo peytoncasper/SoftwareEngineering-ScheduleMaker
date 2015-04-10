@@ -110,8 +110,14 @@ public class MainActivity extends ActionBarActivity implements HTTPGetCallback {
     }
 
     @Override
-    public void onResult(JSONObject result) throws JSONException{
-        Log.d("MainActivity JSON test", result.getString("Success"));
+    public void onResult(JSONObject result){
+        if (result.has("Success")) {
+            try {
+                Log.d("MainActivity JSON test", result.getString("Success"));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public class ResponseReceiver extends BroadcastReceiver{

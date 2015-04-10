@@ -47,7 +47,7 @@ public class HTTPGetService extends AsyncTask<String, Void, JSONObject> {
         String rawServerResponse = null;
         JSONObject parsedServerResponse = null;
         for (String url: urls){
-            Log.d("Service URL", url);
+            Log.d("HTTPGet url", "URL to get JSON from: "+url);
             rawServerResponse = fetchJSON(url);
         }
         try {
@@ -62,11 +62,7 @@ public class HTTPGetService extends AsyncTask<String, Void, JSONObject> {
     @Override
     protected void onPostExecute(JSONObject jsonObject) {
         super.onPostExecute(jsonObject);
-        try {
-            callback.onResult(jsonObject);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        callback.onResult(jsonObject);
 
     }
     
