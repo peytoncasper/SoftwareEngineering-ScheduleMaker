@@ -104,18 +104,6 @@ public class HTTPGetService extends IntentService {
         Log.d("Service Test", "HTTPGetService has been stopped");
     }
 
-    /*
-    class MessageHandler extends android.os.Handler{
-        public void handleMessage(Message message){
-            switch(message.what){
-                case URL_REQUEST:
-                    Toast.makeText(getBaseContext(), "Hello from the service", Toast.LENGTH_LONG).show();
-                    break;
-                default:
-                    super.handleMessage(message);
-            }
-        }
-    }*/
     /**
      * Making service call
      * @url - url to make request
@@ -151,8 +139,9 @@ public class HTTPGetService extends IntentService {
         } catch (IOException e) {
             e.printStackTrace();
             Log.d("Service Test", "HTTP Request Failed - IOException");
-            response = "Server Request Timed-out";
+            response = "{\"Success\":false}";
             Toast.makeText(getBaseContext(), response, Toast.LENGTH_LONG).show();
+
         }
 
         Log.d("Server reply:", response);
