@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 
-public class MainActivity extends ActionBarActivity implements HTTPGetCallback {
+public class MainActivity extends ActionBarActivity {
 
     String[] desiredCourseList = {};//{"ENGL-1301","MATH-1426","PHYS-1443","CSE-1105"};
     String baseURL = "http://ucs-scheduler.cloudapp.net/UTA/ClassStatus?classes=";
@@ -35,7 +35,9 @@ public class MainActivity extends ActionBarActivity implements HTTPGetCallback {
     private TextView mainText;
     private Switch spoofServerSwitch;
     private ListView sectionListView;
-    private ResponseReceiver receiver;
+    //private ResponseReceiver receiver;
+    ArrayList<Course> courseList;
+    int numberOfSectionsTotal;
 
 
     @Override
@@ -43,11 +45,6 @@ public class MainActivity extends ActionBarActivity implements HTTPGetCallback {
         super.onCreate(savedInstanceState);
         Intent intent = getIntent();
         setContentView(R.layout.activity_main);
-
-        IntentFilter filter = new IntentFilter(ResponseReceiver.ACTION_RESP);
-        filter.addCategory(Intent.CATEGORY_DEFAULT);
-        receiver = new ResponseReceiver();
-        registerReceiver(receiver, filter);
 
         spoofServerSwitch = (Switch) findViewById(R.id.spoofServer);
         spoofServerSwitch.setChecked(true);
@@ -57,126 +54,66 @@ public class MainActivity extends ActionBarActivity implements HTTPGetCallback {
 
         sectionListView = (ListView) findViewById(R.id.listView);
 
-        Intent connectToHTTPGetService = new Intent(this, HTTPGetService.class);
-        //bindService(connectToHTTPGetService, httpGetServiceConnection, Context.BIND_AUTO_CREATE);
         httpGetServiceBound = true;
-
-
-
+        courseList = new ArrayList<>();
     }
-
-    /*
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if(httpGetServiceBound){
-            httpGetServiceConnection = null;
-            httpGetServiceBound = false;
-        }
-    }*/
 
     public void requestJSON(View view){
 
         responseDisplay.setText("Please wait, attempting to fetch data...");
+        Log.d("MainActivity", "Initiating JSON Request");
 
 
         StringBuilder urlBuilder = new StringBuilder(baseURL);
-        String classTextField = ((TextView) findViewById(R.id.editText)).getText().toString();
+        String classTextField = ((TextView) findViewById(R.id.classesTextField)).getText().toString();
 
         Log.d("classTextField",classTextField);
         if (classTextField.length() > 0 ){
             urlBuilder.append(classTextField + ",");
         }
         String url = urlBuilder.length() > 0 ? urlBuilder.substring( 0, urlBuilder.length() - 1 ): "";
-        new HTTPGetService(this, url).execute(url);
-        /*
-        Message message = Message.obtain(null,0,0,0,0);
-        Bundle bundle = new Bundle();
-        bundle.putString(HTTPGetService.URL_REQUEST, url);
-        boolean switchStatus = spoofServerSwitch.isChecked();
-        Log.i("MainActivity url",url);
-        httpGetService.fetchJSON(url);
 
-        /*
-        intent.putExtra("edu.uta.ucs.URL_REQUEST", url);
-        intent.putExtra("edu.uta.ucs.SPOOF_SERVER_RESPONSE", switchStatus);
-        */
-    }
+        if(spoofServerSwitch.isChecked())
+            url = HTTPGetService.SPOOF_SERVER_RESPONSE;
 
-    @Override
-    public void onResult(JSONObject result){
-        if (result.has("Success")) {
-            try {
-                Log.d("MainActivity JSON test", result.getString("Success"));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
-    public class ResponseReceiver extends BroadcastReceiver{
-        public static final String ACTION_RESP =
-                "edu.uta.ucs.intent.action.MESSAGE_PROCESSED";
+        new HTTPGetService(new HTTPGetCallback() {
+            @Override
+            public void onResult(JSONObject result) {
 
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String response = intent.getStringExtra("edu.uta.ucs.SERVER_RESPONSE");
-            Log.d("Received: ",response);
-            responseDisplay.setText("About to Show text!");
-            responseDisplay.setText(response);
-            ArrayList<Course> courseList = new ArrayList<Course>();
-            int numberOfSectionsTotal = 0;
-
-            try {
-                JSONObject rawResult = new JSONObject(response);
-                JSONArray jsonCourses = rawResult.getJSONArray("Results");
-                float timeTaken = Float.parseFloat(rawResult.getString("TimeTaken"));
-                Log.d("New Request Time Taken:", Float.toString(timeTaken));
-                courseList.ensureCapacity(jsonCourses.length());
-
-                for(int index = jsonCourses.length(); index != 0;index--){
-                    Log.d("New Course: ", jsonCourses.getJSONObject(index - 1).toString());
-                    courseList.add( new Course(jsonCourses.getJSONObject(index - 1)));
-                    numberOfSectionsTotal++;
+                try {
+                    courseList = getCourses(result.getJSONArray("Results"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-                Collections.reverse(courseList);
 
-                responseDisplay.setText(response);
-            } catch (JSONException e) {
-                e.printStackTrace();
+                ArrayList<Section> sectionArrayList = new ArrayList<Section>(numberOfSectionsTotal);
+
+                for (Course course : courseList)
+                    sectionArrayList.addAll(course.getSectionList());
+
+                updateUpdateListView(sectionArrayList);
             }
-
-            ArrayList<Section> sectionArrayList = new ArrayList<Section>(numberOfSectionsTotal);
-            for (Course course : courseList){
-                sectionArrayList.addAll(course.getSectionList());
-            }
-
-            Log.d("New Section", "ArrayList Built");
-            ListAdapter adapter = new MySectionArrayAdapter(MainActivity.this, R.layout.list_item, sectionArrayList);
-            Log.d("New Section", "ListView Built");
-            sectionListView.setAdapter(adapter);
-
-        }
+        }, url).execute();
     }
 
-    /*ServiceConnection httpGetServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            HTTPGetServiceBinder binder = (HTTPGetServiceBinder) service;
-            httpGetService = binder.getService();
-            httpGetServiceBound = true;
-        }
+    private ArrayList<Course> getCourses(JSONArray jsonCourses) throws JSONException {
+        numberOfSectionsTotal = 0;
+        ArrayList<Course> courseArrayList = new ArrayList<>(jsonCourses.length());
 
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            httpGetServiceMessenger = null;
-            httpGetServiceBound = false;
+        for(int index = jsonCourses.length(); index != 0;index--){
+            Log.d("New Course: ", jsonCourses.getJSONObject(index - 1).toString());
+            courseArrayList.add( new Course(jsonCourses.getJSONObject(index - 1)));
+            numberOfSectionsTotal++;
         }
-    };*/
+        Collections.reverse(courseArrayList);
+
+        return courseArrayList;
+    }
+
+    private void updateUpdateListView(ArrayList sectionArrayList){
+        ListAdapter adapter = new MySectionArrayAdapter(MainActivity.this, R.layout.list_item, sectionArrayList);
+        sectionListView.setAdapter(adapter);
+    }
+
 }

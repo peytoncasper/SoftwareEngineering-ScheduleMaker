@@ -18,7 +18,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-public class HTTPGetService extends AsyncTask<String, Void, JSONObject> {
+public class HTTPGetService extends AsyncTask<Void, Void, JSONObject> {
 
     public static final String URL_REQUEST = "edu.uta.ucs.URL_REQUEST";
     public static final String SPOOF_SERVER_RESPONSE = "edu.uta.ucs.SPOOF_SERVER_RESPONSE";
@@ -36,24 +36,31 @@ public class HTTPGetService extends AsyncTask<String, Void, JSONObject> {
         this.url = url;
     }
 
+
+
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
     }
 
     @Override
-    protected JSONObject doInBackground(String... urls) {
+    protected JSONObject doInBackground(Void... params) {
 
         String rawServerResponse = null;
         JSONObject parsedServerResponse = null;
-        for (String url: urls){
-            Log.d("HTTPGet url", "URL to get JSON from: "+url);
-            rawServerResponse = fetchJSON(url);
-        }
+        Log.d("HTTPGet url", "URL to get JSON from: "+ url);
+        rawServerResponse = fetchJSON(url);
         try {
             parsedServerResponse = new JSONObject(rawServerResponse);
+            float timeTaken = Float.parseFloat(parsedServerResponse.getString("TimeTaken"));
+            Log.d("New Request Time Taken:", Float.toString(timeTaken));
         } catch (JSONException e) {
             e.printStackTrace();
+            try {
+                parsedServerResponse = new JSONObject("{\"Success\":false}");
+            } catch (JSONException e1) {
+                e1.printStackTrace();
+            }
         }
 
         return parsedServerResponse;
@@ -75,37 +82,48 @@ public class HTTPGetService extends AsyncTask<String, Void, JSONObject> {
         String response = null;
         Log.d("Service URL:", url);
 
-        try {
-            // http client
-            HttpParams httpParams = new BasicHttpParams();
-            HttpConnectionParams.setConnectionTimeout(httpParams, 5000);
-            HttpConnectionParams.setSoTimeout(httpParams, 45000);
-            DefaultHttpClient httpClient = new DefaultHttpClient(httpParams);
-            HttpEntity httpEntity = null;
-            HttpResponse httpResponse = null;
-            Log.d("HTTPGet test", "fetchJSON HTTP parameters set");
+        if (url.equalsIgnoreCase(SPOOF_SERVER_RESPONSE)) {
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            response = SPOOFED_RESPONSE;
+        } else {
+            try {
+                // http client
+                HttpParams httpParams = new BasicHttpParams();
+                HttpConnectionParams.setConnectionTimeout(httpParams, 1000);
+                HttpConnectionParams.setSoTimeout(httpParams, 10000);
+                DefaultHttpClient httpClient = new DefaultHttpClient(httpParams);
+                HttpEntity httpEntity = null;
+                HttpResponse httpResponse = null;
+                Log.d("HTTPGet test", "fetchJSON HTTP parameters set");
 
-            HttpGet httpGet = new HttpGet(url);
-            Log.d("HTTPGet test", "HTTPGet setup");
-            httpResponse = httpClient.execute(httpGet);
-            Log.d("HTTPGet test", "HTTPGet executed - response received");
+                HttpGet httpGet = new HttpGet(url);
+                Log.d("HTTPGet test", "HTTPGet setup");
+                httpResponse = httpClient.execute(httpGet);
+                Log.d("HTTPGet test", "HTTPGet executed - response received");
 
-            httpEntity = httpResponse.getEntity();
-            response = EntityUtils.toString(httpEntity);
+                httpEntity = httpResponse.getEntity();
+                response = EntityUtils.toString(httpEntity);
 
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            Log.d("Service Test", "HTTP Request Failed - UnsupportedEncodingException");
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-            Log.d("Service Test", "HTTP Request Failed - ClientProtocolException");
-        } catch (IOException e) {
-            e.printStackTrace();
-            Log.d("Service Test", "HTTP Request Failed - IOException");
-            response = "Server Request Timed-out";
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+                Log.d("Service Test", "HTTP Request Failed - UnsupportedEncodingException");
+            } catch (ClientProtocolException e) {
+                e.printStackTrace();
+                Log.d("Service Test", "HTTP Request Failed - ClientProtocolException");
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.d("Service Test", "HTTP Request Failed - IOException");
+                response = "Server Request Timed-out";
+            }
+
+            Log.d("Server reply", response);
+
         }
 
-        Log.d("Server reply", response);
         return response;
     }
 

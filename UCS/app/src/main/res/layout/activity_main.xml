@@ -20,7 +20,7 @@
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/editText"
+            android:id="@+id/classesTextField"
             android:layout_gravity="center"
             android:clickable="true" />
 
@@ -28,7 +28,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="FETCH JSON"
-            android:id="@+id/button3"
+            android:id="@+id/requestJSON"
             android:layout_gravity="center"
             android:clickable="true"
             android:onClick="requestJSON" />
