@@ -145,8 +145,10 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
 
         // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
+        Log.d("LoginActivity", "PasswordCheck");
+        if ( !(password.length()>0) || !isPasswordValid(password)) {
             mPasswordView.setError(getString(R.string.error_invalid_password));
+            Log.d("LoginActivity", "Password fails");
             focusView = mPasswordView;
             cancel = true;
         }
@@ -180,8 +182,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             startService(intent);
         }
     }
-
-
 
     public void resetPasswordDialog(View view){
         Log.d("Reset Dialog", "Attempting to show dialogue");
