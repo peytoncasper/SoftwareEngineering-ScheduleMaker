@@ -62,7 +62,7 @@ class TimeShort {
         String[] times = timeAsString.split(":");
         this.hour = Byte.parseByte(times[0]);
         this.minute = Byte.parseByte(times[1].substring(0, 2));
-        if (times[1].substring(2).equalsIgnoreCase("PM")) {
+        if (times[1].substring(2).equalsIgnoreCase("PM") && this.hour!=12) {
             this.hour += 12;
         }
 
