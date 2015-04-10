@@ -1,16 +1,11 @@
 package edu.uta.ucs;
 
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.os.Message;
 import android.os.Messenger;
-import android.os.RemoteException;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
@@ -27,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 
-public class MainActivity extends ActionBarActivity implements Callback{
+public class MainActivity extends ActionBarActivity implements HTTPGetCallback {
 
     String[] desiredCourseList = {};//{"ENGL-1301","MATH-1426","PHYS-1443","CSE-1105"};
     String baseURL = "http://ucs-scheduler.cloudapp.net/UTA/ClassStatus?classes=";
@@ -115,7 +110,7 @@ public class MainActivity extends ActionBarActivity implements Callback{
     }
 
     @Override
-    public void onResult(JSONObject result) throws JSONException {
+    public void onResult(JSONObject result) throws JSONException{
         Log.d("MainActivity JSON test", result.getString("Success"));
     }
 

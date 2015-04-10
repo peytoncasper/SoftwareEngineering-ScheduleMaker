@@ -1,13 +1,7 @@
 package edu.uta.ucs;
 
-import android.app.Service;
-import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.Binder;
-import android.os.IBinder;
-import android.os.Messenger;
 import android.util.Log;
-import android.widget.Toast;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -35,9 +29,9 @@ public class HTTPGetService extends AsyncTask<String, Void, JSONObject> {
     //private final IBinder clientBinder = new HTTPGetServiceBinder();
     String url;
 
-    Callback callback;
+    HTTPGetCallback callback;
 
-    public HTTPGetService(Callback callback, String url){
+    public HTTPGetService(HTTPGetCallback callback, String url){
         this.callback = callback;
         this.url = url;
     }
