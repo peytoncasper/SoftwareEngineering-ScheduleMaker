@@ -61,6 +61,7 @@ public class MySectionArrayAdapter extends ArrayAdapter<Section> {
             TextView designationText = (TextView) v.findViewById(R.id.sectionDesignation);
 
             if (courseText != null) {
+                if(p.getSourceCourse()!=null)
                 courseText.setText(p.getSourceCourse().getCourseName().split("-")[1].substring(1));
             }
 

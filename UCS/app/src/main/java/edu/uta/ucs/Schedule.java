@@ -34,7 +34,7 @@ public class Schedule {
         this.selectedSections = selectedSections;
     }
 
-    public ArrayList<Section> scheduleFactory(int index, ArrayList<Course> courseArrayList, ArrayList<Section> sectionArrayList) throws NoSchedulesPossibleException{
+    public static ArrayList<Section> scheduleFactory(int index, ArrayList<Course> courseArrayList, ArrayList<Section> sectionArrayList) throws NoSchedulesPossibleException{
 
         Course course = courseArrayList.get(index);
         ArrayList<Section> possibleSections = course.getSectionList();
@@ -69,7 +69,10 @@ class NoSchedulesPossibleException extends Exception {
         super();
         StringBuilder message = new StringBuilder("Could not build a schedule from this combination of courses:/n" + course.getCourseName());
         for (Section section : sectionArrayList){
-            message.append("/n" + section.getSourceCourse().getCourseName());
+            if (section.getSourceCourse() != null)
+                message.append("/n" + section.getSourceCourse().getCourseName());
+            else
+                message.append("/nError - Unrecognized Course");
         }
         this.message = message.toString();
     }

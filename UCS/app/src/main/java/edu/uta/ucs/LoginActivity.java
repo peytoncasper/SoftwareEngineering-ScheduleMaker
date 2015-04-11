@@ -54,6 +54,10 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     public static final String ACTION_LOGIN ="edu.uta.ucs.intent.action.ACTION_LOGIN";
     public static final String ACTION_RESET_PASSWORD ="edu.uta.ucs.intent.action.ACTION_RESET_PASSWORD";
 
+    private static final String LOGIN_URL = "http://ucs-scheduler.cloudapp.net/UTA/ValidateLogin?";
+    private static final String[] LOGIN_PARAMS ={"username=","&password="};
+    private static final String EMAIL_EXISTS_URL = "http://ucs-scheduler.cloudapp.net/UTA/EmailExists?email=";
+
     private static final String SPOOFED_LOGIN = "{\"Success\":true,\"Email\":\"a@a.a\"}";
     private static final String SPOOFED_RESET_PASSWORD = "{\"Success\":true}";
 
@@ -136,7 +140,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         String email = mEmailView.getText().toString();
         String password = mPasswordView.getText().toString();
 
-        String url = "http://ucs-scheduler.cloudapp.net/UTA/ValidateLogin?username="+ email + "&password="+ password;
+        String url = LOGIN_URL + LOGIN_PARAMS[0] + email + LOGIN_PARAMS[1] + password;
 
 
 
@@ -204,7 +208,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 if (isEmailValid(email)){
                     Intent intent = new Intent(getApplicationContext(), HTTPGetService.class);
 
-                    intent.putExtra(HTTPGetService.URL_REQUEST, "http://ucs-scheduler.cloudapp.net/UTA/EmailExists?email="+email);
+                    intent.putExtra(HTTPGetService.URL_REQUEST, EMAIL_EXISTS_URL+email);
                     //intent.putExtra(HTTPGetService.SPOOFED_RESPONSE, SPOOFED_RESET_PASSWORD);
                     intent.putExtra(HTTPGetService.SOURCE_INTENT, ACTION_RESET_PASSWORD);
 
