@@ -183,6 +183,13 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         }
     }
 
+    public void createAccount(View view){
+        mEmailView.setText("");
+        mPasswordView.setText("");
+        Intent launchCreateAccountActivity = new Intent(LoginActivity.this, CreateAccount.class);
+        LoginActivity.this.startActivity(launchCreateAccountActivity);
+    }
+
     public void resetPasswordDialog(View view){
         Log.d("Reset Dialog", "Attempting to show dialogue");
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
