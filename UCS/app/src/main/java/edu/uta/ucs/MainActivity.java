@@ -74,14 +74,6 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onStart() {
         super.onStart();
-
-        //IntentFilter filter = new IntentFilter(ACTION_RESP);
-        //filter.addCategory(Intent.CATEGORY_DEFAULT);
-
-        //receiver = new ResponseReceiver();
-
-        //registerReceiver(receiver, filter);
-
     }
 
     @Override

@@ -204,8 +204,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 if (isEmailValid(email)){
                     Intent intent = new Intent(getApplicationContext(), HTTPGetService.class);
 
-                    intent.putExtra(HTTPGetService.URL_REQUEST, HTTPGetService.SPOOF_SERVER);
-                    intent.putExtra(HTTPGetService.SPOOFED_RESPONSE, SPOOFED_RESET_PASSWORD);
+                    intent.putExtra(HTTPGetService.URL_REQUEST, "http://ucs-scheduler.cloudapp.net/UTA/EmailExists?email="+email);
+                    //intent.putExtra(HTTPGetService.SPOOFED_RESPONSE, SPOOFED_RESET_PASSWORD);
                     intent.putExtra(HTTPGetService.SOURCE_INTENT, ACTION_RESET_PASSWORD);
 
                     startService(intent);
