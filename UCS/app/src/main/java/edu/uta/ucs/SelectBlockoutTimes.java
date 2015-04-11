@@ -14,7 +14,6 @@ public class SelectBlockoutTimes extends ActionBarActivity {
         setContentView(R.layout.activity_select_blockout_times);
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.

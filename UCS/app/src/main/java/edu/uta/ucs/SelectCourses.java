@@ -18,6 +18,7 @@ import org.json.JSONObject;
 public class SelectCourses extends ActionBarActivity {
 
     public static final String ACTION_DEPARTMENT_SELECT ="edu.uta.ucs.intent.action.ACTION_DEPARTMENT_SELECT";
+    public static final String SPOOFED_DEPARTMENT_COURSES ="edu.uta.ucs.intent.action.ACTION_DEPARTMENT_SELECT";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,12 +73,10 @@ public class SelectCourses extends ActionBarActivity {
                 response = new JSONObject(intent.getStringExtra(HTTPGetService.SERVER_RESPONSE));
                 success = response.getBoolean("Success");
                 if(success){
-                    Toast.makeText(getApplicationContext(), "Account Created", Toast.LENGTH_LONG).show();
-                    Intent launchMainActivity = new Intent(getApplicationContext(), MainActivity.class);
-                    getApplicationContext().startActivity(launchMainActivity);
+                    // enable text field
                 }
                 else {
-
+                    // Try again?
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
