@@ -25,13 +25,34 @@
         </activity>
         <activity
             android:name=".MainActivity"
-            android:label="@string/title_activity_main">
+            android:label="@string/title_activity_main" >
         </activity>
 
         <service
             android:name=".HTTPGetService"
             android:exported="false" >
         </service>
+
+        <activity
+            android:name=".SelectCourses"
+            android:label="@string/title_activity_select_courses"
+            android:parentActivityName=".MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="edu.uta.ucs.MainActivity" />
+        </activity>
+        <activity
+            android:name=".SelectBlockoutTimes"
+            android:label="@string/title_activity_select_blockout_times"
+            android:parentActivityName=".SelectCourses" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="edu.uta.ucs.SelectCourses" />
+        </activity>
+        <activity
+            android:name=".CreateAccount"
+            android:label="@string/title_activity_create_account" >
+        </activity>
     </application>
 
 </manifest>
