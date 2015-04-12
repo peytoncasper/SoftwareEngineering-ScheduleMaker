@@ -34,16 +34,16 @@ public class Schedule {
         this.selectedSections = selectedSections;
     }
 
-    public static ArrayList<Section> scheduleFactory(int index, ArrayList<Course> courseArrayList, ArrayList<Section> sectionArrayList) throws NoSchedulesPossibleException{
+    public static ArrayList<Section> scheduleFactory(int index, ArrayList<Course> courseArrayList, ArrayList<Section> sectionArrayList, ArrayList<Section> blockOutTimesList) throws NoSchedulesPossibleException{
 
         Course course = courseArrayList.get(index);
         ArrayList<Section> possibleSections = course.getSectionList();
         // Shuffle sectionArrayList
         for (Section section : possibleSections){
-            if (!section.conflictsWith(sectionArrayList)){
+            if ((!section.conflictsWith(sectionArrayList)) && (!section.conflictsWith(blockOutTimesList))){
                 sectionArrayList.add(section);
                 try{
-                    return scheduleFactory(index+1, courseArrayList, sectionArrayList);
+                    return scheduleFactory(index+1, courseArrayList, sectionArrayList, blockOutTimesList);
                 } catch (NoSchedulesPossibleException exception){
                     exception.printStackTrace();
                     sectionArrayList.remove(index);

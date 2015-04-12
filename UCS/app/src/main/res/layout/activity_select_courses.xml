@@ -12,8 +12,8 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="SELECT SEMESTER"
-        android:id="@+id/button8" />
+        android:text="@string/action_select_semester"
+        android:id="@+id/select_semester_button" />
 
     <LinearLayout
         android:orientation="horizontal"
@@ -24,7 +24,7 @@
         <EditText
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:id="@+id/editText6"
+            android:id="@+id/course_department_edittext"
             android:hint="DEPT"
             android:layout_weight=".5" />
 
@@ -33,7 +33,7 @@
             android:layout_height="wrap_content"
             android:inputType="number"
             android:ems="10"
-            android:id="@+id/editText7"
+            android:id="@+id/course_number_edittext"
             android:hint="COURSE NUMBER"
             android:layout_weight="1" />
 
@@ -41,26 +41,35 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="ADD"
-            android:id="@+id/button2"
+            android:id="@+id/add_course_button"
             android:layout_weight="0" />
     </LinearLayout>
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="ADD BLOCKOUT TIMES"
-        android:id="@+id/button5" />
-
     <ListView
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:id="@+id/listView2"
+        android:layout_height="0dp"
+        android:id="@+id/selected_courses_listview"
         android:layout_weight="1" />
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="GENERATE SCHEDULES"
-        android:id="@+id/button4"
-        android:layout_gravity="center_horizontal" />
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="GENERATE SCHEDULES"
+            android:id="@+id/generate_schedules_button"
+            android:layout_gravity="center_horizontal"
+            android:layout_weight="1" />
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="SET BLOCK-OUT TIMES"
+            android:id="@+id/set_blockout_times_button"
+            android:layout_weight="1" />
+    </LinearLayout>
+
 </LinearLayout>

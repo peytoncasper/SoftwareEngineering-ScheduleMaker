@@ -87,7 +87,7 @@ public class MainActivity extends ActionBarActivity {
         super.onStop();
     }
 
-    public void requestJSON(View view){
+    private void requestJSON(View view){
 
         responseDisplay.setText("Please wait, attempting to fetch data...");
 
@@ -111,7 +111,7 @@ public class MainActivity extends ActionBarActivity {
         intent.putExtra(HTTPGetService.SOURCE_INTENT, ACTION_RESP);
 
         startService(intent);
-}
+    }
 
     public void stopMethod(){
     }

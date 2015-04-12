@@ -12,8 +12,8 @@
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/editText8"
-        android:hint="Blockout Name"/>
+        android:id="@+id/blockout_time_name_edittext"
+        android:hint="@string/prompt_blockout_time_name"/>
 
     <LinearLayout
         android:orientation="horizontal"
@@ -24,8 +24,8 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="New ToggleButton"
-            android:id="@+id/toggleButton"
+            android:text="@string/text_monday"
+            android:id="@+id/monday_toggleButton"
             android:checked="false"
             android:textOn="MON"
 
@@ -35,46 +35,51 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="New ToggleButton"
-            android:id="@+id/toggleButton2"
+            android:text="@string/text_tuesday"
+            android:id="@+id/tuesday_toggleButton"
             android:textOn="TUE"
-            android:textOff="TUE" />
+            android:textOff="TUE"
+            android:checked="false" />
 
         <ToggleButton
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="New ToggleButton"
-            android:id="@+id/toggleButton3"
+            android:text="@string/text_wednesday"
+            android:id="@+id/wednesday_toggleButton"
             android:textOn="WED"
-            android:textOff="WED" />
+            android:textOff="WED"
+            android:checked="false" />
 
         <ToggleButton
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="New ToggleButton"
-            android:id="@+id/toggleButton4"
+            android:text="@string/text_thursday"
+            android:id="@+id/thursday_toggleButton"
             android:textOn="THU"
-            android:textOff="THU" />
+            android:textOff="THU"
+            android:checked="false" />
 
         <ToggleButton
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="New ToggleButton"
-            android:id="@+id/toggleButton5"
+            android:text="@string/text_friday"
+            android:id="@+id/friday_toggleButton"
             android:textOn="FRI"
-            android:textOff="FRI" />
+            android:textOff="FRI"
+            android:checked="false" />
 
         <ToggleButton
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="New ToggleButton"
-            android:id="@+id/toggleButton6"
+            android:text="@string/text_saturday"
+            android:id="@+id/saturday_toggleButton"
             android:textOn="SAT"
-            android:textOff="SAT" />
+            android:textOff="SAT"
+            android:checked="false" />
 
     </LinearLayout>
 
@@ -90,19 +95,18 @@
             android:layout_weight="1">
 
             <TimePicker
-                android:id="@+id/timePicker"
+                android:id="@+id/start_timePicker"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:timePickerMode="spinner"
-                android:layout_weight="1"
                 android:layout_gravity="center_horizontal" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="Starting Time"
-                android:id="@+id/textView3"
+                android:text="@string/text_starting_time"
+                android:id="@+id/starting_time_textView"
                 android:layout_gravity="center_horizontal" />
         </LinearLayout>
 
@@ -113,35 +117,33 @@
             android:layout_weight="1">
 
             <TimePicker
-                android:id="@+id/timePicker2"
+                android:id="@+id/end_timePicker2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:timePickerMode="spinner"
-                android:layout_weight="1"
                 android:layout_gravity="center_horizontal" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="Endng Time"
-                android:id="@+id/textView2"
-                android:layout_gravity="center_horizontal"
-                android:layout_weight="1" />
+                android:text="@string/text_ending_time"
+                android:id="@+id/ending_time_textView"
+                android:layout_gravity="center_horizontal"/>
         </LinearLayout>
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ADD"
-            android:id="@+id/button6"
+            android:text="@string/action_add_blockout_time"
+            android:id="@+id/add_blockout_time_button"
             android:layout_gravity="center_vertical" />
 
     </LinearLayout>
 
     <ListView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:id="@+id/listView3"
         android:layout_gravity="center_horizontal"
         android:layout_weight="1"
@@ -149,10 +151,24 @@
         android:layout_marginTop="10dp"
         android:layout_marginBottom="5dp" />
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="SAVE BLOCK-OUT TIMES"
-        android:id="@+id/button7" />
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/action_save_blockout_times"
+            android:id="@+id/save_blockout_times_button"
+            android:layout_weight="1" />
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/action_load_blockout_times"
+            android:id="@+id/load_blockout_times_button"
+            android:layout_weight="1" />
+    </LinearLayout>
 
 </LinearLayout>
