@@ -37,7 +37,6 @@ public class MainActivity extends ActionBarActivity {
     private Switch spoofServerSwitch;
     private Switch useDefaultCourseList;
     private ListView sectionListView;
-    private ResponseReceiver receiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +78,6 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver(receiver);
     }
 
     @Override
@@ -87,7 +85,13 @@ public class MainActivity extends ActionBarActivity {
         super.onStop();
     }
 
-    private void requestJSON(View view){
+    public void generateSchedule(View view){
+        Log.d("MainActivity","Opening Generate Schedule");
+        Intent startSelectCoursesActivity = new Intent(MainActivity.this, SelectCourses.class);
+        MainActivity.this.startActivity(startSelectCoursesActivity);
+    }
+
+    public void requestJSON(View view){
 
         responseDisplay.setText("Please wait, attempting to fetch data...");
 

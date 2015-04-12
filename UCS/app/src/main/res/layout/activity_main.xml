@@ -64,7 +64,8 @@
             android:layout_height="wrap_content"
             android:text="@string/action_generate_schedule"
             android:id="@+id/button"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center_horizontal"
+            android:onClick="generateSchedule" />
 
         <ScrollView
             android:layout_width="match_parent"

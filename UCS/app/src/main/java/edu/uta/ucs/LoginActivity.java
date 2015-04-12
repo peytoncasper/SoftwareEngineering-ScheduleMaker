@@ -179,7 +179,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
             Intent intent = new Intent(this, HTTPGetService.class);
 
-            intent.putExtra(HTTPGetService.URL_REQUEST, url);
+            intent.putExtra(HTTPGetService.URL_REQUEST, HTTPGetService.SPOOF_SERVER);
             intent.putExtra(HTTPGetService.SPOOFED_RESPONSE, SPOOFED_LOGIN);
             intent.putExtra(HTTPGetService.SOURCE_INTENT, ACTION_LOGIN);
 

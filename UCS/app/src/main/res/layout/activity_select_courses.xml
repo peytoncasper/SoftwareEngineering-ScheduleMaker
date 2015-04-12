@@ -25,7 +25,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:id="@+id/course_department_edittext"
-            android:hint="DEPT"
+            android:hint="@string/hint_course_department"
             android:layout_weight=".5" />
 
         <EditText
@@ -34,13 +34,13 @@
             android:inputType="number"
             android:ems="10"
             android:id="@+id/course_number_edittext"
-            android:hint="COURSE NUMBER"
+            android:hint="@string/hint_course_number"
             android:layout_weight="1" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ADD"
+            android:text="@string/action_add_course"
             android:id="@+id/add_course_button"
             android:layout_weight="0" />
     </LinearLayout>
@@ -59,7 +59,7 @@
         <Button
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="GENERATE SCHEDULES"
+            android:text="@string/action_generate_schedule"
             android:id="@+id/generate_schedules_button"
             android:layout_gravity="center_horizontal"
             android:layout_weight="1" />
@@ -67,9 +67,10 @@
         <Button
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="SET BLOCK-OUT TIMES"
+            android:text="@string/action_set_blockout_times"
             android:id="@+id/set_blockout_times_button"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:onClick="saveBlockoutTimes" />
     </LinearLayout>
 
 </LinearLayout>

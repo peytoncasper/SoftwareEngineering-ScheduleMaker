@@ -9,6 +9,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import org.json.JSONException;
@@ -29,7 +30,7 @@ public class SelectCourses extends ActionBarActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(new DepartmentCoursesReceiver(), new IntentFilter(ACTION_DEPARTMENT_SELECT));
     }
 
-    private void getDepartmentCourses(){
+    private void getDepartmentCourses(View view){
         String url = null;
         Intent intent = new Intent(this, HTTPGetService.class);
         if(true) {
@@ -39,28 +40,12 @@ public class SelectCourses extends ActionBarActivity {
         }
         else
             intent.putExtra(HTTPGetService.URL_REQUEST, url);
+        startService(intent);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_select_courses, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+    public void SelectBlockoutTimes(View view){
+        Intent startSelectCoursesActivity = new Intent(SelectCourses.this, SelectBlockoutTimes.class);
+        SelectCourses.this.startActivity(startSelectCoursesActivity);
     }
 
     private class DepartmentCoursesReceiver extends BroadcastReceiver {
