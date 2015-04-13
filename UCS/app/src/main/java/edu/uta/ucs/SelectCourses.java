@@ -43,7 +43,7 @@ public class SelectCourses extends ActionBarActivity {
         startService(intent);
     }
 
-    public void SelectBlockoutTimes(View view){
+    public void selectBlockoutTimes(View view){
         Intent startSelectCoursesActivity = new Intent(SelectCourses.this, SelectBlockoutTimes.class);
         SelectCourses.this.startActivity(startSelectCoursesActivity);
     }

@@ -109,6 +109,9 @@ public class Section {
     private ClassStatus status;
     private Course sourceCourse;
 
+    public static final int h12 = 0;
+    public static final int h24 = 1;
+
     /**
      * Constructor
      *
@@ -128,7 +131,7 @@ public class Section {
 
     /**
      * Constructor which takes custom schedule information
-     * @param number UTA Section ID number
+     * @param sectionID UTA Section ID number
      * @param instructors list of instructors for section
      * @param room room the section will meet in
      * @param startTime time the lecture period will begin
@@ -137,8 +140,8 @@ public class Section {
      * @param status current class status (OPEN, CLOSED, WAIT_LIST)
      * @param sourceCourse the course the section is of
      */
-    Section(int number, String instructors, String room, TimeShort startTime, TimeShort endTime, ArrayList<Day> days, ClassStatus status, Course sourceCourse) {
-        this.setSectionID(number);
+    Section(int sectionID, String instructors, String room, TimeShort startTime, TimeShort endTime, ArrayList<Day> days, ClassStatus status, Course sourceCourse) {
+        this.setSectionID(sectionID);
         this.setInstructors(instructors);
         this.setRoom(room);
         this.setStartTime(startTime);
@@ -166,23 +169,18 @@ public class Section {
     Section(JSONObject jsonObject, Course sourceCourse) throws JSONException {
 
         this.setSectionID(Integer.parseInt(jsonObject.getString("CourseNumber")));
-        Log.i("New Section ID", ((Integer)getSectionID()).toString());
 
         this.setSectionNumber(Integer.parseInt(jsonObject.getString("Section")));
-        Log.i("New Section Number", ((Integer)getSectionNumber()).toString());
 
         this.setRoom(jsonObject.getString("Room"));
-        Log.i("New Section Room", getRoom());
 
         this.setInstructors(jsonObject.getString("Instructor"));
-        Log.i("New Section Instructor", getInstructors());
 
         String times[] = jsonObject.getString("MeetingTime").split("-");
         Log.i("New Start Time", times[0]);
         if (!times[0].equalsIgnoreCase("TBA")) {
             this.setStartTime(new TimeShort(times[0]));
             this.setEndTime(new TimeShort(times[1]));
-            Log.i("New Section MeetingTime", getStartTime().toString24h() + "-" + getEndTime().toString24h());
         }
         else{
             this.setStartTime(new TimeShort(0,0));
@@ -198,15 +196,30 @@ public class Section {
             Day temp = Day.valueOf(jsonDaysArray.getString(index -1));
             days.add(temp);
             Log.i("New Section Day: ", ((Day)days.get(days.size()-1)).toString());
-            Day temp2 = (Day)days.get(0);
         }
         Collections.reverse(days);
         Log.i("New Section #of Days: ", ((Integer) days.size()).toString());
 
-        setStatus(ClassStatus.valueOf(jsonObject.getString("Status").toUpperCase()));
-        Log.i("New Section Status: ", getStatus().toString());
+        this.setStatus(ClassStatus.valueOf(jsonObject.getString("Status").toUpperCase()));
 
         this.setSourceCourse(sourceCourse);
+    }
+
+    public JSONObject toJSON() {
+        JSONObject section = new JSONObject();
+        JSONArray days = new JSONArray(getDays());
+        try {
+            section.put("MeetingTime", getTimeString(h12));
+            section.put("CourseNumber", getSectionID());
+            section.put("Section", getSectionNumber());
+            section.put("Instructor", getInstructors());
+            section.put("Room", getRoom());
+            section.put("Status", getStatus());
+            section.put("MeetingDays", days);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return section;
     }
 
     public String getInstructors() {
@@ -215,6 +228,7 @@ public class Section {
 
     public void setInstructors(String instructors) {
         this.instructors = instructors;
+        Log.i("New Section Instructor", instructors);
     }
 
     public TimeShort getStartTime() {
@@ -223,6 +237,7 @@ public class Section {
 
     public void setStartTime(TimeShort startTime) {
         this.startTime = startTime;
+        //Log.i("New Section Start Time", getStartTime().toString24h());
     }
 
     public TimeShort getEndTime() {
@@ -231,21 +246,37 @@ public class Section {
 
     public void setEndTime(TimeShort endTime) {
         this.endTime = endTime;
+        //Log.i("New Section End Time", getEndTime().toString24h());
     }
 
     public boolean hasTimes(){
         return (startTime.getMinAfterMidnight() - endTime.getMinAfterMidnight()) != 0;
     }
 
-    public String getTimeString(){
+    public String getTimeString(int timeFormat){
         if(this.hasTimes()){
-            return startTime.toString24h() + "-" + endTime.toString24h();
+            if (timeFormat == h24)
+                return startTime.toString24h() + "-" + endTime.toString24h();
+            if (timeFormat == h12)
+                return startTime.toString12h() + "-" + endTime.toString12h();
         }
         return "UNKNOWN/TBA";
     }
 
     public ArrayList<Day> getDays() {
         return days;
+    }
+
+    public String getDaysString(){
+        StringBuilder daysStringBuilder = new StringBuilder("[");
+
+        for(Day day : days){
+            daysStringBuilder.append(day.toString() + ",");
+        }
+
+        String result = daysStringBuilder.length() > 0 ? daysStringBuilder.substring( 0, daysStringBuilder.length() - 1 ): "";
+
+        return result+"]";
     }
 
     public void setDays(ArrayList<Day> days) {
@@ -258,6 +289,7 @@ public class Section {
 
     public void setStatus(ClassStatus status) {
         this.status = status;
+        Log.i("New Section Status: ", getStatus().toString());
     }
 
     public int getSectionID() {
@@ -266,6 +298,7 @@ public class Section {
 
     public void setSectionID(int sectionID) {
         this.sectionID = sectionID;
+        Log.i("New Section ID", ((Integer)getSectionID()).toString());
     }
 
     public int getSectionNumber() {
@@ -274,6 +307,7 @@ public class Section {
 
     public void setSectionNumber(int sectionNumber) {
         this.sectionNumber = sectionNumber;
+        Log.i("New Section Number", ((Integer)getSectionNumber()).toString());
     }
 
     public String getRoom() {
@@ -282,6 +316,7 @@ public class Section {
 
     public void setRoom(String room) {
         this.room = room;
+        Log.i("New Section Room", getRoom());
     }
 
     public Course getSourceCourse() {

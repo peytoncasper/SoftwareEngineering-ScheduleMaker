@@ -26,7 +26,8 @@
             android:layout_height="wrap_content"
             android:id="@+id/course_department_edittext"
             android:hint="@string/hint_course_department"
-            android:layout_weight=".5" />
+            android:layout_weight=".5"
+            android:inputType="textCapCharacters" />
 
         <EditText
             android:layout_width="0dp"
@@ -70,7 +71,7 @@
             android:text="@string/action_set_blockout_times"
             android:id="@+id/set_blockout_times_button"
             android:layout_weight="1"
-            android:onClick="saveBlockoutTimes" />
+            android:onClick="selectBlockoutTimes" />
     </LinearLayout>
 
 </LinearLayout>

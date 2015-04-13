@@ -3,10 +3,12 @@ package edu.uta.ucs;
 import android.content.Context;
 import android.graphics.Color;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -62,27 +64,40 @@ public class MySectionArrayAdapter extends ArrayAdapter<Section> {
 
             if (courseText != null) {
                 if(p.getSourceCourse()!=null)
-                courseText.setText(p.getSourceCourse().getCourseName().split("-")[1].substring(1));
+                    if(p.getSourceCourse().getCourseName().contains("-"))
+                        courseText.setText(p.getSourceCourse().getCourseName().split("-")[1].substring(1));
+                    else
+                        courseText.setText(p.getSourceCourse().getCourseName());
             }
 
             if (daysText != null) {
-                daysText.setText(p.getDays().toString().substring(1,p.getDays().toString().length()-1));
+                daysText.setText(p.getDaysString());
             }
             if (roomText != null) {
                 roomText.setText("Room: "+p.getRoom());
+                if (p.getRoom().equals(""))
+                    roomText.setVisibility(View.GONE);
             }
             if (instructorsText != null) {
                 instructorsText.setText(p.getInstructors());
+                if (!p.getInstructors().equals(""))
+                    instructorsText.setVisibility(View.GONE);
             }
 
             if (timesText != null) {
-                timesText.setText("  "+p.getTimeString());
+                timesText.setText("  "+p.getTimeString(Section.h12));
             }
             if (sectionIDText != null) {
-                sectionIDText.setText("UTA Class Number: "+((Integer) p.getSectionID()).toString());
+                if (p.getSectionID()<0)
+                    sectionIDText.setVisibility(View.GONE);
+                else
+                    sectionIDText.setText("UTA Class Number: "+((Integer) p.getSectionID()).toString());
             }
             if (designationText != null) {
-                designationText.setText(p.getSourceCourse().getCourseName().split("-")[0] + "- " + String.format("%03d", p.getSectionNumber()));
+                if (p.getSectionNumber()<0 || p.getSectionNumber() == 0)
+                    designationText.setVisibility(View.GONE);
+                else
+                    designationText.setText(p.getSourceCourse().getCourseName().split("-")[0] + "- " + String.format("%03d", p.getSectionNumber()));
             }
 
             switch (p.getStatus()){

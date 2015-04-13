@@ -54,6 +54,41 @@ public class Course {
         Collections.reverse(sectionList);
     }
 
+    public JSONObject toJSON() {
+        JSONObject course = new JSONObject();
+        try {
+            course.put("CourseId", getCourseDepartment() + "-" + getCourseID());
+            course.put("CourseName", getCourseName());
+            ArrayList<JSONObject> courseResults = new ArrayList<>();
+            for(Section section : sectionList){
+                courseResults.add(section.toJSON());
+            }
+            JSONArray sectionJSON = new JSONArray(courseResults);
+            course.put("CourseResults",sectionJSON);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return course;
+    }
+
+
+    public JSONObject toJSON(Section section) {
+        JSONObject course = new JSONObject();
+        try {
+            course.put("CourseId", getCourseDepartment() + "-" + getCourseID());
+            course.put("CourseName", getCourseName());
+            ArrayList<JSONObject> courseResults = new ArrayList<>();
+            courseResults.add(section.toJSON());
+            JSONArray sectionJSON = new JSONArray(courseResults);
+            course.put("CourseResults",sectionJSON);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return course;
+    }
+
     public boolean addSection(Section sectionToAdd) {
         if (!sectionList.contains(sectionToAdd)) {
             sectionList.add(sectionToAdd);

@@ -36,7 +36,11 @@ public class MainActivity extends ActionBarActivity {
     private EditText courseInput;
     private Switch spoofServerSwitch;
     private Switch useDefaultCourseList;
+
     private ListView sectionListView;
+    private MySectionArrayAdapter adapter;
+
+    ArrayList<Section> sectionArrayList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +70,8 @@ public class MainActivity extends ActionBarActivity {
 
         sectionListView = (ListView) findViewById(R.id.listView);
 
+        sectionArrayList = new ArrayList<>();
+
         LocalBroadcastManager.getInstance(this).registerReceiver(new ResponseReceiver(), new IntentFilter(ACTION_RESP));
 
     }
@@ -73,6 +79,9 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        adapter = new MySectionArrayAdapter(MainActivity.this, R.layout.list_item, sectionArrayList);
+        adapter.setNotifyOnChange(true);
+        sectionListView.setAdapter(adapter);
     }
 
     @Override
@@ -147,15 +156,14 @@ public class MainActivity extends ActionBarActivity {
                 e.printStackTrace();
             }
 
-            ArrayList<Section> sectionArrayList = new ArrayList<Section>(numberOfSectionsTotal);
             for (Course course : courseList){
                 sectionArrayList.addAll(course.getSectionList());
             }
 
             Log.d("New Section", "ArrayList Built");
-            ListAdapter adapter = new MySectionArrayAdapter(MainActivity.this, R.layout.list_item, sectionArrayList);
             Log.d("New Section", "ListView Built");
-            sectionListView.setAdapter(adapter);
+            sectionArrayList = new ArrayList<Section>(numberOfSectionsTotal);
+            adapter.notifyDataSetChanged();
 
         }
     }
