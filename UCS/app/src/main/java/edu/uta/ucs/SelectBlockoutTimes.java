@@ -69,9 +69,9 @@ public class SelectBlockoutTimes extends ActionBarActivity {
         newEndTime = getTime(endTimePicker);
         ArrayList<Day> newDayList = getDays();
         Course newBlockoutCourse = new Course();
-        newBlockoutCourse.setCourseName(nameBlockoutTime.getText().toString());
+        // newBlockoutCourse.setCourseName(nameBlockoutTime.getText().toString());
 
-        Section newBlockoutTime = new Section(-1, "", "", newStartTime, newEndTime, newDayList, ClassStatus.OPEN, newBlockoutCourse);
+        Section newBlockoutTime = new Section(-1, nameBlockoutTime.getText().toString(), "", newStartTime, newEndTime, newDayList, ClassStatus.OPEN, newBlockoutCourse);
         nameBlockoutTime.setText("");
         currentBlockoutTimes.add(newBlockoutTime);
         blockoutTimesListAdapter.notifyDataSetChanged();
@@ -79,10 +79,54 @@ public class SelectBlockoutTimes extends ActionBarActivity {
     }
 
     public void saveBlockoutTimes(View view){
+        /*
         for(Section section : currentBlockoutTimes){
             Log.d("TestCourse Out", section.getSourceCourse().toJSON(section).toString());
-        }
-       this.finish();
+        }*/
+
+        AlertDialog.Builder saveName = new AlertDialog.Builder(this);
+
+        saveName.setTitle("Save as");
+        saveName.setMessage("What do you want to save this set of times as?");
+
+        final EditText blockoutSetName = new EditText(this);
+        saveName.setView(blockoutSetName);
+
+        saveName.setPositiveButton("ok", new DialogInterface.OnClickListener(){
+
+            /**
+             * This method will be invoked when a button in the dialog is clicked.
+             *
+             * @param dialog The dialog that received the click.
+             * @param which  The button that was clicked (e.g.
+             *               {@link android.content.DialogInterface#BUTTON1}) or the position
+             */
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                String blockoutName = blockoutSetName.getText().toString();
+                Course course = new Course("BLOCKOUT", blockoutName, currentBlockoutTimes);
+                Log.d("BlockoutTimes", course.toJSON().toString() );
+                finish();
+            }
+        });
+
+        saveName.setNegativeButton("cancel", new DialogInterface.OnClickListener(){
+
+            /**
+             * This method will be invoked when a button in the dialog is clicked.
+             *
+             * @param dialog The dialog that received the click.
+             * @param which  The button that was clicked (e.g.
+             *               {@link android.content.DialogInterface#BUTTON1}) or the position
+             */
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        saveName.show();
     }
 
     public void removeBlockoutTimes(View view){
@@ -92,7 +136,7 @@ public class SelectBlockoutTimes extends ActionBarActivity {
         builderSingle.setTitle("Select Time to Remove:-");
         final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(SelectBlockoutTimes.this,android.R.layout.select_dialog_singlechoice);
         for(Section section : currentBlockoutTimes){
-            arrayAdapter.add(section.getSourceCourse().getCourseName()+"\t"+section.getDaysString()+" "+section.getTimeString(Section.h12));
+            arrayAdapter.add(section.getInstructors()+"\t"+section.getDaysString()+" "+section.getTimeString(Section.h12));
         }
         builderSingle.setNegativeButton("CANCEL",
                 new DialogInterface.OnClickListener() {
@@ -112,7 +156,7 @@ public class SelectBlockoutTimes extends ActionBarActivity {
                         final Section selectedSection = currentBlockoutTimes.get(which);
                         AlertDialog.Builder builderInner = new AlertDialog.Builder(SelectBlockoutTimes.this);
                         builderInner.setMessage(strName);
-                        builderInner.setTitle(selectedSection.toString());//"Are you sure you want to remove this?\nIt can't be undone");
+                        builderInner.setTitle("Are you sure you want to remove this?\nIt can't be undone");
                         builderInner.setPositiveButton("OK",
                                 new DialogInterface.OnClickListener() {
 

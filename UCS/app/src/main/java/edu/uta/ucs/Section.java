@@ -276,7 +276,7 @@ public class Section {
 
         String result = daysStringBuilder.length() > 0 ? daysStringBuilder.substring( 0, daysStringBuilder.length() - 1 ): "";
 
-        return result+"]";
+        return result.length() > 0 ? result+"]" : "";
     }
 
     public void setDays(ArrayList<Day> days) {

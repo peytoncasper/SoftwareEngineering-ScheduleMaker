@@ -63,25 +63,32 @@ public class MySectionArrayAdapter extends ArrayAdapter<Section> {
             TextView designationText = (TextView) v.findViewById(R.id.sectionDesignation);
 
             if (courseText != null) {
-                if(p.getSourceCourse()!=null)
-                    if(p.getSourceCourse().getCourseName().contains("-"))
+                if(p.getSourceCourse()!=null) {
+                    if ((p.getSourceCourse().getCourseName() == null && p.getInstructors() != null) || (p.getSourceCourse().getCourseID().equalsIgnoreCase("BLOCKOUT")) ){
+                        courseText.setText(p.getInstructors());
+                        instructorsText.setVisibility(View.GONE);
+                    }
+                    else if (p.getSourceCourse().getCourseName().contains("-"))
                         courseText.setText(p.getSourceCourse().getCourseName().split("-")[1].substring(1));
                     else
                         courseText.setText(p.getSourceCourse().getCourseName());
+                }
             }
 
             if (daysText != null) {
                 daysText.setText(p.getDaysString());
             }
             if (roomText != null) {
-                roomText.setText("Room: "+p.getRoom());
                 if (p.getRoom().equals(""))
                     roomText.setVisibility(View.GONE);
+                else
+                    roomText.setText("Room: "+p.getRoom());
             }
-            if (instructorsText != null) {
-                instructorsText.setText(p.getInstructors());
-                if (!p.getInstructors().equals(""))
+            if (instructorsText != null){
+                if (p.getInstructors().equals(""))
                     instructorsText.setVisibility(View.GONE);
+                else
+                    instructorsText.setText(p.getInstructors());
             }
 
             if (timesText != null) {
