@@ -28,6 +28,9 @@ public class Course {
     Course(/*String courseDepartment, */String courseID, String name, ArrayList<Section> sectionList) {
         this(/*courseDepartment,*/ courseID, name);
         this.setSectionList(sectionList);
+        for (Section section : sectionList){
+            section.setSourceCourse(this);
+        }
     }
 
     Course( /*String courseDepartment,*/ String courseID, String name) {

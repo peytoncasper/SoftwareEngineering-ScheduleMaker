@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,11 +22,12 @@ public class SelectCourses extends ActionBarActivity {
     public static final String ACTION_DEPARTMENT_SELECT ="edu.uta.ucs.intent.action.ACTION_DEPARTMENT_SELECT";
     public static final String SPOOFED_DEPARTMENT_COURSES ="edu.uta.ucs.intent.action.ACTION_DEPARTMENT_SELECT";
 
+    private Course blockOut = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_courses);
-
 
         LocalBroadcastManager.getInstance(this).registerReceiver(new DepartmentCoursesReceiver(), new IntentFilter(ACTION_DEPARTMENT_SELECT));
     }
@@ -34,7 +36,6 @@ public class SelectCourses extends ActionBarActivity {
         String url = null;
         Intent intent = new Intent(this, HTTPGetService.class);
         if(true) {
-
             intent.putExtra(HTTPGetService.URL_REQUEST, HTTPGetService.SPOOF_SERVER);
             intent.putExtra(HTTPGetService.SPOOFED_RESPONSE, SPOOFED_DEPARTMENT_COURSES);
         }
@@ -45,7 +46,21 @@ public class SelectCourses extends ActionBarActivity {
 
     public void selectBlockoutTimes(View view){
         Intent startSelectCoursesActivity = new Intent(SelectCourses.this, SelectBlockoutTimes.class);
-        SelectCourses.this.startActivity(startSelectCoursesActivity);
+        SelectCourses.this.startActivityForResult(startSelectCoursesActivity, 0);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        String blockoutTimes = data.getStringExtra("BLOCKOUT");
+        try {
+            JSONObject jsonBlockoutTimes = new JSONObject(blockoutTimes);
+            blockOut = new Course(jsonBlockoutTimes);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        if (blockOut != null)
+        Log.d("test", blockOut.toJSON().toString());
     }
 
     private class DepartmentCoursesReceiver extends BroadcastReceiver {
