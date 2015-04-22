@@ -12,7 +12,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -79,7 +78,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        adapter = new MySectionArrayAdapter(MainActivity.this, R.layout.list_item, sectionArrayList);
+        adapter = new MySectionArrayAdapter(MainActivity.this, R.layout.section_list_display, sectionArrayList);
         adapter.setNotifyOnChange(true);
         sectionListView.setAdapter(adapter);
     }
