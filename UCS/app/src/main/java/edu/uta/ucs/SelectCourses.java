@@ -124,6 +124,28 @@ class DesiredCoursesArrayAdapter extends ArrayAdapter<DesiredCourse>{
     }
 }
 
+class SemesterCourseInfo{
+    class Department {
+        String Abbreviation;
+        String Description;
+        ArrayList<String> Courses;
+
+        Department(String Abbreviation, String Description, ArrayList<String> Courses) {
+            this.Abbreviation = Abbreviation;
+            this.Description = Description;
+            this.Courses = Courses;
+        }
+    }
+
+    int semesterNumber;
+    ArrayList<Department> departmentArrayList;
+
+    SemesterCourseInfo(int semesterNumber, ArrayList<Department> departments) {
+        this.semesterNumber = semesterNumber;
+        this.departmentArrayList = departments;
+    }
+}
+
 public class SelectCourses extends ActionBarActivity {
 
     public static final String ACTION_DEPARTMENT_SELECT ="edu.uta.ucs.intent.action.ACTION_DEPARTMENT_SELECT";
