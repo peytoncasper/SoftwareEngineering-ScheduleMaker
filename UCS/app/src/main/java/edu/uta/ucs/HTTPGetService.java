@@ -45,7 +45,6 @@ public class HTTPGetService extends IntentService {
     public static final String SOURCE_OPCODE = "SOURCE_OPCODE";
     public static final String SPOOFED_LOGIN_RESPONSE = "{\"Success\":true,\"Email\":\"a@a.a\"}";
 
-    private final IBinder mbinder = new LocalBinder();
     Messenger messenger;
     String url;
 
@@ -86,6 +85,7 @@ public class HTTPGetService extends IntentService {
         LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
         sendBroadcast(broadcastIntent);
 
+        this.stopSelf();
         //Log.d("Broadcasting Response: ",response);
     }
 
@@ -146,12 +146,5 @@ public class HTTPGetService extends IntentService {
 
         Log.d("Server reply:", response);
         return response;
-    }
-
-    public class LocalBinder extends Binder {
-
-        public HTTPGetService getService() {
-            return HTTPGetService.this;
-        }
     }
 }
