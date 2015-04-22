@@ -9,7 +9,8 @@
     <string name="text_starting_time">Starting Time</string>
     <string name="text_ending_time">Ending Time</string>
     <string name="action_load_blockout_times">LOAD TIMES</string>
-    <string name="action_save_blockout_times">SAVE &amp; USE TIMES</string>
+    <string name="action_save_blockout_times">SAVE TIMES</string>
+    <string name="action_use_blockout_times">USE THESE TIMES</string>
     <string name="action_add_blockout_time">ADD</string>
     <string name="prompt_blockout_time_name">Block-out Name</string>
     <string name="action_select_semester">SELECT SEMESTER</string>

@@ -189,4 +189,11 @@
             android:layout_weight="1" />
     </LinearLayout>
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/action_use_blockout_times"
+        android:id="@+id/use_blockout_times_button"
+        android:onClick="useBlockoutTimes" />
+
 </LinearLayout>

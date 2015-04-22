@@ -43,7 +43,8 @@
             android:layout_height="wrap_content"
             android:text="@string/action_add_course"
             android:id="@+id/add_course_button"
-            android:layout_weight="0" />
+            android:layout_weight="0"
+            android:onClick="addCourse" />
     </LinearLayout>
 
     <ListView

@@ -6,16 +6,15 @@ import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TimePicker;
 import android.widget.ToggleButton;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -26,6 +25,8 @@ public class SelectBlockoutTimes extends ActionBarActivity {
     ToggleButton mondayToggleButton, tuesdayToggleButton, wednesdayToggleButton, thursdayToggleButton, fridayToggleButton, saturdayToggleButton;
     TimePicker startTimePicker, endTimePicker;
     ListView sectionListView;
+
+    String blockoutSetName = null;
     MySectionArrayAdapter blockoutTimesListAdapter;
 
     ArrayList<Section> currentBlockoutTimes;
@@ -57,9 +58,25 @@ public class SelectBlockoutTimes extends ActionBarActivity {
     protected void onStart() {
         super.onStart();
 
-        blockoutTimesListAdapter = new MySectionArrayAdapter(SelectBlockoutTimes.this, R.layout.list_item, currentBlockoutTimes);
+        blockoutTimesListAdapter = new MySectionArrayAdapter(SelectBlockoutTimes.this, R.layout.section_list_display, currentBlockoutTimes);
         blockoutTimesListAdapter.setNotifyOnChange(true);
         sectionListView.setAdapter(blockoutTimesListAdapter);
+
+        Intent intent = getIntent();
+        if (intent.hasExtra("BLOCKOUT TIMES")){
+            String blockOutTimes = intent.getStringExtra("BLOCKOUT TIMES");
+            try {
+                JSONObject jsonObject = new JSONObject(blockOutTimes);
+                Course course = new Course(jsonObject);
+                for (Section section : course.getSectionList()){
+                    currentBlockoutTimes.add(section);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            blockoutTimesListAdapter.notifyDataSetChanged();
+        }
     }
 
     public void addBlockoutTime(View view){
@@ -79,6 +96,20 @@ public class SelectBlockoutTimes extends ActionBarActivity {
 
     }
 
+    public void useBlockoutTimes(View view){
+
+        if (blockoutSetName == null)
+            blockoutSetName = "";
+        Course course = new Course("BLOCKOUT", blockoutSetName, currentBlockoutTimes);
+        Log.d("BlockoutTimes", course.toJSON().toString());
+
+        Intent intent = new Intent();
+        intent.putExtra("BLOCKOUT", course.toJSON().toString());
+        setResult(0, intent);
+
+        finish();
+    }
+
     public void saveBlockoutTimes(View view){
         /*
         for(Section section : currentBlockoutTimes){
@@ -90,8 +121,8 @@ public class SelectBlockoutTimes extends ActionBarActivity {
         saveName.setTitle("Save as");
         saveName.setMessage("What do you want to save this set of times as?");
 
-        final EditText blockoutSetName = new EditText(this);
-        saveName.setView(blockoutSetName);
+        final EditText blockoutNameEditTextDialog = new EditText(this);
+        saveName.setView(blockoutNameEditTextDialog);
 
         saveName.setPositiveButton("ok", new DialogInterface.OnClickListener(){
 
@@ -104,14 +135,9 @@ public class SelectBlockoutTimes extends ActionBarActivity {
              */
             @Override
             public void onClick(DialogInterface dialog, int which) {
-
-                String blockoutName = blockoutSetName.getText().toString();
-                Course course = new Course("BLOCKOUT", blockoutName, currentBlockoutTimes);
+                blockoutSetName = blockoutNameEditTextDialog.getText().toString();
+                Course course = new Course("BLOCKOUT", blockoutSetName, currentBlockoutTimes);
                 Log.d("BlockoutTimes", course.toJSON().toString() );
-                Intent intent = new Intent();
-                intent.putExtra("BLOCKOUT", course.toJSON().toString());
-                setResult(0, intent);
-                finish();
             }
         });
 
