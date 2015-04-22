@@ -3,12 +3,10 @@ package edu.uta.ucs;
 import android.content.Context;
 import android.graphics.Color;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -35,7 +33,9 @@ public class MySectionArrayAdapter extends ArrayAdapter<Section> {
      */
     public MySectionArrayAdapter(Context context, int resource, ArrayList<Section> items) {
         super(context, resource, items);
-    }@Override
+    }
+
+    @Override
      public View getView(int position, View convertView, ViewGroup parent) {
 
         View v = convertView;
@@ -44,7 +44,7 @@ public class MySectionArrayAdapter extends ArrayAdapter<Section> {
 
             LayoutInflater vi;
             vi = LayoutInflater.from(getContext());
-            v = vi.inflate(R.layout.list_item, null);
+            v = vi.inflate(R.layout.section_list_display, null);
 
         }
 
