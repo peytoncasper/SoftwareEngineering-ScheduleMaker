@@ -16,11 +16,15 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+/**
+ * Holds Info to be shown in listview
+ */
 class DesiredCourse {
     private String courseDepartment;
     private String courseNumber;
@@ -32,6 +36,13 @@ class DesiredCourse {
         setCourseTitle(null);
     }
 
+    /**
+     * Constructor
+     *
+     * @param department
+     * @param number
+     * @param title
+     */
     DesiredCourse(String department, String number, String title){
         setCourseDepartment(department);
         setCourseNumber(number);
@@ -124,25 +135,98 @@ class DesiredCoursesArrayAdapter extends ArrayAdapter<DesiredCourse>{
     }
 }
 
-class SemesterCourseInfo{
-    class Department {
-        String Abbreviation;
-        String Description;
-        ArrayList<String> Courses;
+/**
+ * Holds all course info for an entire semester for AutoComplete and filtering of courses for validity
+ */
+class SemesterInfo{
 
-        Department(String Abbreviation, String Description, ArrayList<String> Courses) {
-            this.Abbreviation = Abbreviation;
-            this.Description = Description;
-            this.Courses = Courses;
+    /**
+     * Holds a departments' ID, Title, and an arraylist of CourseInfo to hold course information for all courses in that department.
+     */
+    class DepartmentInfo {
+
+
+        /**
+         * Holds a course number for autocomplete as well as the tile for that course number.
+         */
+        class CourseInfo{
+            int courseNumber;
+            String courseTitle;
+
+            /**
+             * Constructor
+             * @param courseInfoJSONObject JSON Object must have the following keys present:
+             *                   <ul>
+             *                   <li>"CourseNumber" - integer, represents the course number in the course info
+             *                   <li><t>In an example course, such as "ENGL-1301", this would the the "1301" part
+             *                   <li>"CourseTitle" - string, course title. Example: "RHETORIC AND COMPOSITION I" for ENGL-1301
+             *                   <ul/>
+             * @throws JSONException
+             */
+            public CourseInfo(JSONObject courseInfoJSONObject) throws JSONException {
+                this.courseNumber = courseInfoJSONObject.getInt("CourseNumber");
+                this.courseTitle = courseInfoJSONObject.getString("CourseTitle");
+            }
+        }
+
+        String departmentID;
+        String departmentTitle;
+        ArrayList<CourseInfo> courses;
+
+        /**
+         * Constructor
+         *
+         * @param departmentInfoRaw JSON Object must have the following keys present:
+         *                   <ul>
+         *                   <li>"ID" - string, abbreviated department title as used in MyMav.
+         *                          EX: "ENGL" for "English" department
+         *                              "ECED" for "Early Childhood Education" department
+         *                   <li>"Title" - string, full name of department. EX: "English" or "Early Childhood Education"
+         *                   <li>"Courses" - JSONArray, Course Information. See CourseInfo constructor for requirements
+         *                   <ul/>
+         * @throws JSONException
+         */
+        public DepartmentInfo(JSONObject departmentInfoRaw) throws JSONException {
+            this.departmentID = departmentInfoRaw.getString("ID");
+            this.departmentTitle = departmentInfoRaw.getString("Title");
+            JSONArray courseJSONArrayRaw = departmentInfoRaw.getJSONArray("Courses");
+
+            for(int index = courseJSONArrayRaw.length(); index != 0;index--){
+                this.courses.add(new CourseInfo(courseJSONArrayRaw.getJSONObject(index - 1)));
+            }
         }
     }
 
     int semesterNumber;
-    ArrayList<Department> departmentArrayList;
+    ArrayList<DepartmentInfo> departmentArrayList;
 
-    SemesterCourseInfo(int semesterNumber, ArrayList<Department> departments) {
-        this.semesterNumber = semesterNumber;
-        this.departmentArrayList = departments;
+    /**
+     * Constructor
+     *
+     * @param semesterInfoRaw JSON Object must have the following keys present:
+     *                   <ul>
+     *                   <li>"Success" - boolean, represents good server response
+     *                   <li>"SemesterNumber" - integer, UTA semster number. EX: 2155 for Summer 2015, 2158 for Spring 2015
+     *                   <li>"Departments" - JSONArray, Departments information. See DepartmentInfo constructor for requirements
+     *                   <ul/>
+     * @throws JSONException
+     */
+    SemesterInfo(JSONObject semesterInfoRaw) throws JSONException {
+        boolean success;
+        success = semesterInfoRaw.getBoolean("Success");
+        if(success){
+            this.semesterNumber = semesterInfoRaw.getInt("SemesterNumber");
+            JSONArray departmentJSONArrayRaw = semesterInfoRaw.getJSONArray("Departments");
+            this.departmentArrayList = new ArrayList<>(departmentJSONArrayRaw.length());
+
+            for(int index = departmentJSONArrayRaw.length(); index != 0;index--){
+                this.departmentArrayList.add(new DepartmentInfo(departmentJSONArrayRaw.getJSONObject( index-1 )));
+            }
+        }
+        else {
+            semesterNumber = 0;
+            departmentArrayList = null;
+        }
     }
 }
 
