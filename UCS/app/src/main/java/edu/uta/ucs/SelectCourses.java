@@ -140,18 +140,58 @@ class DesiredCoursesArrayAdapter extends ArrayAdapter<DesiredCourse>{
  */
 class SemesterInfo{
 
+    public int getSemesterNumber() {
+        return semesterNumber;
+    }
+
+    public void setSemesterNumber(int semesterNumber) {
+        this.semesterNumber = semesterNumber;
+    }
+
+    public ArrayList<DepartmentInfo> getDepartmentArrayList() {
+        return departmentArrayList;
+    }
+
+    public void setDepartmentArrayList(ArrayList<DepartmentInfo> departmentArrayList) {
+        this.departmentArrayList = departmentArrayList;
+    }
+
     /**
      * Holds a departments' ID, Title, and an arraylist of CourseInfo to hold course information for all courses in that department.
      */
     class DepartmentInfo {
 
 
+        public String getDepartmentID() {
+            return departmentID;
+        }
+
+        public void setDepartmentID(String departmentID) {
+            this.departmentID = departmentID;
+        }
+
+        public String getDepartmentTitle() {
+            return departmentTitle;
+        }
+
+        public void setDepartmentTitle(String departmentTitle) {
+            this.departmentTitle = departmentTitle;
+        }
+
+        public ArrayList<CourseInfo> getCourses() {
+            return courses;
+        }
+
+        public void setCourses(ArrayList<CourseInfo> courses) {
+            this.courses = courses;
+        }
+
         /**
          * Holds a course number for autocomplete as well as the tile for that course number.
          */
         class CourseInfo{
-            int courseNumber;
-            String courseTitle;
+            private int courseNumber;
+            private String courseTitle;
 
             /**
              * Constructor
@@ -167,11 +207,27 @@ class SemesterInfo{
                 this.courseNumber = courseInfoJSONObject.getInt("CourseNumber");
                 this.courseTitle = courseInfoJSONObject.getString("CourseTitle");
             }
+
+            public int getCourseNumber() {
+                return courseNumber;
+            }
+
+            public void setCourseNumber(int courseNumber) {
+                this.courseNumber = courseNumber;
+            }
+
+            public String getCourseTitle() {
+                return courseTitle;
+            }
+
+            public void setCourseTitle(String courseTitle) {
+                this.courseTitle = courseTitle;
+            }
         }
 
-        String departmentID;
-        String departmentTitle;
-        ArrayList<CourseInfo> courses;
+        private String departmentID;
+        private String departmentTitle;
+        private ArrayList<CourseInfo> courses;
 
         /**
          * Constructor
@@ -197,8 +253,8 @@ class SemesterInfo{
         }
     }
 
-    int semesterNumber;
-    ArrayList<DepartmentInfo> departmentArrayList;
+    private int semesterNumber;
+    private ArrayList<DepartmentInfo> departmentArrayList;
 
     /**
      * Constructor
@@ -227,6 +283,44 @@ class SemesterInfo{
             semesterNumber = 0;
             departmentArrayList = null;
         }
+    }
+}
+
+class DepartmentInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInfo>{
+
+    private ArrayList<SemesterInfo.DepartmentInfo> departmentInfoArrayList;
+    private Context context;
+
+    /**
+     * Constructor
+     *
+     * @param context  The current context.
+     * @param resource The resource ID for a layout file containing a TextView to use when
+     *                 instantiating views.
+     * @param objects  The objects to represent in the ListView.
+     */
+    public DepartmentInfoArrayAdapter(Context context, int resource, ArrayList<SemesterInfo.DepartmentInfo> objects) {
+        super(context, resource, objects);
+        this.departmentInfoArrayList = objects;
+        this.context = context;
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        if (convertView == null){
+            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView = inflater.inflate(R.layout.desired_courses_listview, parent, false);
+        }
+
+        TextView departmentID = ((TextView) convertView.findViewById(R.id.desiredCourseDepartment));
+        TextView departmentTitle = ((TextView) convertView.findViewById(R.id.desiredCourseTitle));
+
+        SemesterInfo.DepartmentInfo departmentInfo = departmentInfoArrayList.get(position);
+
+        departmentID.setText(departmentInfo.getDepartmentID());
+        departmentTitle.setText("\t" + departmentInfo.getDepartmentTitle());
+
+        return convertView;
     }
 }
 
