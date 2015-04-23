@@ -13,6 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -276,7 +278,7 @@ class SemesterInfo{
             this.departmentArrayList = new ArrayList<>(departmentJSONArrayRaw.length());
 
             for(int index = departmentJSONArrayRaw.length(); index != 0;index--){
-                this.departmentArrayList.add(new DepartmentInfo(departmentJSONArrayRaw.getJSONObject( index-1 )));
+                this.departmentArrayList.add(new DepartmentInfo(departmentJSONArrayRaw.getJSONObject(index - 1)));
             }
         }
         else {
@@ -286,9 +288,9 @@ class SemesterInfo{
     }
 }
 
-class DepartmentInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInfo>{
+class DepartmentInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInfo> implements Filterable{
 
-    private ArrayList<SemesterInfo.DepartmentInfo> departmentInfoArrayList;
+    private ArrayList<SemesterInfo.DepartmentInfo> departmentInfoArrayList = new ArrayList<>();
     private Context context;
 
     /**
@@ -303,6 +305,21 @@ class DepartmentInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInf
         super(context, resource, objects);
         this.departmentInfoArrayList = objects;
         this.context = context;
+    }
+
+    @Override
+    public int getCount() {
+        return departmentInfoArrayList.size();
+    }
+
+    @Override
+    public SemesterInfo.DepartmentInfo getItem(int position) {
+        return departmentInfoArrayList.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
     }
 
     @Override
@@ -321,6 +338,32 @@ class DepartmentInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInf
         departmentTitle.setText("\t" + departmentInfo.getDepartmentTitle());
 
         return convertView;
+    }
+
+    @Override
+    public Filter getFilter() {
+        Filter filter = new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                FilterResults filterResults = new FilterResults();
+                if (constraint != null){
+                    
+                }
+                return filterResults;
+            }
+
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                if (results != null && results.count > 0){
+                    notifyDataSetChanged();
+                }
+                else {
+                    notifyDataSetInvalidated();
+                }
+            }
+        };
+
+                return filter;
     }
 }
 
