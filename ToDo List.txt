@@ -1,0 +1,36 @@
+ToDo:
+	Fix 12am/12pm problem in block out times
+	Decide on UI
+
+App:
+	-Login
+	  >	Login
+	  >	Create new user
+	  >	Forgot password
+		
+	-Main
+		View a schedule
+		Add/Create schedule
+		
+	-Create Schedule
+	  >	Add classes
+		Fetch courses and sections
+		Generate schedule
+		BUG: Crash on back from select block out activity
+		
+	-Detailed Schedule View
+		Verify Schedule
+		Week view
+		Delete Schedule
+		
+	-Settings
+		12/24 Hour toggle
+		User settings
+			Modify password
+			Modify e-mail
+			Delete account
+	
+Server:
+	-Verify Schedule
+	-User Account
+	-Get Semester's classes
