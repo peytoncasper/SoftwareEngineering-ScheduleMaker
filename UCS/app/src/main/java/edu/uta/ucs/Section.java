@@ -54,6 +54,8 @@ class TimeShort {
     }
 
     public TimeShort(int hour, int minute) {
+        Log.d("New TimeShort Hour",""+(byte)hour);
+        Log.d("New TimeShort Minute",""+(byte)minute);
         this.hour = (byte) hour;
         this.minute = (byte) minute;
     }
@@ -86,7 +88,13 @@ class TimeShort {
     }
 
     public String toString12h() {
-        String result = String.format("%d", this.hour % 12) + ":" + String.format("%02d", this.minute) + (this.hour > 12 ? "PM" : "AM");
+        String result;
+        if(this.hour!=12&&this.hour!=0)
+            result = String.format("%d", this.hour % 12) + ":" + String.format("%02d", this.minute) + (this.hour > 12 ? "PM" : "AM");
+        else if(this.hour==12)
+            result = String.format("%d",this.hour) + ":" + String.format("%02d", this.minute) + (this.hour >= 12 ? "PM" : "AM");
+        else
+            result = String.format("%d",12) + ":" + String.format("%02d", this.minute) + (this.hour >= 12 ? "PM" : "AM");
         return result;
     }
 

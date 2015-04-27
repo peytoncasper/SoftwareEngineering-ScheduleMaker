@@ -132,29 +132,29 @@
                 android:layout_gravity="center_horizontal"/>
         </LinearLayout>
 
-        <LinearLayout
-            android:orientation="vertical"
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal">
+
+        <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom">
+            android:text="@string/action_add_blockout_time"
+            android:id="@+id/add_blockout_time_button"
+            android:onClick="addBlockoutTime"
+            android:layout_gravity="top" />
 
-            <Button
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/action_add_blockout_time"
-                android:id="@+id/add_blockout_time_button"
-                android:onClick="addBlockoutTime"
-                android:layout_gravity="top" />
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="REMOVE"
-                android:id="@+id/button2"
-                android:layout_gravity="bottom"
-                android:onClick="removeBlockoutTimes" />
-        </LinearLayout>
-
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="REMOVE"
+            android:id="@+id/button2"
+            android:layout_gravity="bottom"
+            android:onClick="removeBlockoutTimes" />
     </LinearLayout>
 
     <ListView
