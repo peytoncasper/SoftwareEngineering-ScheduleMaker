@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.Filter;
 import android.widget.Filterable;
@@ -23,6 +24,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Holds Info to be shown in listview
@@ -158,6 +161,19 @@ class SemesterInfo{
         this.departmentArrayList = departmentArrayList;
     }
 
+    public static ArrayList<SemesterInfo> ScheduleFactory(JSONObject SemesterRaw) throws JSONException {
+        JSONArray semestersArray = SemesterRaw.getJSONArray("Semesters");
+        ArrayList<SemesterInfo> results = new ArrayList<>(semestersArray.length());
+
+        for(int index = semestersArray.length(); index != 0;index--){
+            SemesterInfo parsedSemester = new SemesterInfo(semestersArray.getJSONObject( index-1 ));
+            results.add(parsedSemester);
+        }
+        Collections.reverse(results);
+
+        return results;
+    }
+
     /**
      * Holds a departments' ID, Title, and an arraylist of CourseInfo to hold course information for all courses in that department.
      */
@@ -270,21 +286,14 @@ class SemesterInfo{
      * @throws JSONException
      */
     SemesterInfo(JSONObject semesterInfoRaw) throws JSONException {
-        boolean success;
-        success = semesterInfoRaw.getBoolean("Success");
-        if(success){
-            this.semesterNumber = semesterInfoRaw.getInt("SemesterNumber");
-            JSONArray departmentJSONArrayRaw = semesterInfoRaw.getJSONArray("Departments");
-            this.departmentArrayList = new ArrayList<>(departmentJSONArrayRaw.length());
+        this.semesterNumber = semesterInfoRaw.getInt("SemesterNumber");
+        JSONArray departmentJSONArrayRaw = semesterInfoRaw.getJSONArray("Departments");
+        this.departmentArrayList = new ArrayList<>(departmentJSONArrayRaw.length());
 
-            for(int index = departmentJSONArrayRaw.length(); index != 0;index--){
-                this.departmentArrayList.add(new DepartmentInfo(departmentJSONArrayRaw.getJSONObject(index - 1)));
+        for(int index = departmentJSONArrayRaw.length(); index != 0;index--){
+            this.departmentArrayList.add(new DepartmentInfo(departmentJSONArrayRaw.getJSONObject(index - 1)));
             }
-        }
-        else {
-            semesterNumber = 0;
-            departmentArrayList = null;
-        }
+
     }
 }
 
@@ -346,15 +355,26 @@ class DepartmentInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInf
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
                 FilterResults filterResults = new FilterResults();
+                List<SemesterInfo.DepartmentInfo> results = new ArrayList<>();
                 if (constraint != null){
-                    
+                    for(SemesterInfo.DepartmentInfo departmentInfo : departmentInfoArrayList){
+                        if(departmentInfo.getDepartmentID().startsWith(constraint.toString())){
+                            results.add(departmentInfo);
+                        }
+                        if(departmentInfo.getDepartmentTitle().contains(constraint.toString())){
+                            results.add(departmentInfo);
+                        }
+                    }
                 }
+                filterResults.values = results;
+                filterResults.count = results.size();
                 return filterResults;
             }
 
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
                 if (results != null && results.count > 0){
+                    departmentInfoArrayList = (ArrayList<SemesterInfo.DepartmentInfo>) results.values;
                     notifyDataSetChanged();
                 }
                 else {
@@ -363,33 +383,38 @@ class DepartmentInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInf
             }
         };
 
-                return filter;
+        return filter;
     }
 }
 
 public class SelectCourses extends ActionBarActivity {
 
     public static final String ACTION_DEPARTMENT_SELECT ="edu.uta.ucs.intent.action.ACTION_DEPARTMENT_SELECT";
-    public static final String SPOOFED_DEPARTMENT_COURSES ="edu.uta.ucs.intent.action.ACTION_DEPARTMENT_SELECT";
+    public static final String SPOOFED_DEPARTMENT_COURSES ="";
+    public static final String ACTION_GET_SEMESTER ="edu.uta.ucs.intent.action.ACTION_DEPARTMENT_SELECT";
+    public static final String SPOOF_SEMESTER ="{\"Success\":false,\"Semesters\":[{\"Id\":5,\"SemesterNumber\":\"2155\",\"Departments\":[{\"Id\":531,\"SemesterId\":5,\"DepartmentAcronym\":\"ADVT\",\"CourseNumbers\":[{\"Id\":8975,\"DepartmentId\":531,\"CourseName\":\"INTEGRATED MARKETING COMMUNICATION (IMC) CASE STUDIES\",\"CourseNumber\":\"4300\"}]},{\"Id\":532,\"SemesterId\":5,\"DepartmentAcronym\":\"AE\",\"CourseNumbers\":[{\"Id\":8976,\"DepartmentId\":532,\"CourseName\":\"PREPARATORY COURSE FOR AEROSPACE ENGINEERING\",\"CourseNumber\":\"5300\"},{\"Id\":8977,\"DepartmentId\":532,\"CourseName\":\"FINITE ELEMENT METHODS\",\"CourseNumber\":\"5310\"},{\"Id\":8978,\"DepartmentId\":532,\"CourseName\":\"ANALYTIC METHODS IN ENGINEERING\",\"CourseNumber\":\"5331\"},{\"Id\":8979,\"DepartmentId\":532,\"CourseName\":\"OPTIMAL CONTROL OF DYNAMIC SYS\",\"CourseNumber\":\"5335\"},{\"Id\":8980,\"DepartmentId\":532,\"CourseName\":\"AEROSPACE ENGINEERING INTERNSHIP\",\"CourseNumber\":\"6196\"},{\"Id\":8981,\"DepartmentId\":532,\"CourseName\":\"RESEARCH IN AEROSPACE ENGINEERING\",\"CourseNumber\":\"6697\"},{\"Id\":8982,\"DepartmentId\":532,\"CourseName\":\"DISSERTATION\",\"CourseNumber\":\"6699\"},{\"Id\":8983,\"DepartmentId\":532,\"CourseName\":\"DISSERTATION\",\"CourseNumber\":\"6999\"}]},{\"Id\":533,\"SemesterId\":5,\"DepartmentAcronym\":\"AS\",\"CourseNumbers\":[]},{\"Id\":534,\"SemesterId\":5,\"DepartmentAcronym\":\"ASA\",\"CourseNumbers\":[{\"Id\":8984,\"DepartmentId\":534,\"CourseName\":\"AFFILIATED STUDY ABROAD\",\"CourseNumber\":\"1191\"},{\"Id\":8985,\"DepartmentId\":534,\"CourseName\":\"AFFILIATED STUDY ABROAD\",\"CourseNumber\":\"1291\"},{\"Id\":8986,\"DepartmentId\":534,\"CourseName\":\"AFFILIATED STUDIES ABROAD\",\"CourseNumber\":\"1391\"},{\"Id\":8987,\"DepartmentId\":534,\"CourseName\":\"AFFILIATED STUDIES ABROAD\",\"CourseNumber\":\"1491\"},{\"Id\":8988,\"DepartmentId\":534,\"CourseName\":\"AFFILIATED STUDY ABROAD\",\"CourseNumber\":\"2191\"},{\"Id\":8989,\"DepartmentId\":534,\"CourseName\":\"AFFILIATED STUDIES ABROAD\",\"CourseNumber\":\"2391\"},{\"Id\":8990,\"DepartmentId\":534,\"CourseName\":\"AFFILIATED STUDY ABROAD\",\"CourseNumber\":\"3191\"},{\"Id\":8991,\"DepartmentId\":534,\"CourseName\":\"AFFILIATED STUDIES ABROAD\",\"CourseNumber\":\"3391\"},{\"Id\":8992,\"DepartmentId\":534,\"CourseName\":\"AFFILIATED STUDIES ABROAD\",\"CourseNumber\":\"4391\"}]},{\"Id\":535,\"SemesterId\":5,\"DepartmentAcronym\":\"AAST\",\"CourseNumbers\":[{\"Id\":8993,\"DepartmentId\":535,\"CourseName\":\"INTRODUCTION TO AFRICAN AMERICAN STUDIES\",\"CourseNumber\":\"2300\"},{\"Id\":8994,\"DepartmentId\":535,\"CourseName\":\"CONFERENCE COURSE\",\"CourseNumber\":\"4391\"}]},{\"Id\":536,\"SemesterId\":5,\"DepartmentAcronym\":\"ANTH\",\"CourseNumbers\":[{\"Id\":8995,\"DepartmentId\":536,\"CourseName\":\"GLOBAL CULTURES\",\"CourseNumber\":\"2322\"},{\"Id\":8996,\"DepartmentId\":536,\"CourseName\":\"ARCHAEOLOGICAL CULTURES\",\"CourseNumber\":\"2358\"}]},{\"Id\":537,\"SemesterId\":5,\"DepartmentAcronym\":\"ARAB\",\"CourseNumbers\":[]},{\"Id\":538,\"SemesterId\":5,\"DepartmentAcronym\":\"ARCH\",\"CourseNumbers\":[{\"Id\":8997,\"DepartmentId\":538,\"CourseName\":\"CONFERENCE COURSE\",\"CourseNumber\":\"1191\"},{\"Id\":8998,\"DepartmentId\":538,\"CourseName\":\"MASTERWORKS OF WESTERN ARCHITECTURE\",\"CourseNumber\":\"2300\"},{\"Id\":8999,\"DepartmentId\":538,\"CourseName\":\"THE CITY OF ROME\",\"CourseNumber\":\"4305\"},{\"Id\":9000,\"DepartmentId\":538,\"CourseName\":\"URBAN DESIGN THEORY\",\"CourseNumber\":\"4306\"},{\"Id\":9001,\"DepartmentId\":538,\"CourseName\":\"TOPICS IN ARCHITECTURAL THEORY\",\"CourseNumber\":\"4311\"},{\"Id\":9002,\"DepartmentId\":538,\"CourseName\":\"NOTATIONAL DRAWING\",\"CourseNumber\":\"4341\"},{\"Id\":9003,\"DepartmentId\":538,\"CourseName\":\"SELECTED TOPICS ARCHITECTURE\",\"CourseNumber\":\"4395\"},{\"Id\":9004,\"DepartmentId\":538,\"CourseName\":\"CITY OF ROME\",\"CourseNumber\":\"5305\"},{\"Id\":9005,\"DepartmentId\":538,\"CourseName\":\"URBAN DESIGN\",\"CourseNumber\":\"5306\"},{\"Id\":9006,\"DepartmentId\":538,\"CourseName\":\"ARCHITECTURAL THEORY\",\"CourseNumber\":\"5311\"},{\"Id\":9007,\"DepartmentId\":538,\"CourseName\":\"PRACTICUM\",\"CourseNumber\":\"5381\"},{\"Id\":9008,\"DepartmentId\":538,\"CourseName\":\"TOPICS IN ARCHITECTURE\",\"CourseNumber\":\"5395\"},{\"Id\":9009,\"DepartmentId\":538,\"CourseName\":\"PRACTICUM\",\"CourseNumber\":\"5681\"},{\"Id\":9010,\"DepartmentId\":538,\"CourseName\":\"CONFERENCE COURSE\",\"CourseNumber\":\"5691\"}]},{\"Id\":539,\"SemesterId\":5,\"DepartmentAcronym\":\"ART\",\"CourseNumbers\":[{\"Id\":9011,\"DepartmentId\":539,\"CourseName\":\"ART APPRECIATION\",\"CourseNumber\":\"1301\"},{\"Id\":9012,\"DepartmentId\":539,\"CourseName\":\"TWO\",\"CourseNumber\":\"1305\"},{\"Id\":9013,\"DepartmentId\":539,\"CourseName\":\"THREE\",\"CourseNumber\":\"1306\"},{\"Id\":9014,\"DepartmentId\":539,\"CourseName\":\"DRAWING FUNDAMENTALS\",\"CourseNumber\":\"1307\"},{\"Id\":9015,\"DepartmentId\":539,\"CourseName\":\"ART OF THE WESTERN WORLD II: BAROQUE TO MODERN\",\"CourseNumber\":\"1310\"},{\"Id\":9016,\"DepartmentId\":539,\"CourseName\":\"DIGITAL DESIGN\",\"CourseNumber\":\"2304\"},{\"Id\":9017,\"DepartmentId\":539,\"CourseName\":\"LIFE DRAWING\",\"CourseNumber\":\"3348\"},{\"Id\":9018,\"DepartmentId\":539,\"CourseName\":\"DIGITAL IMAGING\",\"CourseNumber\":\"3352\"},{\"Id\":9019,\"DepartmentId\":539,\"CourseName\":\"SIGN AND SYMBOL\",\"CourseNumber\":\"3354\"},{\"Id\":9020,\"DepartmentId\":539,\"CourseName\":\"SCRIPT TO SCREEN\",\"CourseNumber\":\"4311\"},{\"Id\":9021,\"DepartmentId\":539,\"CourseName\":\"ADVANCED PRINTMAKING\",\"CourseNumber\":\"4345\"},{\"Id\":9022,\"DepartmentId\":539,\"CourseName\":\"ADVANCED PHOTOGRAPHY\",\"CourseNumber\":\"4359\"},{\"Id\":9023,\"DepartmentId\":539,\"CourseName\":\"INDEPENDENT STUDY\",\"CourseNumber\":\"4391\"},{\"Id\":9024,\"DepartmentId\":539,\"CourseName\":\"SPECIAL STUDIES\",\"CourseNumber\":\"4392\"},{\"Id\":9025,\"DepartmentId\":539,\"CourseName\":\"ART INTERNSHIP\",\"CourseNumber\":\"4395\"},{\"Id\":9026,\"DepartmentId\":539,\"CourseName\":\"SPECIAL STUDIES IN FILM/VIDEO\",\"CourseNumber\":\"4397\"},{\"Id\":9027,\"DepartmentId\":539,\"CourseName\":\"ART INTERNSHIP\",\"CourseNumber\":\"4695\"},{\"Id\":9028,\"DepartmentId\":539,\"CourseName\":\"INDEPENDENT STUDY\",\"CourseNumber\":\"5391\"}]},{\"Id\":540,\"SemesterId\":5,\"DepartmentAcronym\":\"ASTR\",\"CourseNumbers\":[{\"Id\":9029,\"DepartmentId\":540,\"CourseName\":\"INTRODUCTORY ASTRONOMY I\",\"CourseNumber\":\"1345\"},{\"Id\":9030,\"DepartmentId\":540,\"CourseName\":\"INTRODUCTORY ASTRONOMY II\",\"CourseNumber\":\"1346\"}]},{\"Id\":541,\"SemesterId\":5,\"DepartmentAcronym\":\"BEEP\",\"CourseNumbers\":[{\"Id\":9031,\"DepartmentId\":541,\"CourseName\":\"SPANISH FOR TEACHERS IN DUAL LANGUAGE PROGRAMS: AN IMMERSION APPROACH\",\"CourseNumber\":\"4366\"},{\"Id\":9032,\"DepartmentId\":541,\"CourseName\":\"ESL METHODS FOR EC\",\"CourseNumber\":\"5321\"},{\"Id\":9033,\"DepartmentId\":541,\"CourseName\":\"SPANISH FOR SCHOOL ADMINISTRATORS TEACHERS\",\"CourseNumber\":\"5366\"}]},{\"Id\":542,\"SemesterId\":5,\"DepartmentAcronym\":\"BE\",\"CourseNumbers\":[{\"Id\":9034,\"DepartmentId\":542,\"CourseName\":\"LABORATORY PRINCIPLES\",\"CourseNumber\":\"4382\"},{\"Id\":9035,\"DepartmentId\":542,\"CourseName\":\"DIRECTED RESEARCH IN BIOENGINEERING\",\"CourseNumber\":\"4391\"},{\"Id\":9036,\"DepartmentId\":542,\"CourseName\":\"DIRECTED RESEARCH IN BIOENGINEERING\",\"CourseNumber\":\"5191\"},{\"Id\":9037,\"DepartmentId\":542,\"CourseName\":\"DIRECTED RESEARCH IN BIOENGINEERING\",\"CourseNumber\":\"5291\"},{\"Id\":9038,\"DepartmentId\":542,\"CourseName\":\"HUMAN PHYSIOLOGY IN BIOENGINEERING\",\"CourseNumber\":\"5309\"},{\"Id\":9039,\"DepartmentId\":542,\"CourseName\":\"TISSUE ENGINEERING LAB\",\"CourseNumber\":\"5365\"},{\"Id\":9040,\"DepartmentId\":542,\"CourseName\":\"DRUG DELIVERY LAB\",\"CourseNumber\":\"5373\"},{\"Id\":9041,\"DepartmentId\":542,\"CourseName\":\"LABORATORY PRINCIPLES\",\"CourseNumber\":\"5382\"},{\"Id\":9042,\"DepartmentId\":542,\"CourseName\":\"RESEARCH PROJECT\",\"CourseNumber\":\"5390\"},{\"Id\":9043,\"DepartmentId\":542,\"CourseName\":\"DIRECTED RESEARCH IN BIOENGINEERING\",\"CourseNumber\":\"5391\"},{\"Id\":9044,\"DepartmentId\":542,\"CourseName\":\"THESIS\",\"CourseNumber\":\"5398\"},{\"Id\":9045,\"DepartmentId\":542,\"CourseName\":\"THESIS\",\"CourseNumber\":\"5698\"},{\"Id\":9046,\"DepartmentId\":542,\"CourseName\":\"PhD SEMINAR IN BIOENGINEERING\",\"CourseNumber\":\"6103\"},{\"Id\":9047,\"DepartmentId\":542,\"CourseName\":\"DOCTORAL COMPREHENSIVE EXAMINATION\",\"CourseNumber\":\"6195\"},{\"Id\":9048,\"DepartmentId\":542,\"CourseName\":\"RESEARCH IN BIOENGINEERING\",\"CourseNumber\":\"6197\"},{\"Id\":9049,\"DepartmentId\":542,\"CourseName\":\"RESEARCH IN BIOENGINEERING\",\"CourseNumber\":\"6297\"},{\"Id\":9050,\"DepartmentId\":542,\"CourseName\":\"INTERNSHIP IN BIOENGINEERING\",\"CourseNumber\":\"6395\"},{\"Id\":9051,\"DepartmentId\":542,\"CourseName\":\"RESEARCH IN BIOENGINEERING\",\"CourseNumber\":\"6397\"},{\"Id\":9052,\"DepartmentId\":542,\"CourseName\":\"DISSERTATION\",\"CourseNumber\":\"6399\"},{\"Id\":9053,\"DepartmentId\":542,\"CourseName\":\"DISSERTATION\",\"CourseNumber\":\"6499\"},{\"Id\":9054,\"DepartmentId\":542,\"CourseName\":\"INTERNSHIP IN BIOENGINEERING\",\"CourseNumber\":\"6695\"},{\"Id\":9055,\"DepartmentId\":542,\"CourseName\":\"RESEARCH IN BIOENGINEERING\",\"CourseNumber\":\"6697\"},{\"Id\":9056,\"DepartmentId\":542,\"CourseName\":\"DISSERTATION\",\"CourseNumber\":\"6699\"},{\"Id\":9057,\"DepartmentId\":542,\"CourseName\":\"DISSERTATION\",\"CourseNumber\":\"6999\"},{\"Id\":9058,\"DepartmentId\":542,\"CourseName\":\"DOCTORAL DEGREE COMPLETION\",\"CourseNumber\":\"7399\"}]},{\"Id\":543,\"SemesterId\":5,\"DepartmentAcronym\":\"BIOL\",\"CourseNumbers\":[{\"Id\":9059,\"DepartmentId\":543,\"CourseName\":\"INTRODUCTION TO BIOLOGY I\",\"CourseNumber\":\"1333\"},{\"Id\":9060,\"DepartmentId\":543,\"CourseName\":\"INTRODUCTION TO BIOLOGY II\",\"CourseNumber\":\"1334\"},{\"Id\":9061,\"DepartmentId\":543,\"CourseName\":\"CELL AND MOLECULAR BIOLOGY\",\"CourseNumber\":\"1441\"},{\"Id\":9062,\"DepartmentId\":543,\"CourseName\":\"STRUCTURE AND FUNCTION OF ORGANISMS\",\"CourseNumber\":\"1442\"},{\"Id\":9063,\"DepartmentId\":543,\"CourseName\":\"INTRODUCTION TO BIOSTATISTICS\",\"CourseNumber\":\"2300\"},{\"Id\":9064,\"DepartmentId\":543,\"CourseName\":\"EVOLUTION ECOLOGY\",\"CourseNumber\":\"2343\"},{\"Id\":9065,\"DepartmentId\":543,\"CourseName\":\"HUMAN ANATOMY AND PHYSIOLOGY I\",\"CourseNumber\":\"2457\"},{\"Id\":9066,\"DepartmentId\":543,\"CourseName\":\"HUMAN ANATOMY AND PHYSIOLOGY II\",\"CourseNumber\":\"2458\"},{\"Id\":9067,\"DepartmentId\":543,\"CourseName\":\"NURSING MICROBIOLOGY\",\"CourseNumber\":\"2460\"},{\"Id\":9068,\"DepartmentId\":543,\"CourseName\":\"COOPERATIVE PROGRAM IN BIOLOGY\",\"CourseNumber\":\"3149\"},{\"Id\":9069,\"DepartmentId\":543,\"CourseName\":\"COOPERATIVE PROGRAM IN BIOLOGY\",\"CourseNumber\":\"3249\"},{\"Id\":9070,\"DepartmentId\":543,\"CourseName\":\"DRUGS AND BEHAVIOR\",\"CourseNumber\":\"3303\"},{\"Id\":9071,\"DepartmentId\":543,\"CourseName\":\"NON\",\"CourseNumber\":\"3309\"},{\"Id\":9072,\"DepartmentId\":543,\"CourseName\":\"SELECTED TOPICS IN MICROBIOLOGY\",\"CourseNumber\":\"3311\"},{\"Id\":9073,\"DepartmentId\":543,\"CourseName\":\"IMMUNOBIOLOGY\",\"CourseNumber\":\"3312\"},{\"Id\":9074,\"DepartmentId\":543,\"CourseName\":\"GENETICS\",\"CourseNumber\":\"3315\"},{\"Id\":9075,\"DepartmentId\":543,\"CourseName\":\"BRAIN AND BEHAVIOR\",\"CourseNumber\":\"3322\"},{\"Id\":9076,\"DepartmentId\":543,\"CourseName\":\"COOPERATIVE PROGRAM IN BIOLOGY\",\"CourseNumber\":\"3349\"},{\"Id\":9077,\"DepartmentId\":543,\"CourseName\":\"GENERAL MICROBIOLOGY\",\"CourseNumber\":\"3444\"},{\"Id\":9078,\"DepartmentId\":543,\"CourseName\":\"GENERAL ZOOLOGY\",\"CourseNumber\":\"3454\"},{\"Id\":9079,\"DepartmentId\":543,\"CourseName\":\"DIRECTED STUDY\",\"CourseNumber\":\"4179\"},{\"Id\":9080,\"DepartmentId\":543,\"CourseName\":\"RESEARCH IN BIOLOGY\",\"CourseNumber\":\"4189\"},{\"Id\":9081,\"DepartmentId\":543,\"CourseName\":\"DIRECTED STUDY\",\"CourseNumber\":\"4279\"},{\"Id\":9082,\"DepartmentId\":543,\"CourseName\":\"RESEARCH IN BIOLOGY\",\"CourseNumber\":\"4289\"},{\"Id\":9083,\"DepartmentId\":543,\"CourseName\":\"TISSUE ENGINEERING LAB\",\"CourseNumber\":\"4365\"},{\"Id\":9084,\"DepartmentId\":543,\"CourseName\":\"DIRECTED STUDY\",\"CourseNumber\":\"4379\"},{\"Id\":9085,\"DepartmentId\":543,\"CourseName\":\"INSTRUCTIONAL TECHNIQUES IN BIOLOGY\",\"CourseNumber\":\"4388\"},{\"Id\":9086,\"DepartmentId\":543,\"CourseName\":\"HONORS SENIOR PROJECT IN BIOLOGY\",\"CourseNumber\":\"4393\"},{\"Id\":9087,\"DepartmentId\":543,\"CourseName\":\"RESEARCH IN BIOLOGY\",\"CourseNumber\":\"5193\"},{\"Id\":9088,\"DepartmentId\":543,\"CourseName\":\"INDIVIDUAL PROBLEMS IN BIOLOGY\",\"CourseNumber\":\"5291\"},{\"Id\":9089,\"DepartmentId\":543,\"CourseName\":\"RESEARCH\",\"CourseNumber\":\"5293\"},{\"Id\":9090,\"DepartmentId\":543,\"CourseName\":\"INDIVIDUAL PROBLEMS IN BIOLOGY\",\"CourseNumber\":\"5391\"},{\"Id\":9091,\"DepartmentId\":543,\"CourseName\":\"RESEARCH IN BIOLOGY\",\"CourseNumber\":\"5393\"},{\"Id\":9092,\"DepartmentId\":543,\"CourseName\":\"THESIS\",\"CourseNumber\":\"5398\"},{\"Id\":9093,\"DepartmentId\":543,\"CourseName\":\"RESEARCH\",\"CourseNumber\":\"5493\"},{\"Id\":9094,\"DepartmentId\":543,\"CourseName\":\"RESEARCH IN BIOLOGY\",\"CourseNumber\":\"5693\"},{\"Id\":9095,\"DepartmentId\":543,\"CourseName\":\"THESIS\",\"CourseNumber\":\"5698\"},{\"Id\":9096,\"DepartmentId\":543,\"CourseName\":\"ADVANCED RESEARCH\",\"CourseNumber\":\"6191\"},{\"Id\":9097,\"DepartmentId\":543,\"CourseName\":\"ADVANCED RESEARCH\",\"CourseNumber\":\"6391\"},{\"Id\":9098,\"DepartmentId\":543,\"CourseName\":\"DISSERTATION\",\"CourseNumber\":\"6399\"},{\"Id\":9099,\"DepartmentId\":543,\"CourseName\":\"ADVANCED RESEARCH\",\"CourseNumber\":\"6591\"},{\"Id\":9100,\"DepartmentId\":543,\"CourseName\":\"ADVANCED RESEARCH\",\"CourseNumber\":\"6691\"},{\"Id\":9101,\"DepartmentId\":543,\"CourseName\":\"DISSERTATION\",\"CourseNumber\":\"6699\"},{\"Id\":9102,\"DepartmentId\":543,\"CourseName\":\"DISSERTATION\",\"CourseNumber\":\"6999\"},{\"Id\":9103,\"DepartmentId\":543,\"CourseName\":\"DOCTORAL DEGREE COMPLETION\",\"CourseNumber\":\"7399\"}]},{\"Id\":544,\"SemesterId\":5,\"DepartmentAcronym\":\"BCMN\",\"CourseNumbers\":[{\"Id\":9104,\"DepartmentId\":544,\"CourseName\":\"BROADCAST WRITING AND REPORTING\",\"CourseNumber\":\"2347\"},{\"Id\":9105,\"DepartmentId\":544,\"CourseName\":\"RADIO PRODUCTION I\",\"CourseNumber\":\"2357\"},{\"Id\":9106,\"DepartmentId\":544,\"CourseName\":\"TELEVISION PRODUCTION I\",\"CourseNumber\":\"2358\"},{\"Id\":9107,\"DepartmentId\":544,\"CourseName\":\"PROFESSIONAL INTERNSHIP\",\"CourseNumber\":\"4395\"}]},{\"Id\":545,\"SemesterId\":5,\"DepartmentAcronym\":\"BSAD\",\"CourseNumbers\":[{\"Id\":9108,\"DepartmentId\":545,\"CourseName\":\"DISSERTATION\",\"CourseNumber\":\"6399\"},{\"Id\":9109,\"DepartmentId\":545,\"CourseName\":\"DISSERTATION\",\"CourseNumber\":\"6699\"},{\"Id\":9110,\"DepartmentId\":545,\"CourseName\":\"DISSERTATION\",\"CourseNumber\":\"6999\"},{\"Id\":9111,\"DepartmentId\":545,\"CourseName\":\"DOCTORAL DEGREE COMPLETION\",\"CourseNumber\":\"7399\"}]}]}]}";
 
-    private EditText courseDepartment;
-    private EditText courseNumber;
+    private AutoCompleteTextView courseDepartment;
+    private AutoCompleteTextView courseNumber;
 
     private ListView desiredCoursesListView;
     private DesiredCoursesArrayAdapter desiredCoursesArrayAdapter;
 
     private Course blockoutTimes = null;
     private ArrayList<DesiredCourse> desiredCoursesArrayList;
+    private ArrayList<SemesterInfo.DepartmentInfo> departmentInfoArrayList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_courses);
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(new DepartmentCoursesReceiver(), new IntentFilter(ACTION_DEPARTMENT_SELECT));
+        LocalBroadcastManager.getInstance(this).registerReceiver(new DepartmentCoursesReceiver(), new IntentFilter(ACTION_GET_SEMESTER));
 
-        courseDepartment = ((EditText) findViewById(R.id.course_department_edittext));
-        courseNumber = ((EditText) findViewById(R.id.course_number_edittext));
+        courseDepartment = ((AutoCompleteTextView) findViewById(R.id.course_department_edittext));
+        courseDepartment.setThreshold(0);
+        courseDepartment.setAdapter(new DepartmentInfoArrayAdapter(this,R.layout.section_list_display, departmentInfoArrayList));
+        courseNumber = ((AutoCompleteTextView) findViewById(R.id.course_number_edittext));
 
         desiredCoursesListView = (ListView) findViewById(R.id.selected_courses_listview);
 
@@ -421,17 +446,18 @@ public class SelectCourses extends ActionBarActivity {
 
     }
 
-    public void getDepartmentCourses(View view){
+    public void getSemesterCourses(View view){
         String url = null;
 
         Intent intent = new Intent(this, HTTPGetService.class);
         if(true) {
             intent.putExtra(HTTPGetService.URL_REQUEST, HTTPGetService.SPOOF_SERVER);
-            intent.putExtra(HTTPGetService.SPOOFED_RESPONSE, SPOOFED_DEPARTMENT_COURSES);
+            intent.putExtra(HTTPGetService.SPOOFED_RESPONSE, SPOOF_SEMESTER);
         }
         else
             intent.putExtra(HTTPGetService.URL_REQUEST, url);
 
+        intent.putExtra(HTTPGetService.SOURCE_INTENT, ACTION_GET_SEMESTER);
         startService(intent);
     }
 
@@ -465,6 +491,7 @@ public class SelectCourses extends ActionBarActivity {
             JSONObject response = null;
             boolean success = false;
             try {
+                Log.i("Server Response",intent.getStringExtra(HTTPGetService.SERVER_RESPONSE));
                 response = new JSONObject(intent.getStringExtra(HTTPGetService.SERVER_RESPONSE));
                 success = response.getBoolean("Success");
                 if(success){
