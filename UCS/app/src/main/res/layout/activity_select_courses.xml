@@ -33,11 +33,11 @@
         <AutoCompleteTextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:inputType="number"
             android:ems="10"
             android:id="@+id/course_number_edittext"
             android:hint="@string/hint_course_number"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:inputType="text" />
 
         <Button
             android:layout_width="wrap_content"
