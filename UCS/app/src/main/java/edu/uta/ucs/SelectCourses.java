@@ -483,6 +483,7 @@ public class SelectCourses extends ActionBarActivity {
     private ArrayList<SemesterInfo.DepartmentInfo.CourseInfo> courseInfoArrayList = new ArrayList<>();
 
     private SemesterInfo.DepartmentInfo.CourseInfo tempCourseInfo;
+    private SemesterInfo selectedSemester;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -514,6 +515,18 @@ public class SelectCourses extends ActionBarActivity {
                 updateCourseInfoAdapter(departmentInfo.getCourses());
             }
         });
+        courseDepartment.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(!hasFocus){
+                    SemesterInfo.DepartmentInfo departmentInfo = getDepartmentInfo(courseDepartment.getText().toString());
+                    if (departmentInfo != null){
+                        courseDepartment.setText(departmentInfo.getDepartmentAcronym());
+                        updateCourseInfoAdapter(departmentInfo.getCourses());
+                    }
+                }
+            }
+        });
 
         courseNumber.setThreshold(0);
         courseNumber.setAdapter(courseInfoArrayAdapter);
@@ -532,17 +545,25 @@ public class SelectCourses extends ActionBarActivity {
     }
 
     public void addCourse(View view){
+
+        if(selectedSemester == null){
+            Toast.makeText(getApplicationContext(), "Please select a semester first", Toast.LENGTH_LONG).show();
+            return;
+        }
         String department = courseDepartment.getText().toString().toUpperCase();
         String number = courseNumber.getText().toString();
 
-        if (!department.equals("") && !number.equals("") ) {
-            if(tempCourseInfo != null){
-                desiredCoursesArrayList.add(new DesiredCourse(department, number, "\t" + tempCourseInfo.getCourseTitle()));
-                tempCourseInfo = null;
-            }
-            else {
-                desiredCoursesArrayList.add(new DesiredCourse(department, number, ""));
-            }
+        SemesterInfo.DepartmentInfo.CourseInfo selectedCourse = getCourseInfo(department, number);
+
+        if (selectedCourse != null) {
+
+            Log.d("Selected Course",selectedCourse.getDepartmentInfo().getDepartmentAcronym() + " - " + ((Integer) selectedCourse.getCourseNumber()).toString() + "\t" + selectedCourse.getCourseTitle());
+
+            if(!desiredCoursesArrayList.contains(selectedCourse))
+                desiredCoursesArrayList.add(selectedCourse);
+            else
+                Toast.makeText(getApplicationContext(), "Class already selected", Toast.LENGTH_LONG).show();
+
             desiredCoursesArrayAdapter.notifyDataSetChanged();
 
             courseDepartment.setText("");
@@ -550,7 +571,39 @@ public class SelectCourses extends ActionBarActivity {
 
             courseDepartment.requestFocus();
         }
+        else {
+            Toast.makeText(getApplicationContext(), "Class not found", Toast.LENGTH_LONG).show();
 
+            courseDepartment.setText("");
+            courseNumber.setText("");
+
+            courseDepartment.requestFocus();
+        }
+
+    }
+
+    public SemesterInfo.DepartmentInfo.CourseInfo getCourseInfo(String department, String number){
+
+        for(SemesterInfo.DepartmentInfo departmentInfo : selectedSemester.getDepartmentArrayList()){
+            if(departmentInfo.getDepartmentAcronym().toUpperCase().equals(department.toUpperCase())){
+                for (SemesterInfo.DepartmentInfo.CourseInfo courseInfo : departmentInfo.getCourses()){
+                    if (((Integer) courseInfo.getCourseNumber()).toString().equals(number)){
+                        return courseInfo;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public SemesterInfo.DepartmentInfo getDepartmentInfo(String department){
+
+        for(SemesterInfo.DepartmentInfo departmentInfo : selectedSemester.getDepartmentArrayList()){
+            if(departmentInfo.getDepartmentAcronym().toUpperCase().equals(department.toUpperCase())){
+                return departmentInfo;
+            }
+        }
+        return null;
     }
 
     public void getSemesterCourses(View view){
@@ -614,11 +667,12 @@ public class SelectCourses extends ActionBarActivity {
                 response = new JSONObject(intent.getStringExtra(HTTPGetService.SERVER_RESPONSE));
                 success = response.getBoolean("Success");
                 semesterInfo = SemesterInfo.SemesterInfoFactory(response);
-                ArrayList<String> departmentList = new ArrayList<>(semesterInfo.get(0).getDepartmentArrayList().size());
-                for(SemesterInfo.DepartmentInfo departmentInfo : semesterInfo.get(0).getDepartmentArrayList()){
+                selectedSemester = semesterInfo.get(0);
+                ArrayList<String> departmentList = new ArrayList<>(selectedSemester.getDepartmentArrayList().size());
+                for(SemesterInfo.DepartmentInfo departmentInfo : selectedSemester.getDepartmentArrayList()){
                     departmentList.add(departmentInfo.getDepartmentAcronym());
                 }
-                updateDepartmentInfoAdapter(semesterInfo.get(0).getDepartmentArrayList());
+                updateDepartmentInfoAdapter(selectedSemester.getDepartmentArrayList());
 
                 if(success){
                     // enable text field
