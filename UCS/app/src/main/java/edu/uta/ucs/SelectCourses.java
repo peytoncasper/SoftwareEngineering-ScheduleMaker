@@ -28,59 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Holds Info to be shown in listview
- */
-class DesiredCourse {
-    private String courseDepartment;
-    private String courseNumber;
-    private String courseTitle;
-
-    DesiredCourse(){
-        setCourseDepartment(null);
-        setCourseNumber(null);
-        setCourseTitle(null);
-    }
-
-    /**
-     * Constructor
-     *
-     * @param department
-     * @param number
-     * @param title
-     */
-    DesiredCourse(String department, String number, String title){
-        setCourseDepartment(department);
-        setCourseNumber(number);
-        setCourseTitle(title);
-    }
-
-    public String getCourseDepartment() {
-        return courseDepartment;
-    }
-
-    public void setCourseDepartment(String courseDepartment) {
-        this.courseDepartment = courseDepartment;
-    }
-
-    public String getCourseNumber() {
-        return courseNumber;
-    }
-
-    public void setCourseNumber(String courseNumber) {
-        this.courseNumber = courseNumber;
-    }
-
-    public String getCourseTitle() {
-        return courseTitle;
-    }
-
-    public void setCourseTitle(String courseTitle) {
-        this.courseTitle = courseTitle;
-    }
-}
-
-class DesiredCoursesArrayAdapter extends ArrayAdapter<DesiredCourse>{
+class DesiredCoursesArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInfo.CourseInfo>{
 
     /**
      * Constructor
@@ -98,7 +46,7 @@ class DesiredCoursesArrayAdapter extends ArrayAdapter<DesiredCourse>{
      * @param context  The current context.
      * @param resource The resource ID for a layout file containing a TextView to use when
      */
-    public DesiredCoursesArrayAdapter(Context context, int resource, ArrayList<DesiredCourse> item ) {
+    public DesiredCoursesArrayAdapter(Context context, int resource, ArrayList<SemesterInfo.DepartmentInfo.CourseInfo> item ) {
         super(context, resource, item);
     }
 
@@ -113,16 +61,16 @@ class DesiredCoursesArrayAdapter extends ArrayAdapter<DesiredCourse>{
             view = vi.inflate(R.layout.desired_courses_listview, null);
         }
 
-        DesiredCourse desiredCourse = getItem(position);
+        SemesterInfo.DepartmentInfo.CourseInfo courseInfo = getItem(position);
 
-        if (desiredCourse != null){
+        if (courseInfo != null){
             TextView desiredCourseDepartment = ((TextView) view.findViewById(R.id.desiredCourseDepartment));
             TextView desiredCourseNumber = ((TextView) view.findViewById(R.id.desiredCourseNumber));
             TextView desiredCourseTitle = ((TextView) view.findViewById(R.id.desiredCourseTitle));
 
-            String Department = desiredCourse.getCourseDepartment() + " ";
-            String Number = "- " + desiredCourse.getCourseNumber();
-            String Title = desiredCourse.getCourseTitle();
+            String Department = courseInfo.getDepartmentInfo().getDepartmentAcronym();
+            String Number = " - " + ((Integer) courseInfo.getCourseNumber()).toString();
+            String Title = "\t" + courseInfo.getCourseTitle();
 
             if (Department != null){
                 desiredCourseDepartment.setText(Department);
@@ -530,7 +478,7 @@ public class SelectCourses extends ActionBarActivity {
     private CourseInfoArrayAdapter courseInfoArrayAdapter;
 
     private Course blockoutTimes = null;
-    private ArrayList<DesiredCourse> desiredCoursesArrayList;
+    private ArrayList<SemesterInfo.DepartmentInfo.CourseInfo> desiredCoursesArrayList;
     private ArrayList<SemesterInfo.DepartmentInfo> departmentInfoArrayList = new ArrayList<>();
     private ArrayList<SemesterInfo.DepartmentInfo.CourseInfo> courseInfoArrayList = new ArrayList<>();
 
