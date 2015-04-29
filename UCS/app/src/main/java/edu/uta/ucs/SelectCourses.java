@@ -609,12 +609,12 @@ public class SelectCourses extends ActionBarActivity {
         String url = null;
 
         Intent intent = new Intent(this, HTTPGetService.class);
-        if(true) {
-            intent.putExtra(HTTPGetService.URL_REQUEST, URL_GET_SEMESTER);
+        if(false) {
+            intent.putExtra(HTTPGetService.URL_REQUEST, HTTPGetService.SPOOF_SERVER);
             intent.putExtra(HTTPGetService.SPOOFED_RESPONSE, SPOOF_SEMESTER);
         }
         else
-            intent.putExtra(HTTPGetService.URL_REQUEST, url);
+            intent.putExtra(HTTPGetService.URL_REQUEST, URL_GET_SEMESTER);
 
         intent.putExtra(HTTPGetService.SOURCE_INTENT, ACTION_GET_SEMESTER);
         startService(intent);
