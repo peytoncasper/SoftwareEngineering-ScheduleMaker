@@ -65,7 +65,8 @@
             android:text="@string/action_generate_schedule"
             android:id="@+id/generate_schedules_button"
             android:layout_gravity="center_horizontal"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:onClick="getCourseSections" />
 
         <Button
             android:layout_width="0dp"
