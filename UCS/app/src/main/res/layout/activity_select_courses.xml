@@ -49,12 +49,10 @@
     </LinearLayout>
 
     <ListView
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:id="@+id/selected_courses_listview"
-        android:layout_gravity="center_horizontal"
-        android:choiceMode="singleChoice"
-        android:layout_weight="1"/>
+        android:layout_weight="1" />
 
     <LinearLayout
         android:orientation="horizontal"
@@ -67,8 +65,7 @@
             android:text="@string/action_generate_schedule"
             android:id="@+id/generate_schedules_button"
             android:layout_gravity="center_horizontal"
-            android:layout_weight="1"
-            android:onClick="getCourseSections" />
+            android:layout_weight="1" />
 
         <Button
             android:layout_width="0dp"
