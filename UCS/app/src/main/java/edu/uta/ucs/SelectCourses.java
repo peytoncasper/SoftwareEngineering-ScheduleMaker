@@ -751,6 +751,19 @@ public class SelectCourses extends ActionBarActivity {
                 e.printStackTrace();
             }
 
+            try {
+                ArrayList<Section> blockoutSections;
+                if (blockoutTimes != null)
+                    blockoutSections = blockoutTimes.getSectionList();
+                else
+                    blockoutSections = new ArrayList<Section>();
+
+                Schedule.scheduleFactory(0,fetchedCourses, new ArrayList<Section>(), blockoutSections);
+            } catch (NoSchedulesPossibleException e) {
+                e.printStackTrace();
+            }
+
+
             Log.d("New Section", "ArrayList Built");
 
             progressDialog.dismiss();
