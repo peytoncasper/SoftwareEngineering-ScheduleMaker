@@ -482,8 +482,8 @@ public class SelectCourses extends ActionBarActivity {
 
     private Course blockoutTimes = null;
     private ArrayList<SemesterInfo.DepartmentInfo.CourseInfo> desiredCoursesArrayList;
-    private ArrayList<SemesterInfo.DepartmentInfo> departmentInfoArrayList = new ArrayList<>();
-    private ArrayList<SemesterInfo.DepartmentInfo.CourseInfo> courseInfoArrayList = new ArrayList<>();
+    private ArrayList<SemesterInfo.DepartmentInfo> departmentInfoArrayList;
+    private ArrayList<SemesterInfo.DepartmentInfo.CourseInfo> courseInfoArrayList;
 
     private SemesterInfo.DepartmentInfo.CourseInfo tempCourseInfo;
     private SemesterInfo selectedSemester;
@@ -494,6 +494,9 @@ public class SelectCourses extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_courses);
+
+        departmentInfoArrayList = new ArrayList<>();
+        courseInfoArrayList = new ArrayList<>();
 
         LocalBroadcastManager.getInstance(this).registerReceiver(new DepartmentCoursesReceiver(), new IntentFilter(ACTION_GET_SEMESTER));
         LocalBroadcastManager.getInstance(this).registerReceiver(new DesiredSectionsReceiver(), new IntentFilter(ACTION_GET_DESIRED_COURSE_SECTIONS));
