@@ -625,12 +625,12 @@ public class SelectCourses extends ActionBarActivity {
         Intent intent = new Intent(this, HTTPGetService.class);
         if(false) {
             intent.putExtra(HTTPGetService.URL_REQUEST, HTTPGetService.SPOOF_SERVER);
-            intent.putExtra(HTTPGetService.SPOOFED_RESPONSE, SPOOF_SEMESTER);
+            intent.putExtra(HTTPGetService.SPOOFED_RESPONSE, SPOOF_DESIRED_COURSE_SECTIONS);
         }
         else
             intent.putExtra(HTTPGetService.URL_REQUEST, urlFinal);
 
-        intent.putExtra(HTTPGetService.SOURCE_INTENT, ACTION_GET_SEMESTER);
+        intent.putExtra(HTTPGetService.SOURCE_INTENT, ACTION_GET_DESIRED_COURSE_SECTIONS);
         startService(intent);
         showProgressDialog("Getting All Selected Course Data");
     }
@@ -728,9 +728,28 @@ public class SelectCourses extends ActionBarActivity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            JSONObject response = null;
-            boolean success = false;
+            String response = intent.getStringExtra(HTTPGetService.SERVER_RESPONSE);
+            Log.d("Received: ",response);
+            ArrayList<Course> courseList = new ArrayList<Course>();
+            int numberOfSectionsTotal = 0;
+
+            try {
+                JSONObject rawResult = new JSONObject(response);
+                JSONArray jsonCourses = rawResult.getJSONArray("Results");
+                float timeTaken = Float.parseFloat(rawResult.getString("TimeTaken"));
+                Log.d("New Request Time Taken:", Float.toString(timeTaken));
+                courseList = Course.buildCourseList(jsonCourses);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            Log.d("New Section", "ArrayList Built");
+            Log.d("New Section", "ListView Built");
+
             progressDialog.dismiss();
+
         }
+
     }
 }
