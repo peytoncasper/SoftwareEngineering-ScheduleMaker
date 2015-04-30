@@ -1,5 +1,6 @@
 package edu.uta.ucs;
 
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -485,6 +486,8 @@ public class SelectCourses extends ActionBarActivity {
     private SemesterInfo.DepartmentInfo.CourseInfo tempCourseInfo;
     private SemesterInfo selectedSemester;
 
+    private ProgressDialog progressDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -619,6 +622,7 @@ public class SelectCourses extends ActionBarActivity {
 
         intent.putExtra(HTTPGetService.SOURCE_INTENT, ACTION_GET_SEMESTER);
         startService(intent);
+        showProgressDialog("Getting Semester Data");
     }
 
     public void selectBlockoutTimes(View view){
@@ -656,6 +660,13 @@ public class SelectCourses extends ActionBarActivity {
         Toast.makeText(getBaseContext(), "Department Data Updated", Toast.LENGTH_LONG).show();
     }
 
+    private void showProgressDialog(String title){
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle(title);
+        progressDialog.setMessage("Please wait while data is fetched...");
+        progressDialog.show();
+    }
+
     private class DepartmentCoursesReceiver extends BroadcastReceiver {
 
         @Override
@@ -683,6 +694,7 @@ public class SelectCourses extends ActionBarActivity {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+            progressDialog.dismiss();
         }
     }
 }
