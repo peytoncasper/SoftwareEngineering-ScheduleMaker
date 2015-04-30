@@ -464,7 +464,7 @@ class CourseInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInfo.Co
 
 public class SelectCourses extends ActionBarActivity {
 
-    private static final boolean spoofServerSwitch = true;
+    private static final boolean spoofServerSwitch = false;
 
     public static final String URL_GET_DESIRED_COURSE_SECTIONS ="http://ucs-scheduler.cloudapp.net/UTA/ClassStatus?classes=";
     public static final String ACTION_GET_DESIRED_COURSE_SECTIONS ="edu.uta.ucs.intent.action.ACTION_GET_DESIRED_COURSE_SECTIONS";
@@ -621,6 +621,7 @@ public class SelectCourses extends ActionBarActivity {
 
     public void getCourseSections(View view){
         StringBuilder urlBuilder = new StringBuilder(URL_GET_DESIRED_COURSE_SECTIONS);
+        urlBuilder.append(((Integer) selectedSemester.getSemesterNumber()).toString() + "*");
 
         for (SemesterInfo.DepartmentInfo.CourseInfo courseInfo : desiredCoursesArrayList){
             urlBuilder.append(courseInfo.getDepartmentInfo().getDepartmentAcronym());
@@ -646,7 +647,7 @@ public class SelectCourses extends ActionBarActivity {
         String url = null;
 
         Intent intent = new Intent(this, HTTPGetService.class);
-        if(false) {
+        if(spoofServerSwitch) {
             intent.putExtra(HTTPGetService.URL_REQUEST, HTTPGetService.SPOOF_SERVER);
             intent.putExtra(HTTPGetService.SPOOFED_RESPONSE, SPOOF_SEMESTER);
         }
@@ -751,7 +752,6 @@ public class SelectCourses extends ActionBarActivity {
             }
 
             Log.d("New Section", "ArrayList Built");
-            Log.d("New Section", "ListView Built");
 
             progressDialog.dismiss();
 
