@@ -6,13 +6,12 @@
     android:background="#FFFFFF">
 
     <TextView
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="DEPT "
         android:id="@+id/desiredCourseDepartment"
-        android:layout_gravity="start"
-        android:layout_weight="1" />
+        android:layout_gravity="start" />
 
     <TextView
         android:layout_width="wrap_content"
