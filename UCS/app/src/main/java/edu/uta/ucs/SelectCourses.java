@@ -261,6 +261,7 @@ class SemesterInfo{
      */
     SemesterInfo(JSONObject semesterInfoRaw) throws JSONException {
         this.semesterNumber = semesterInfoRaw.getInt("SemesterNumber");
+        Log.i("Semester Number", ((Integer) semesterNumber).toString());
         JSONArray departmentJSONArrayRaw = semesterInfoRaw.getJSONArray("Departments");
         this.departmentArrayList = new ArrayList<>(departmentJSONArrayRaw.length());
 
@@ -712,7 +713,13 @@ public class SelectCourses extends ActionBarActivity {
                 response = new JSONObject(intent.getStringExtra(HTTPGetService.SERVER_RESPONSE));
                 success = response.getBoolean("Success");
                 semesterInfo = SemesterInfo.SemesterInfoFactory(response);
-                selectedSemester = semesterInfo.get(0);
+                for (SemesterInfo semester : semesterInfo){
+                    Log.i("Semster number", ((Integer) semester.getSemesterNumber()).toString());
+                    if (semester.getSemesterNumber() == 2152){
+                        Log.i("Semester Fetch", ((Integer) semester.getSemesterNumber()).toString());
+                        selectedSemester = semester;
+                    }
+                }
                 ArrayList<String> departmentList = new ArrayList<>(selectedSemester.getDepartmentArrayList().size());
                 for(SemesterInfo.DepartmentInfo departmentInfo : selectedSemester.getDepartmentArrayList()){
                     departmentList.add(departmentInfo.getDepartmentAcronym());
@@ -762,8 +769,12 @@ public class SelectCourses extends ActionBarActivity {
 
                 if (fetchedCourses != null)
                     sectionArrayList = Schedule.scheduleFactory(0,fetchedCourses, new ArrayList<Section>(), blockoutSections);
+                for (Section section : sectionArrayList){
+                    Log.i("Built Schedule",section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseID() + "-" + section.toJSON().toString());
+                }
             } catch (NoSchedulesPossibleException e) {
                 e.printStackTrace();
+                e.getConflict();
             }
 
 
