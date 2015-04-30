@@ -487,6 +487,8 @@ public class SelectCourses extends ActionBarActivity {
     private ArrayList<SemesterInfo.DepartmentInfo> departmentInfoArrayList;
     private ArrayList<SemesterInfo.DepartmentInfo.CourseInfo> courseInfoArrayList;
 
+    private ArrayList<Course> fetchedCourses;
+
     private SemesterInfo.DepartmentInfo.CourseInfo tempCourseInfo;
     private SemesterInfo selectedSemester;
 
@@ -735,7 +737,6 @@ public class SelectCourses extends ActionBarActivity {
         public void onReceive(Context context, Intent intent) {
             String response = intent.getStringExtra(HTTPGetService.SERVER_RESPONSE);
             Log.d("Received: ",response);
-            ArrayList<Course> courseList = new ArrayList<Course>();
             int numberOfSectionsTotal = 0;
 
             try {
@@ -743,7 +744,7 @@ public class SelectCourses extends ActionBarActivity {
                 JSONArray jsonCourses = rawResult.getJSONArray("Results");
                 float timeTaken = Float.parseFloat(rawResult.getString("TimeTaken"));
                 Log.d("New Request Time Taken:", Float.toString(timeTaken));
-                courseList = Course.buildCourseList(jsonCourses);
+                fetchedCourses = Course.buildCourseList(jsonCourses);
 
             } catch (JSONException e) {
                 e.printStackTrace();
