@@ -736,6 +736,7 @@ public class SelectCourses extends ActionBarActivity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
+            ArrayList<Section> sectionArrayList = null;
             String response = intent.getStringExtra(HTTPGetService.SERVER_RESPONSE);
             Log.d("Received: ",response);
             int numberOfSectionsTotal = 0;
@@ -758,7 +759,9 @@ public class SelectCourses extends ActionBarActivity {
                 else
                     blockoutSections = new ArrayList<Section>();
 
-                Schedule.scheduleFactory(0,fetchedCourses, new ArrayList<Section>(), blockoutSections);
+
+                if (fetchedCourses != null)
+                    sectionArrayList = Schedule.scheduleFactory(0,fetchedCourses, new ArrayList<Section>(), blockoutSections);
             } catch (NoSchedulesPossibleException e) {
                 e.printStackTrace();
             }
