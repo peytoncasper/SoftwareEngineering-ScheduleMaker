@@ -36,7 +36,7 @@ public class Schedule {
         this.selectedSections = selectedSections;
     }
 
-    public static ArrayList<Section> scheduleFactory(int index, ArrayList<Course> courseArrayList, ArrayList<Section> sectionArrayList, ArrayList<Section> blockOutTimesList) throws NoSchedulesPossibleException{
+    public static ArrayList<Section> scheduleGenerator(int index, ArrayList<Course> courseArrayList, ArrayList<Section> sectionArrayList, ArrayList<Section> blockOutTimesList) throws NoSchedulesPossibleException{
 
         Log.i("schedule Factory", "Loop Counter:" + ((Integer) index).toString());
         if (index == courseArrayList.size()){
@@ -46,6 +46,20 @@ public class Schedule {
         ArrayList<Section> possibleSections = course.getSectionList();
         // Shuffle sectionArrayList
         for (Section section : possibleSections){
+            for (Section sectionToCompare : sectionArrayList){
+                if (section.conflictsWith(sectionToCompare)){
+                    StringBuilder errorBuilder = new StringBuilder("Conflict between " + section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseID() + "-" + section.getSectionNumber());
+                    errorBuilder.append(" and " + sectionToCompare.getSourceCourse().getCourseName() + " " + sectionToCompare.getSourceCourse().getCourseID() + "-" + sectionToCompare.getSectionNumber());
+                    Log.e("Schedule Conflict Error", errorBuilder.toString());
+                }
+            }
+            for (Section sectionToCompare : blockOutTimesList){
+                if (section.conflictsWith(sectionToCompare)){
+                    StringBuilder errorBuilder = new StringBuilder("Conflict between " + section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseID() + "-" + section.getSectionNumber());
+                    errorBuilder.append(" and " + sectionToCompare.getSourceCourse().getCourseID() + " "  + sectionToCompare.getInstructors());
+                    Log.e("Schedule Conflict Error", errorBuilder.toString());
+                }
+            }
             if (section.conflictsWith(sectionArrayList)){
                 StringBuilder errorBuilder = new StringBuilder("Conflict between " + section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseID() + "-" + section.getSectionNumber());
                 for (Section sectionConflict : sectionArrayList){
@@ -64,7 +78,7 @@ public class Schedule {
             else{
                 sectionArrayList.add(section);
                 try{
-                    return scheduleFactory(index+1, courseArrayList, sectionArrayList, blockOutTimesList);
+                    return scheduleGenerator(index + 1, courseArrayList, sectionArrayList, blockOutTimesList);
                 } catch (NoSchedulesPossibleException exception){
                     exception.printStackTrace();
                     sectionArrayList.remove(index);

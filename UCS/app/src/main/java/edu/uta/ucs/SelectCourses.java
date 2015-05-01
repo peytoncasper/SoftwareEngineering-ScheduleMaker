@@ -768,7 +768,7 @@ public class SelectCourses extends ActionBarActivity {
 
 
                 if (fetchedCourses != null)
-                    sectionArrayList = Schedule.scheduleFactory(0,fetchedCourses, new ArrayList<Section>(), blockoutSections);
+                    sectionArrayList = Schedule.scheduleGenerator(0, fetchedCourses, new ArrayList<Section>(), blockoutSections);
                 for (Section section : sectionArrayList){
                     Log.i("Built Schedule",section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseID() + "-" + section.toJSON().toString());
                 }
