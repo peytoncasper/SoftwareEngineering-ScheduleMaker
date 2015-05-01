@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -849,6 +850,80 @@ public class SelectCourses extends ActionBarActivity {
             progressDialog.dismiss();
 
         }
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        String selectedSemesterString = null;
+        SharedPreferences.Editor editor = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE).edit();
+        //String desiredCoursesString = null;
+        if (selectedSemester != null){
+            try {
+                selectedSemesterString = selectedSemester.toJSON().toString();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            editor.putString("selectedSemester", selectedSemesterString);
+            editor.apply();
+            Log.i("Selected Semester Info", selectedSemesterString );
+        }
+
+        if (desiredCoursesArrayList != null)
+        if (desiredCoursesArrayList.size() > 0){
+            StringBuilder desiredCoursesString = new StringBuilder();
+            for (SemesterInfo.DepartmentInfo.CourseInfo courseInfo : desiredCoursesArrayList){
+                desiredCoursesString.append(courseInfo.getDepartmentInfo().getDepartmentAcronym() + "-" + courseInfo.getCourseNumber() + ",");
+            }
+            Log.i("Desired Courses Builder", desiredCoursesString.length() > 0 ? desiredCoursesString.substring( 0, desiredCoursesString.length() - 1 ): null);
+            editor.putString("desiredCourses", desiredCoursesString.length() > 0 ? desiredCoursesString.substring( 0, desiredCoursesString.length() - 1 ): null);
+            editor.apply();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        SharedPreferences preferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+        String selectedSemesterString = preferences.getString("selectedSemester", null);
+        JSONObject selectedSemesterJSON = null;
+        if (selectedSemesterString != null) {
+            try {
+                selectedSemesterJSON = new JSONObject(selectedSemesterString);
+                selectedSemester = new SemesterInfo(selectedSemesterJSON);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            ArrayList<String> departmentList = new ArrayList<>(selectedSemester.getDepartmentArrayList().size());
+            for(SemesterInfo.DepartmentInfo departmentInfo : selectedSemester.getDepartmentArrayList()){
+                departmentList.add(departmentInfo.getDepartmentAcronym());
+            }
+            updateDepartmentInfoAdapter(selectedSemester.getDepartmentArrayList());
+
+            String desiredCoursesString = preferences.getString("desiredCourses", null);
+            if (desiredCoursesString != null){
+                String[] desiredCoursesArray = desiredCoursesString.split(",");
+                for (String string : desiredCoursesArray){
+                    String[] courseInfoStrings = string.split("-");
+                    SemesterInfo.DepartmentInfo.CourseInfo courseInfo = getCourseInfo(courseInfoStrings[0], courseInfoStrings[1]);
+                    desiredCoursesArrayList.add(courseInfo);
+                    Log.i("Desired Course", string);
+                    try {
+                        Log.i("Desired Course", courseInfo.toJSON().toString());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                departmentInfoArrayAdapter.notifyDataSetChanged();
+            }
+            else
+                Log.i("Desired Course", "No Desired Courses Found");
+            //desiredCoursesArrayList.add(selectedCourse);
+        }
+        else
+            getSemesterInfo(this.getCurrentFocus());
+
 
     }
 }
