@@ -837,7 +837,7 @@ public class SelectCourses extends ActionBarActivity {
                 if (fetchedCourses != null)
                     sectionArrayList = Schedule.scheduleGenerator(0, fetchedCourses, new ArrayList<Section>(), blockoutSections);
                 for (Section section : sectionArrayList){
-                    Log.i("Built Schedule",section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseID() + "-" + section.toJSON().toString());
+                    Log.i("Built Schedule",section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseID() + "-" + section.getSectionNumber() + "\t" + section.toJSON().toString());
                 }
             } catch (NoSchedulesPossibleException e) {
                 e.printStackTrace();
@@ -858,7 +858,6 @@ public class SelectCourses extends ActionBarActivity {
         super.onPause();
         String selectedSemesterString = null;
         SharedPreferences.Editor editor = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE).edit();
-        //String desiredCoursesString = null;
         if (selectedSemester != null){
             try {
                 selectedSemesterString = selectedSemester.toJSON().toString();
@@ -919,7 +918,6 @@ public class SelectCourses extends ActionBarActivity {
             }
             else
                 Log.i("Desired Course", "No Desired Courses Found");
-            //desiredCoursesArrayList.add(selectedCourse);
         }
         else
             getSemesterInfo(this.getCurrentFocus());
