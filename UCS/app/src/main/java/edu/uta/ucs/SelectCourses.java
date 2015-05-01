@@ -29,71 +29,64 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-class DesiredCoursesArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInfo.CourseInfo>{
-
-    /**
-     * Constructor
-     *
-     * @param context  The current context.
-     * @param resource The resource ID for a layout file containing a TextView to use when
-     */
-    DesiredCoursesArrayAdapter(Context context, int resource) {
-        super(context, resource);
-    }
-
-    /**
-     * Constructor
-     *
-     * @param context  The current context.
-     * @param resource The resource ID for a layout file containing a TextView to use when
-     */
-    public DesiredCoursesArrayAdapter(Context context, int resource, ArrayList<SemesterInfo.DepartmentInfo.CourseInfo> item ) {
-        super(context, resource, item);
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-
-        View view = convertView;
-
-        if (view == null) {
-            LayoutInflater vi;
-            vi = LayoutInflater.from(getContext());
-            view = vi.inflate(R.layout.desired_courses_listview, null);
-        }
-
-        SemesterInfo.DepartmentInfo.CourseInfo courseInfo = getItem(position);
-
-        if (courseInfo != null){
-            TextView desiredCourseDepartment = ((TextView) view.findViewById(R.id.desiredCourseDepartment));
-            TextView desiredCourseNumber = ((TextView) view.findViewById(R.id.desiredCourseNumber));
-            TextView desiredCourseTitle = ((TextView) view.findViewById(R.id.desiredCourseTitle));
-
-            String Department = courseInfo.getDepartmentInfo().getDepartmentAcronym();
-            String Number = " - " + ((Integer) courseInfo.getCourseNumber()).toString();
-            String Title = "\t" + courseInfo.getCourseTitle();
-
-            if (Department != null){
-                desiredCourseDepartment.setText(Department);
-            }
-
-            if (Number != null){
-                desiredCourseNumber.setText(Number);
-            }
-
-            if (Title != null){
-                desiredCourseTitle.setText(Title);
-            }
-        }
-
-        return view;
-    }
-}
-
 /**
  * Holds all course info for an entire semester for AutoComplete and filtering of courses for validity
  */
 class SemesterInfo{
+
+    private int semesterNumber;
+    private ArrayList<DepartmentInfo> departmentArrayList;
+
+
+    public static ArrayList<SemesterInfo> SemesterInfoFactory(JSONObject SemesterRaw) throws JSONException {
+        JSONArray semestersArray = SemesterRaw.getJSONArray("Semesters");
+        ArrayList<SemesterInfo> results = new ArrayList<>(semestersArray.length());
+
+        for(int index = semestersArray.length(); index != 0;index--){
+            SemesterInfo parsedSemester = new SemesterInfo(semestersArray.getJSONObject( index-1 ));
+            results.add(parsedSemester);
+        }
+        Collections.reverse(results);
+
+        return results;
+    }
+
+    /**
+     * Constructor
+     *
+     * @param semesterInfoRaw JSON Object must have the following keys present:
+     *                   <ul>
+     *                   <li>"Success" - boolean, represents good server response
+     *                   <li>"SemesterNumber" - integer, UTA semster number. EX: 2155 for Summer 2015, 2158 for Spring 2015
+     *                   <li>"Departments" - JSONArray, Departments information. See DepartmentInfo constructor for requirements
+     *                   <ul/>
+     * @throws JSONException
+     */
+    SemesterInfo(JSONObject semesterInfoRaw) throws JSONException {
+        this.semesterNumber = semesterInfoRaw.getInt("SemesterNumber");
+        Log.i("Semester Number", ((Integer) semesterNumber).toString());
+        JSONArray departmentJSONArrayRaw = semesterInfoRaw.getJSONArray("Departments");
+        this.departmentArrayList = new ArrayList<>(departmentJSONArrayRaw.length());
+
+        for(int index = departmentJSONArrayRaw.length(); index != 0;index--){
+            this.departmentArrayList.add(new DepartmentInfo(departmentJSONArrayRaw.getJSONObject(index - 1)));
+            }
+
+    }
+
+    public JSONObject toJSON() throws JSONException {
+
+        ArrayList<JSONObject> departmentInfoArray = new ArrayList<>(departmentArrayList.size());
+        for(DepartmentInfo departmentInfo : departmentArrayList){
+            departmentInfoArray.add(departmentInfo.toJSON());
+        }
+        JSONArray departmentInfoJSONArray = new JSONArray(departmentInfoArray);
+
+        JSONObject semesterInfoJSON = new JSONObject();
+        semesterInfoJSON.put("SemesterNumber", semesterNumber);
+        semesterInfoJSON.put("Departments", departmentInfoJSONArray);
+        return semesterInfoJSON;
+    }
 
     public int getSemesterNumber() {
         return semesterNumber;
@@ -111,24 +104,66 @@ class SemesterInfo{
         this.departmentArrayList = departmentArrayList;
     }
 
-    public static ArrayList<SemesterInfo> SemesterInfoFactory(JSONObject SemesterRaw) throws JSONException {
-        JSONArray semestersArray = SemesterRaw.getJSONArray("Semesters");
-        ArrayList<SemesterInfo> results = new ArrayList<>(semestersArray.length());
-
-        for(int index = semestersArray.length(); index != 0;index--){
-            SemesterInfo parsedSemester = new SemesterInfo(semestersArray.getJSONObject( index-1 ));
-            results.add(parsedSemester);
-        }
-        Collections.reverse(results);
-
-        return results;
-    }
-
     /**
      * Holds a departments' ID, Title, and an arraylist of CourseInfo to hold course information for all courses in that department.
      */
     class DepartmentInfo {
 
+        private int departmentID;
+        private String departmentAcronym;
+        private String departmentTitle;
+        private ArrayList<CourseInfo> courses;
+
+        /**
+         * Constructor
+         *
+         * @param departmentInfoRaw JSON Object must have the following keys present:
+         *                   <ul>
+         *                   <li>"ID" - string, abbreviated department title as used in MyMav.
+         *                          EX: "ENGL" for "English" department
+         *                              "ECED" for "Early Childhood Education" department
+         *                   <li>"Title" - string, full name of department. EX: "English" or "Early Childhood Education"
+         *                   <li>"Courses" - JSONArray, Course Information. See CourseInfo constructor for requirements
+         *                   <ul/>
+         * @throws JSONException
+         */
+        public DepartmentInfo(JSONObject departmentInfoRaw) throws JSONException {
+            this.setDepartmentID(departmentInfoRaw.getInt("Id"));
+            this.setDepartmentAcronym(departmentInfoRaw.getString("DepartmentAcronym"));
+            this.setDepartmentTitle(null);//departmentInfoRaw.getString("Title");
+            JSONArray courseJSONArrayRaw = departmentInfoRaw.getJSONArray("CourseNumbers");
+            this.courses = new ArrayList<>(courseJSONArrayRaw.length());
+
+            for(int index = courseJSONArrayRaw.length(); index != 0;index--){
+                this.getCourses().add(new CourseInfo(courseJSONArrayRaw.getJSONObject(index - 1), this));
+            }
+
+            Log.i("Department Details", "New Department Added:"+ getDepartmentID() + " " + getDepartmentAcronym() + " " + getDepartmentTitle() + " " + getCourses().size());
+        }
+
+        public DepartmentInfo(){
+            this.setDepartmentID(0);
+            this.setDepartmentAcronym(null);
+            this.setDepartmentTitle(null);
+            this.setCourses(null);
+        }
+
+        public JSONObject toJSON() throws JSONException {
+
+            ArrayList<JSONObject> courseInfoArray = new ArrayList<>(courses.size());
+            for(CourseInfo courseInfo : courses){
+                courseInfoArray.add(courseInfo.toJSON());
+            }
+            JSONArray courseInfoJSONArray = new JSONArray(courseInfoArray);
+
+            JSONObject departmentInfoJSON = new JSONObject();
+
+            departmentInfoJSON.put("Id", departmentID);
+            departmentInfoJSON.put("DepartmentAcronym",departmentAcronym);
+            departmentInfoJSON.put("CourseNumbers", courseInfoJSONArray);
+
+            return departmentInfoJSON;
+        }
 
         public int getDepartmentID() {
             return departmentID;
@@ -166,6 +201,7 @@ class SemesterInfo{
          * Holds a course number for autocomplete as well as the tile for that course number.
          */
         class CourseInfo{
+
             private int courseNumber;
             private String courseTitle;
             private DepartmentInfo departmentInfo;
@@ -185,6 +221,28 @@ class SemesterInfo{
                 this.courseTitle = courseInfoJSONObject.getString("CourseName");
                 Log.i("Course Details", "New Course Added:" + " " + this.courseNumber + " " + this.courseTitle);
                 this.departmentInfo = departmentInfo;
+            }
+
+            public CourseInfo(JSONObject courseInfoJSONObject) throws JSONException {
+                this.courseNumber = courseInfoJSONObject.getInt("CourseNumber");
+                this.courseTitle = courseInfoJSONObject.getString("CourseName");
+                this.departmentInfo = new DepartmentInfo();
+                this.departmentInfo.setDepartmentAcronym(courseInfoJSONObject.getString("DepartmentAcronym"));
+            }
+
+            /*public JSONObject toJSONIsolated() throws JSONException {
+                JSONObject courseInfo = new JSONObject();
+                courseInfo.put("CourseNumber", courseNumber);
+                courseInfo.put("CourseTitle", courseTitle);
+                courseInfo.put("DepartmentAcronym", getDepartmentAcronym());
+                return courseInfo;
+            }*/
+
+            public JSONObject toJSON() throws JSONException {
+                JSONObject courseInfo = new JSONObject();
+                courseInfo.put("CourseNumber", courseNumber);
+                courseInfo.put("CourseName", courseTitle);
+                return courseInfo;
             }
 
             public int getCourseNumber() {
@@ -211,64 +269,6 @@ class SemesterInfo{
                 this.departmentInfo = departmentInfo;
             }
         }
-
-        private int departmentID;
-        private String departmentAcronym;
-        private String departmentTitle;
-        private ArrayList<CourseInfo> courses;
-
-        /**
-         * Constructor
-         *
-         * @param departmentInfoRaw JSON Object must have the following keys present:
-         *                   <ul>
-         *                   <li>"ID" - string, abbreviated department title as used in MyMav.
-         *                          EX: "ENGL" for "English" department
-         *                              "ECED" for "Early Childhood Education" department
-         *                   <li>"Title" - string, full name of department. EX: "English" or "Early Childhood Education"
-         *                   <li>"Courses" - JSONArray, Course Information. See CourseInfo constructor for requirements
-         *                   <ul/>
-         * @throws JSONException
-         */
-        public DepartmentInfo(JSONObject departmentInfoRaw) throws JSONException {
-            this.setDepartmentID(departmentInfoRaw.getInt("Id"));
-            this.setDepartmentAcronym(departmentInfoRaw.getString("DepartmentAcronym"));
-            this.setDepartmentTitle(null);//departmentInfoRaw.getString("Title");
-            JSONArray courseJSONArrayRaw = departmentInfoRaw.getJSONArray("CourseNumbers");
-            this.courses = new ArrayList<>(courseJSONArrayRaw.length());
-
-            for(int index = courseJSONArrayRaw.length(); index != 0;index--){
-                this.courses.add(new CourseInfo(courseJSONArrayRaw.getJSONObject(index - 1), this));
-            }
-
-            Log.i("Department Details", "New Department Added:"+ getDepartmentID() + " " + getDepartmentAcronym() + " " + getDepartmentTitle() + " " + courses.size());
-        }
-    }
-
-    private int semesterNumber;
-    private ArrayList<DepartmentInfo> departmentArrayList;
-
-    /**
-     * Constructor
-     *
-     * @param semesterInfoRaw JSON Object must have the following keys present:
-     *                   <ul>
-     *                   <li>"Success" - boolean, represents good server response
-     *                   <li>"SemesterNumber" - integer, UTA semster number. EX: 2155 for Summer 2015, 2158 for Spring 2015
-     *                   <li>"Departments" - JSONArray, Departments information. See DepartmentInfo constructor for requirements
-     *                   <ul/>
-     * @throws JSONException
-     */
-    SemesterInfo(JSONObject semesterInfoRaw) throws JSONException {
-        this.semesterNumber = semesterInfoRaw.getInt("SemesterNumber");
-        Log.i("Semester Number", ((Integer) semesterNumber).toString());
-        JSONArray departmentJSONArrayRaw = semesterInfoRaw.getJSONArray("Departments");
-        this.departmentArrayList = new ArrayList<>(departmentJSONArrayRaw.length());
-
-        for(int index = departmentJSONArrayRaw.length(); index != 0;index--){
-            this.departmentArrayList.add(new DepartmentInfo(departmentJSONArrayRaw.getJSONObject(index - 1)));
-            }
-
     }
 }
 
@@ -463,9 +463,73 @@ class CourseInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInfo.Co
     }
 }
 
+class DesiredCoursesArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInfo.CourseInfo>{
+
+    /**
+     * Constructor
+     *
+     * @param context  The current context.
+     * @param resource The resource ID for a layout file containing a TextView to use when
+     */
+    DesiredCoursesArrayAdapter(Context context, int resource) {
+        super(context, resource);
+    }
+
+    /**
+     * Constructor
+     *
+     * @param context  The current context.
+     * @param resource The resource ID for a layout file containing a TextView to use when
+     */
+    public DesiredCoursesArrayAdapter(Context context, int resource, ArrayList<SemesterInfo.DepartmentInfo.CourseInfo> item ) {
+        super(context, resource, item);
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+
+        View view = convertView;
+
+        if (view == null) {
+            LayoutInflater vi;
+            vi = LayoutInflater.from(getContext());
+            view = vi.inflate(R.layout.desired_courses_listview, null);
+        }
+
+        SemesterInfo.DepartmentInfo.CourseInfo courseInfo = getItem(position);
+
+        if (courseInfo != null){
+            TextView desiredCourseDepartment = ((TextView) view.findViewById(R.id.desiredCourseDepartment));
+            TextView desiredCourseNumber = ((TextView) view.findViewById(R.id.desiredCourseNumber));
+            TextView desiredCourseTitle = ((TextView) view.findViewById(R.id.desiredCourseTitle));
+
+            String Department = courseInfo.getDepartmentInfo().getDepartmentAcronym();
+            String Number = " - " + ((Integer) courseInfo.getCourseNumber()).toString();
+            String Title = "\t" + courseInfo.getCourseTitle();
+
+            if (Department != null){
+                desiredCourseDepartment.setText(Department);
+            }
+
+            if (Number != null){
+                desiredCourseNumber.setText(Number);
+            }
+
+            if (Title != null){
+                desiredCourseTitle.setText(Title);
+            }
+        }
+
+        return view;
+    }
+}
+
+
 public class SelectCourses extends ActionBarActivity {
 
     private static final boolean spoofServerSwitch = false;
+
+    private static final String SHARED_PREFS = "SHARED_PREFS";
 
     public static final String URL_GET_DESIRED_COURSE_SECTIONS ="http://ucs-scheduler.cloudapp.net/UTA/ClassStatus?classes=";
     public static final String ACTION_GET_DESIRED_COURSE_SECTIONS ="edu.uta.ucs.intent.action.ACTION_GET_DESIRED_COURSE_SECTIONS";
@@ -598,15 +662,12 @@ public class SelectCourses extends ActionBarActivity {
 
     public SemesterInfo.DepartmentInfo.CourseInfo getCourseInfo(String department, String number){
 
-        for(SemesterInfo.DepartmentInfo departmentInfo : selectedSemester.getDepartmentArrayList()){
-            if(departmentInfo.getDepartmentAcronym().toUpperCase().equals(department.toUpperCase())){
+        SemesterInfo.DepartmentInfo departmentInfo = getDepartmentInfo(department);
                 for (SemesterInfo.DepartmentInfo.CourseInfo courseInfo : departmentInfo.getCourses()){
                     if (((Integer) courseInfo.getCourseNumber()).toString().equals(number)){
                         return courseInfo;
                     }
                 }
-            }
-        }
         return null;
     }
 
@@ -644,7 +705,7 @@ public class SelectCourses extends ActionBarActivity {
         showProgressDialog("Getting All Selected Course Data");
     }
 
-    public void getSemesterCourses(View view){
+    public void getSemesterInfo(View view){
         String url = null;
 
         Intent intent = new Intent(this, HTTPGetService.class);
@@ -672,7 +733,11 @@ public class SelectCourses extends ActionBarActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        String blockoutTimes = data.getStringExtra("BLOCKOUT");
+        String blockoutTimes;
+        if (data.hasExtra("BLOCKOUT"))
+            blockoutTimes = data.getStringExtra("BLOCKOUT");
+        else
+            return;
         try {
             JSONObject jsonBlockoutTimes = new JSONObject(blockoutTimes);
             this.blockoutTimes = new Course(jsonBlockoutTimes);
@@ -738,6 +803,7 @@ public class SelectCourses extends ActionBarActivity {
             progressDialog.dismiss();
         }
     }
+
 
     private class DesiredSectionsReceiver extends BroadcastReceiver {
 

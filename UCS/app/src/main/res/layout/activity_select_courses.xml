@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:text="@string/action_select_semester"
         android:id="@+id/select_semester_button"
-        android:onClick="getSemesterCourses" />
+        android:onClick="getSemesterInfo" />
 
     <LinearLayout
         android:orientation="horizontal"
