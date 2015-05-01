@@ -1,11 +1,13 @@
 package edu.uta.ucs;
 
+import android.annotation.TargetApi;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -16,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ListView;
@@ -466,6 +469,8 @@ class CourseInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInfo.Co
 
 class DesiredCoursesArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInfo.CourseInfo>{
 
+    ArrayList<SemesterInfo.DepartmentInfo.CourseInfo> courseInfoArrayList;
+
     /**
      * Constructor
      *
@@ -484,6 +489,7 @@ class DesiredCoursesArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInf
      */
     public DesiredCoursesArrayAdapter(Context context, int resource, ArrayList<SemesterInfo.DepartmentInfo.CourseInfo> item ) {
         super(context, resource, item);
+        courseInfoArrayList = item;
     }
 
     @Override
@@ -497,12 +503,14 @@ class DesiredCoursesArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInf
             view = vi.inflate(R.layout.desired_courses_listview, null);
         }
 
-        SemesterInfo.DepartmentInfo.CourseInfo courseInfo = getItem(position);
+        final SemesterInfo.DepartmentInfo.CourseInfo courseInfo = getItem(position);
 
         if (courseInfo != null){
             TextView desiredCourseDepartment = ((TextView) view.findViewById(R.id.desiredCourseDepartment));
             TextView desiredCourseNumber = ((TextView) view.findViewById(R.id.desiredCourseNumber));
             TextView desiredCourseTitle = ((TextView) view.findViewById(R.id.desiredCourseTitle));
+
+            Button desiredCourseRemoveButton = ((Button) view.findViewById(R.id.desiredCourseButton));
 
             String Department = courseInfo.getDepartmentInfo().getDepartmentAcronym();
             String Number = " - " + ((Integer) courseInfo.getCourseNumber()).toString();
@@ -519,6 +527,14 @@ class DesiredCoursesArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInf
             if (Title != null){
                 desiredCourseTitle.setText(Title);
             }
+
+            desiredCourseRemoveButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    courseInfoArrayList.remove(courseInfo);
+                    notifyDataSetChanged();
+                }
+            });
         }
 
         return view;
@@ -853,6 +869,7 @@ public class SelectCourses extends ActionBarActivity {
 
     }
 
+    @TargetApi(Build.VERSION_CODES.GINGERBREAD)
     @Override
     protected void onPause() {
         super.onPause();
@@ -914,7 +931,7 @@ public class SelectCourses extends ActionBarActivity {
                         e.printStackTrace();
                     }
                 }
-                departmentInfoArrayAdapter.notifyDataSetChanged();
+                desiredCoursesArrayAdapter.notifyDataSetChanged();
             }
             else
                 Log.i("Desired Course", "No Desired Courses Found");
