@@ -329,6 +329,8 @@ class DepartmentInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInf
         departmentNumber.setText("");
         departmentTitle.setText("\t");// + departmentInfo.getDepartmentTitle());
 
+        convertView.findViewById(R.id.desiredCourseButton).setVisibility(View.GONE);
+
         return convertView;
     }
 
@@ -424,6 +426,8 @@ class CourseInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInfo.Co
         departmentID.setText("");
         departmentNumber.setText(((Integer) courseInfo.getCourseNumber()).toString());
         departmentTitle.setText("\t" + courseInfo.getCourseTitle());
+
+        convertView.findViewById(R.id.desiredCourseButton).setVisibility(View.GONE);
 
         return convertView;
     }
