@@ -3,6 +3,7 @@ package edu.uta.ucs;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,6 +22,9 @@ import java.util.ArrayList;
 
 public class SelectBlockoutTimes extends ActionBarActivity {
 
+    private static final String BLOCKOUT_NAME = "BLOCKOUT_NAME";
+    private static final String BLOCKOUT_TIMES = "BLOCKOUT_TIMES";
+
     EditText nameBlockoutTime;
     ToggleButton mondayToggleButton, tuesdayToggleButton, wednesdayToggleButton, thursdayToggleButton, fridayToggleButton, saturdayToggleButton;
     TimePicker startTimePicker, endTimePicker;
@@ -30,6 +34,9 @@ public class SelectBlockoutTimes extends ActionBarActivity {
     MySectionArrayAdapter blockoutTimesListAdapter;
 
     ArrayList<Section> currentBlockoutTimes;
+    Course currentBlockoutCourse;
+
+    SharedPreferences.Editor sharedPrefsEditor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +84,7 @@ public class SelectBlockoutTimes extends ActionBarActivity {
 
             blockoutTimesListAdapter.notifyDataSetChanged();
         }
+
     }
 
     public void addBlockoutTime(View view){
@@ -87,7 +95,6 @@ public class SelectBlockoutTimes extends ActionBarActivity {
         newEndTime = getTime(endTimePicker);
         ArrayList<Day> newDayList = getDays();
         Course newBlockoutCourse = new Course();
-        // newBlockoutCourse.setCourseName(nameBlockoutTime.getText().toString());
 
         Section newBlockoutTime = new Section(-1, nameBlockoutTime.getText().toString(), "", newStartTime, newEndTime, newDayList, ClassStatus.OPEN, newBlockoutCourse);
         nameBlockoutTime.setText("");
@@ -100,11 +107,11 @@ public class SelectBlockoutTimes extends ActionBarActivity {
 
         if (blockoutSetName == null)
             blockoutSetName = "";
-        Course course = new Course("BLOCKOUT", blockoutSetName, currentBlockoutTimes);
-        Log.d("BlockoutTimes", course.toJSON().toString());
+        currentBlockoutCourse = new Course("BLOCKOUT", blockoutSetName, currentBlockoutTimes);
+        Log.d("BlockoutTimes", currentBlockoutCourse.toJSON().toString());
 
         Intent intent = new Intent();
-        intent.putExtra("BLOCKOUT", course.toJSON().toString());
+        intent.putExtra("BLOCKOUT", currentBlockoutCourse.toJSON().toString());
         setResult(0, intent);
 
         finish();
@@ -136,8 +143,8 @@ public class SelectBlockoutTimes extends ActionBarActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 blockoutSetName = blockoutNameEditTextDialog.getText().toString();
-                Course course = new Course("BLOCKOUT", blockoutSetName, currentBlockoutTimes);
-                Log.d("BlockoutTimes", course.toJSON().toString() );
+                currentBlockoutCourse = new Course("BLOCKOUT", blockoutSetName, currentBlockoutTimes);
+                Log.d("BlockoutTimes", currentBlockoutCourse.toJSON().toString() );
             }
         });
 
