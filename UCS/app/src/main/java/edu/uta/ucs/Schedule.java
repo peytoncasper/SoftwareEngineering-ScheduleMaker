@@ -45,12 +45,14 @@ public class Schedule {
         Course course = courseArrayList.get(index);
         ArrayList<Section> possibleSections = course.getSectionList();
         // Shuffle sectionArrayList
+        checkPossibleSections:
         for (Section section : possibleSections){
             for (Section sectionToCompare : sectionArrayList){
                 if (section.conflictsWith(sectionToCompare)){
                     StringBuilder errorBuilder = new StringBuilder("Conflict between " + section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseID() + "-" + section.getSectionNumber());
                     errorBuilder.append(" and " + sectionToCompare.getSourceCourse().getCourseName() + " " + sectionToCompare.getSourceCourse().getCourseID() + "-" + sectionToCompare.getSectionNumber());
                     Log.e("Schedule Conflict Error", errorBuilder.toString());
+                    continue checkPossibleSections;
                 }
             }
             for (Section sectionToCompare : blockOutTimesList){
@@ -58,31 +60,15 @@ public class Schedule {
                     StringBuilder errorBuilder = new StringBuilder("Conflict between " + section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseID() + "-" + section.getSectionNumber());
                     errorBuilder.append(" and " + sectionToCompare.getSourceCourse().getCourseID() + " "  + sectionToCompare.getInstructors());
                     Log.e("Schedule Conflict Error", errorBuilder.toString());
+                    continue checkPossibleSections;
                 }
             }
-            if (section.conflictsWith(sectionArrayList)){
-                StringBuilder errorBuilder = new StringBuilder("Conflict between " + section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseID() + "-" + section.getSectionNumber());
-                for (Section sectionConflict : sectionArrayList){
-                    errorBuilder.append("\n" + sectionConflict.getSourceCourse().getCourseName() + " " + sectionConflict.getSourceCourse().getCourseID() + "-" + sectionConflict.getSectionNumber());
-                }
-                Log.e("Schedule Conflict Error", errorBuilder.toString());
-            }
-            if (section.conflictsWith(blockOutTimesList)){
-                StringBuilder errorBuilder = new StringBuilder("Conflict between " + section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseID() + "-" + section.getSectionNumber());
-                for (Section sectionConflict : blockOutTimesList){
-                    errorBuilder.append("\n" + sectionConflict.getSourceCourse().getCourseName() + " "  + sectionConflict.getInstructors());
-                }
-                Log.e("Schedule Conflict Error", errorBuilder.toString());
-
-            }
-            else{
-                sectionArrayList.add(section);
-                try{
-                    return scheduleGenerator(index + 1, courseArrayList, sectionArrayList, blockOutTimesList);
-                } catch (NoSchedulesPossibleException exception){
-                    exception.printStackTrace();
-                    sectionArrayList.remove(index);
-                }
+            sectionArrayList.add(section);
+            try{
+                return scheduleGenerator(index + 1, courseArrayList, sectionArrayList, blockOutTimesList);
+            } catch (NoSchedulesPossibleException exception){
+                exception.printStackTrace();
+                sectionArrayList.remove(index);
             }
 
         }throw new NoSchedulesPossibleException(course, sectionArrayList);
