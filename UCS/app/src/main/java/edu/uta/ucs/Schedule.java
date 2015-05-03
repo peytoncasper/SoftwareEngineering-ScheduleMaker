@@ -2,6 +2,10 @@ package edu.uta.ucs;
 
 import android.util.Log;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 /**
@@ -74,6 +78,29 @@ public class Schedule {
         }throw new NoSchedulesPossibleException(course, sectionArrayList);
 
     }
+
+    /**
+     * ScheduleName
+     * ArrayOfCourses
+     *
+     * Courses
+     * @return
+     */
+    public JSONObject toJSON() {
+        JSONObject schedule = new JSONObject();
+
+        try {
+            schedule.put("ScheduleName",this.name);
+            ArrayList<Integer> sectionArrayList = new ArrayList<>();
+            for(Section section: selectedSections) {
+                sectionArrayList.add(section.getSectionID());
+            }
+            schedule.put("ClassNumber",sectionArrayList);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return schedule;
+    }
 }
 
 class NoSchedulesPossibleException extends Exception {
@@ -113,5 +140,4 @@ class NoSchedulesPossibleException extends Exception {
         Log.e("Cannot Generate", message);
         return message;
     }
-
 }
