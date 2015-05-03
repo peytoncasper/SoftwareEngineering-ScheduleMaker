@@ -28,7 +28,8 @@
             android:id="@+id/course_department_edittext"
             android:hint="@string/hint_course_department"
             android:layout_weight=".5"
-            android:inputType="textCapCharacters" />
+            android:inputType="textCapCharacters"
+            android:dropDownWidth="match_parent"/>
 
         <AutoCompleteTextView
             android:layout_width="0dp"
@@ -37,7 +38,8 @@
             android:id="@+id/course_number_edittext"
             android:hint="@string/hint_course_number"
             android:layout_weight="1"
-            android:inputType="text" />
+            android:inputType="text"
+            android:dropDownWidth="match_parent"/>
 
         <Button
             android:layout_width="wrap_content"
