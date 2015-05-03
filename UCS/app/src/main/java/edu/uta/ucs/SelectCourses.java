@@ -574,6 +574,7 @@ public class SelectCourses extends ActionBarActivity {
     private ArrayList<SemesterInfo.DepartmentInfo.CourseInfo> courseInfoArrayList;
 
     private ArrayList<Course> fetchedCourses;
+    private long lastFetchTime;
 
     private SemesterInfo.DepartmentInfo.CourseInfo tempCourseInfo;
     private SemesterInfo selectedSemester;
@@ -641,6 +642,8 @@ public class SelectCourses extends ActionBarActivity {
         desiredCoursesArrayList = new ArrayList<>();
         desiredCoursesArrayAdapter = new DesiredCoursesArrayAdapter(SelectCourses.this, R.layout.desired_courses_listview, desiredCoursesArrayList);
         desiredCoursesListView.setAdapter(desiredCoursesArrayAdapter);
+
+        lastFetchTime = 0;
     }
 
     public void addCourse(View view){
@@ -703,6 +706,7 @@ public class SelectCourses extends ActionBarActivity {
     }
 
     public void getCourseSections(View view){
+
         StringBuilder urlBuilder = new StringBuilder(URL_GET_DESIRED_COURSE_SECTIONS);
         urlBuilder.append(((Integer) selectedSemester.getSemesterNumber()).toString() + "*");
 
@@ -790,6 +794,14 @@ public class SelectCourses extends ActionBarActivity {
         progressDialog.show();
     }
 
+    private boolean coursesNeedUpdating(){
+        boolean needsUpdating = (System.currentTimeMillis() - lastFetchTime) > 180000;
+        if(needsUpdating) return needsUpdating;
+        if (fetchedCourses == null) return true;
+        if (desiredCoursesArrayList.size() != fetchedCourses.size()) return true;
+        return true;
+    }
+
     private class DepartmentCoursesReceiver extends BroadcastReceiver {
 
         @Override
@@ -834,19 +846,26 @@ public class SelectCourses extends ActionBarActivity {
         public void onReceive(Context context, Intent intent) {
             ArrayList<Section> sectionArrayList = null;
             String response = intent.getStringExtra(HTTPGetService.SERVER_RESPONSE);
-            Log.d("Received: ",response);
+            Log.d("Received: ", response);
             int numberOfSectionsTotal = 0;
 
             try {
                 JSONObject rawResult = new JSONObject(response);
+                if (!rawResult.getBoolean("Success")){
+                    progressDialog.dismiss();
+                    Toast.makeText(getApplicationContext(), "Couldn't contact server. Please try again in a few minutes", Toast.LENGTH_LONG).show();
+                    return;
+                }
                 JSONArray jsonCourses = rawResult.getJSONArray("Results");
                 float timeTaken = Float.parseFloat(rawResult.getString("TimeTaken"));
                 Log.d("New Request Time Taken:", Float.toString(timeTaken));
                 fetchedCourses = Course.buildCourseList(jsonCourses);
+                lastFetchTime = System.currentTimeMillis();
 
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+            progressDialog.dismiss();
 
             try {
                 ArrayList<Section> blockoutSections;
@@ -855,21 +874,24 @@ public class SelectCourses extends ActionBarActivity {
                 else
                     blockoutSections = new ArrayList<Section>();
 
-
                 if (fetchedCourses != null)
                     sectionArrayList = Schedule.scheduleGenerator(0, fetchedCourses, new ArrayList<Section>(), blockoutSections);
                 for (Section section : sectionArrayList){
-                    Log.i("Built Schedule",section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseID() + "-" + section.getSectionNumber() + "\t" + section.toJSON().toString());
+                    Log.i("Built Schedule Sections",section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseID() + "-" + section.getSectionNumber() + "\t" + section.toJSON().toString());
                 }
+
+                Schedule schedule = new Schedule("Schedule Name", selectedSemester.getSemesterNumber(), sectionArrayList);
+                Intent scheduleIntent = new Intent(getApplicationContext(), DetailedSchedule.class);
+                scheduleIntent.putExtra("Schedule Data", schedule.toJSON().toString());
+                startActivity(scheduleIntent);
+                Log.i("Built Schedule", schedule.toJSON().toString());
+                Schedule scheduleTest = new Schedule(schedule.toJSON());
             } catch (NoSchedulesPossibleException e) {
                 e.printStackTrace();
                 e.getConflict();
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-
-
-            Log.d("New Section", "ArrayList Built");
-
-            progressDialog.dismiss();
 
         }
 
@@ -902,6 +924,7 @@ public class SelectCourses extends ActionBarActivity {
             editor.putString("desiredCourses", desiredCoursesString.length() > 0 ? desiredCoursesString.substring( 0, desiredCoursesString.length() - 1 ): null);
             editor.apply();
         }
+        desiredCoursesArrayList.clear();
     }
 
     @Override

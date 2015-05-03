@@ -19,22 +19,20 @@ public class Course {
     private ArrayList<Section> sectionList;
 
     Course() {
-        //this.setCourseDepartment(null);
         this.setCourseID(null);
         this.setCourseName(null);
         this.setSectionList(null);
     }
 
-    Course(/*String courseDepartment, */String courseID, String name, ArrayList<Section> sectionList) {
-        this(/*courseDepartment,*/ courseID, name);
+    Course(String courseID, String name, ArrayList<Section> sectionList) {
+        this(courseID, name);
         this.setSectionList(sectionList);
         for (Section section : sectionList){
             section.setSourceCourse(this);
         }
     }
 
-    Course( /*String courseDepartment,*/ String courseID, String name) {
-       // this.setCourseDepartment(courseDepartment);
+    Course(String courseID, String name) {
         this.setCourseID(courseID);
         this.setCourseName(name);
     }
@@ -42,10 +40,7 @@ public class Course {
     Course(JSONObject jsonObject) throws JSONException {
         this.setCourseName(jsonObject.getString("CourseName"));
         Log.i("New Course Name", getCourseName());
-        //String[] courseInfo = jsonObject.getString("CourseId").split("-");
-        //this.setCourseDepartment(courseInfo[0]);
         this.setCourseID(jsonObject.getString("CourseId"));
-        //Log.i("New Course ID", getCourseDepartment() + " " + getCourseID());
         JSONArray jsonSectionList = jsonObject.getJSONArray("CourseResults");
         sectionList = new ArrayList<Section>(jsonSectionList.length());
 
@@ -60,7 +55,7 @@ public class Course {
     public JSONObject toJSON() {
         JSONObject course = new JSONObject();
         try {
-            course.put("CourseId", /*getCourseDepartment() + "-" +*/ getCourseID());
+            course.put("CourseId", getCourseID());
             course.put("CourseName", getCourseName());
             ArrayList<JSONObject> courseResults = new ArrayList<>();
             for(Section section : sectionList){
@@ -79,7 +74,7 @@ public class Course {
     public JSONObject toJSON(Section section) {
         JSONObject course = new JSONObject();
         try {
-            course.put("CourseId",/* getCourseDepartment() + "-" +*/ getCourseID());
+            course.put("CourseId", getCourseID());
             course.put("CourseName", getCourseName());
             ArrayList<JSONObject> courseResults = new ArrayList<>();
             courseResults.add(section.toJSON());

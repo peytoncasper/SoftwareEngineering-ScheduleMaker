@@ -7,4 +7,8 @@
     <string name="title_activity_select_courses">Select Courses</string>
     <string name="title_activity_select_blockout_times">Select Blockout Times</string>
     <string name="title_activity_create_account">" Create Account"</string>
+
+    <string name="title_activity_detailed_schedule">DetailedSchedule</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>

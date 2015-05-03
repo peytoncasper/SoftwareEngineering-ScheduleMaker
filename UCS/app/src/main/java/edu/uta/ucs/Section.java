@@ -61,6 +61,11 @@ class TimeShort {
     }
 
     public TimeShort(String timeAsString) {
+        if (timeAsString.equalsIgnoreCase("UNKNOWN/TBA")){
+            this.hour = 0;
+            this.minute = 0;
+            return;
+        }
         String[] times = timeAsString.split(":");
         this.hour = Byte.parseByte(times[0]);
         this.minute = Byte.parseByte(times[1].substring(0, 2));
@@ -186,7 +191,11 @@ public class Section {
 
         String times[] = jsonObject.getString("MeetingTime").split("-");
         Log.i("New Start Time", times[0]);
-        if (!times[0].equalsIgnoreCase("TBA")) {
+        if (times[0].equalsIgnoreCase("UNKNOWN/TBA")){
+            this.setStartTime(new TimeShort(0,0));
+            this.setEndTime(new TimeShort(0,0));
+        }
+        else if (!times[0].equalsIgnoreCase("TBA")) {
             this.setStartTime(new TimeShort(times[0]));
             this.setEndTime(new TimeShort(times[1]));
         }

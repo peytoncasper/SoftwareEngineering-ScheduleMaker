@@ -2,13 +2,19 @@ package edu.uta.ucs;
 
 import android.util.Log;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Created by arunk_000 on 4/5/2015.
  */
 public class Schedule {
     private String name;
+    private int semesterNumber;
     private ArrayList<Section> selectedSections;
 
     Schedule() {
@@ -18,6 +24,25 @@ public class Schedule {
 
     Schedule(String name) {
         this.setName(name);
+    }
+
+    Schedule(String name, int semesterNumber, ArrayList<Section> sectionArrayList){
+        this.name = name;
+        this.semesterNumber = semesterNumber;
+        this.selectedSections = sectionArrayList;
+    }
+
+    Schedule(JSONObject scheduleJSON) throws JSONException {
+        name = scheduleJSON.getString("ScheduleName");
+        semesterNumber = scheduleJSON.getInt("ScheduleSemester");
+        JSONArray scheduleCoursesJSONArray = scheduleJSON.getJSONArray("ScheduleCourses");
+        ArrayList<JSONObject> scheduleCoursesString = new ArrayList<>(scheduleCoursesJSONArray.length());
+        selectedSections = new ArrayList<>();
+        for (int index = 0; index < scheduleCoursesJSONArray.length(); index++){
+            JSONObject courseJSON = new JSONObject(scheduleCoursesJSONArray.getString(index));
+            Course course = new Course(courseJSON);
+            selectedSections.addAll(course.getSectionList());
+        }
     }
 
     public String getName() {
@@ -36,6 +61,24 @@ public class Schedule {
         this.selectedSections = selectedSections;
     }
 
+    public JSONObject toJSON() throws JSONException {
+        JSONObject result = new JSONObject();
+
+        result.put("ScheduleName", name);
+        result.put("ScheduleSemester", semesterNumber);
+
+        ArrayList<String> selectedSectionsString = new ArrayList<>(selectedSections.size());
+
+        for (Section section : selectedSections){
+            selectedSectionsString.add(section.getSourceCourse().toJSON(section).toString());
+        }
+        JSONArray selectedSectionsJSONArray = new JSONArray(selectedSectionsString);
+
+        result.put("ScheduleCourses",selectedSectionsJSONArray);
+
+        return result;
+    }
+
     public static ArrayList<Section> scheduleGenerator(int index, ArrayList<Course> courseArrayList, ArrayList<Section> sectionArrayList, ArrayList<Section> blockOutTimesList) throws NoSchedulesPossibleException{
 
         Log.i("schedule Factory", "Loop Counter:" + ((Integer) index).toString());
@@ -43,7 +86,9 @@ public class Schedule {
             return sectionArrayList;
         }
         Course course = courseArrayList.get(index);
-        ArrayList<Section> possibleSections = course.getSectionList();
+        ArrayList<Section> possibleSections = new ArrayList<>(course.getSectionList().size());
+        possibleSections.addAll(course.getSectionList());
+        Collections.shuffle(possibleSections);
         // Shuffle sectionArrayList
         checkPossibleSections:
         for (Section section : possibleSections){
@@ -63,6 +108,7 @@ public class Schedule {
                     continue checkPossibleSections;
                 }
             }
+            Log.i("Adding Section to List", section.toJSON().toString());
             sectionArrayList.add(section);
             try{
                 return scheduleGenerator(index + 1, courseArrayList, sectionArrayList, blockOutTimesList);
@@ -88,13 +134,7 @@ class NoSchedulesPossibleException extends Exception {
 
     public NoSchedulesPossibleException(Course course, ArrayList<Section> sectionArrayList){
         super();
-        StringBuilder message = new StringBuilder("Could not build a schedule from this combination of courses:\n" + course.getCourseName() + "\n");
-        for (Section section : sectionArrayList){
-            if (section.getSourceCourse() != null)
-                message.append("\t" + section.getSourceCourse().getCourseName() + " - " + section.getSourceCourse().getCourseID());
-            else
-                message.append("\nError - Unrecognized Course");
-        }
+        StringBuilder message = new StringBuilder("Could not build a schedule from this combination of courses\n");
         this.message = message.toString();
     }
 

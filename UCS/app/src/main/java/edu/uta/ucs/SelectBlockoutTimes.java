@@ -363,13 +363,14 @@ public class SelectBlockoutTimes extends ActionBarActivity {
 
         sectionListView = ((ListView) findViewById(R.id.show_blockout_times_listView));
 
-        currentBlockoutTimes = new ArrayList<>();
 
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+
+        currentBlockoutTimes = new ArrayList<>();
 
         blockoutTimesListAdapter = new MySectionArrayAdapter(SelectBlockoutTimes.this, R.layout.section_list_display, currentBlockoutTimes);
         blockoutTimesListAdapter.setNotifyOnChange(true);
@@ -399,7 +400,6 @@ public class SelectBlockoutTimes extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
 
         /**
          * Loads all blockout times from memory to make runtime tasks faster
@@ -462,7 +462,7 @@ public class SelectBlockoutTimes extends ActionBarActivity {
         currentBlockoutCourse = new Course("BLOCKOUT", blockoutSetName, currentBlockoutTimes);
         Log.d("BlockoutTimes", currentBlockoutCourse.toJSON().toString());
 
-        Intent intent = new Intent();
+        Intent intent = new Intent(this, SelectBlockoutTimes.class);
         intent.putExtra("BLOCKOUT", currentBlockoutCourse.toJSON().toString());
         setResult(0, intent);
 

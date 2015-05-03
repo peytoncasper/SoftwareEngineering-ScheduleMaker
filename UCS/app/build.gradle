@@ -21,8 +21,9 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile files('libs/gson-2.3.1.jar')
     compile 'com.android.support:appcompat-v7:21.0.3'
     compile 'com.google.android.gms:play-services:6.5.87'
-    compile files('libs/gson-2.3.1.jar')
     compile 'net.danlew:android.joda:2.7.1'
+    compile 'com.android.support:support-v4:21.0.3'
 }

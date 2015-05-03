@@ -62,6 +62,16 @@ public class MySectionArrayAdapter extends ArrayAdapter<Section> {
             TextView sectionIDText = (TextView) v.findViewById(R.id.sectionID);
             TextView designationText = (TextView) v.findViewById(R.id.sectionDesignation);
 
+            courseText.setTextColor(Color.BLACK);
+
+            daysText.setTextColor(Color.BLACK);
+            roomText.setTextColor(Color.BLACK);
+            instructorsText.setTextColor(Color.BLACK);
+
+            timesText.setTextColor(Color.BLACK);
+            sectionIDText.setTextColor(Color.BLACK);
+            designationText.setTextColor(Color.BLACK);
+
             if (courseText != null) {
                 if(p.getSourceCourse()!=null) {
                     if ((p.getSourceCourse().getCourseName() == null && p.getInstructors() != null) || (p.getSourceCourse().getCourseID().equalsIgnoreCase("BLOCKOUT")) ){
