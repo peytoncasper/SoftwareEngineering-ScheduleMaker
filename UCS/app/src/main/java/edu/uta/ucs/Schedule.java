@@ -82,6 +82,7 @@ public class Schedule {
     public Schedule(JSONObject jsonSchedule) throws JSONException{
         this.setName(jsonSchedule.getString("ScheduleName"));
         Log.i("New Schedule Name:",this.name);
+        //add JSON to schedule object stuff here once we know format from Peyton...
     }
 
     /**
