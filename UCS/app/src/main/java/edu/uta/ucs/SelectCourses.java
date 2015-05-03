@@ -755,6 +755,8 @@ public class SelectCourses extends ActionBarActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         String blockoutTimes;
+        if (data == null)
+            return;
         if (data.hasExtra("BLOCKOUT"))
             blockoutTimes = data.getStringExtra("BLOCKOUT");
         else
