@@ -124,6 +124,9 @@ public class MySectionArrayAdapter extends ArrayAdapter<Section> {
                 case CLOSED:
                     v.setBackgroundColor(Color.rgb(255, 204, 204));
                     break;
+                case CONFLICT:
+                    v.setBackgroundColor(Color.rgb(255, 204, 204));
+                    break;
                 case WAIT_LIST:
                     v.setBackgroundColor(Color.rgb(255, 255, 204));
                     break;

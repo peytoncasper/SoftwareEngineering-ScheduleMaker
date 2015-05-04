@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 enum ClassStatus {
-    OPEN("OPEN"), CLOSED("CLOSED"), WAIT_LIST("WAIT_LIST");
+    OPEN("OPEN"), CLOSED("CLOSED"), WAIT_LIST("WAIT_LIST"), CONFLICT("CONFLICT");
 
     private String value;
 

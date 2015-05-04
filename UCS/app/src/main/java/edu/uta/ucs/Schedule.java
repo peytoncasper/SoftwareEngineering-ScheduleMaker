@@ -13,6 +13,10 @@ import java.util.Collections;
  * Created by arunk_000 on 4/5/2015.
  */
 public class Schedule {
+
+    public static final String SCHEDULE_NAMES = "SCHEDULE_NAMES";
+    public static final String SCHEDULE_SAVEFILE = "SCHEDULE_SAVEFILE";
+
     private String name;
     private int semesterNumber;
     private ArrayList<Section> selectedSections;
@@ -65,7 +69,7 @@ public class Schedule {
         JSONObject result = new JSONObject();
 
         result.put("ScheduleName", name);
-        result.put("ScheduleSemester", semesterNumber);
+        result.put("ScheduleSemester", getSemesterNumber());
 
         ArrayList<String> selectedSectionsString = new ArrayList<>(selectedSections.size());
 
@@ -119,6 +123,10 @@ public class Schedule {
 
         }throw new NoSchedulesPossibleException(course, sectionArrayList);
 
+    }
+
+    public int getSemesterNumber() {
+        return semesterNumber;
     }
 }
 

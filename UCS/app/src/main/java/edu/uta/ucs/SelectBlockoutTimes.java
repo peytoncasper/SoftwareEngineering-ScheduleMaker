@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.Adapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -40,6 +41,9 @@ class BlockoutCoursesAdapter extends BaseExpandableListAdapter {
     public BlockoutCoursesAdapter(ArrayList<Course> courseArrayList, Context context) {
         this.courseArrayList = courseArrayList;
         this.context = context;
+        if (courseArrayList == null){
+            courseArrayList = new ArrayList<>();
+        }
         this.checked = new Boolean[courseArrayList.size()];
         for (int index = 0; index < courseArrayList.size(); index++){
             this.checked[index] = false;
@@ -153,7 +157,7 @@ class BlockoutCoursesAdapter extends BaseExpandableListAdapter {
      * @return the View corresponding to the group at the specified position
      */
     @Override
-    public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
+    public View getGroupView(final int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
 
         String courseName = ((Course) getGroup(groupPosition)).getCourseName();
         if (convertView == null){
@@ -163,6 +167,16 @@ class BlockoutCoursesAdapter extends BaseExpandableListAdapter {
 
         TextView courseNameTextView = (TextView) convertView.findViewById(R.id.courseExpandableListViewTitle);
         CheckBox courseCheckbox = (CheckBox) convertView.findViewById(R.id.courseExpandableListViewCheckbox);
+        Button courseDelete = (Button) convertView.findViewById(R.id.courseExpandableListViewDeleteButton);
+
+
+        courseDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                courseArrayList.remove(getGroup(groupPosition));
+                notifyDataSetChanged();
+            }
+        });
 
         CheckListener checkListener = new CheckListener(groupPosition);
         courseCheckbox.setFocusable(false);
@@ -217,6 +231,16 @@ class BlockoutCoursesAdapter extends BaseExpandableListAdapter {
             TextView sectionIDText = (TextView) convertView.findViewById(R.id.sectionID);
             TextView designationText = (TextView) convertView.findViewById(R.id.sectionDesignation);
 
+            courseText.setTextColor(Color.BLACK);
+
+            daysText.setTextColor(Color.BLACK);
+            roomText.setTextColor(Color.BLACK);
+            instructorsText.setTextColor(Color.BLACK);
+
+            timesText.setTextColor(Color.BLACK);
+            sectionIDText.setTextColor(Color.BLACK);
+            designationText.setTextColor(Color.BLACK);
+
             if (courseText != null) {
                 if(childSection.getSourceCourse()!=null) {
                     if ((childSection.getSourceCourse().getCourseName() == null && childSection.getInstructors() != null) || (childSection.getSourceCourse().getCourseID().equalsIgnoreCase("BLOCKOUT")) ){
@@ -231,7 +255,6 @@ class BlockoutCoursesAdapter extends BaseExpandableListAdapter {
             }
 
             if (daysText != null) {
-                daysText.setTextColor(Color.BLACK);
                 daysText.setText(childSection.getDaysString());
             }
             if (roomText != null) {
@@ -248,7 +271,6 @@ class BlockoutCoursesAdapter extends BaseExpandableListAdapter {
             }
 
             if (timesText != null) {
-                timesText.setTextColor(Color.BLACK);
                 timesText.setText("  " + childSection.getTimeString(Section.h12));
             }
             if (sectionIDText != null) {
@@ -404,9 +426,9 @@ public class SelectBlockoutTimes extends ActionBarActivity {
         /**
          * Loads all blockout times from memory to make runtime tasks faster
          */
-        String savedBlockoutCourseString = blockoutTimesSaver.getString(BLOCKOUT_TIMES, null);
+        String savedBlockoutCourseString = blockoutTimesSaver.getString(BLOCKOUT_TIMES, "");
         Log.i("Blockout Times", savedBlockoutCourseString);
-        if (savedBlockoutCourseString != null){
+        if (!savedBlockoutCourseString.equals("")){
             try {
                 JSONArray savedBlockoutCourseJSONArrayString = new JSONArray(savedBlockoutCourseString);
                 JSONArray savedBlockoutCourseJSONArray = new JSONArray();
