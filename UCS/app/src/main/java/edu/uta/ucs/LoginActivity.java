@@ -54,9 +54,9 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     public static final String ACTION_LOGIN ="edu.uta.ucs.intent.action.ACTION_LOGIN";
     public static final String ACTION_RESET_PASSWORD ="edu.uta.ucs.intent.action.ACTION_RESET_PASSWORD";
 
-    private static final String LOGIN_URL = "http://ucs-scheduler.cloudapp.net/UTA/ValidateLogin?";
+    private static final String LOGIN_URL = "http://ucs.azurewebsites.net/UTA/ValidateLogin?";
     private static final String[] LOGIN_PARAMS ={"username=","&password="};
-    private static final String EMAIL_EXISTS_URL = "http://ucs-scheduler.cloudapp.net/UTA/EmailExists?email=";
+    private static final String EMAIL_EXISTS_URL = "http://ucs.azurewebsites.net/UTA/EmailExists?email=";
 
     private static final String SPOOFED_LOGIN = "{\"Success\":true,\"Email\":\"a@a.a\"}";
     private static final String SPOOFED_RESET_PASSWORD = "{\"Success\":true}";
@@ -179,8 +179,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
             Intent intent = new Intent(this, HTTPGetService.class);
 
-            intent.putExtra(HTTPGetService.URL_REQUEST, HTTPGetService.SPOOF_SERVER);
-            intent.putExtra(HTTPGetService.SPOOFED_RESPONSE, SPOOFED_LOGIN);
+            intent.putExtra(HTTPGetService.URL_REQUEST, url);
+            //intent.putExtra(HTTPGetService.SPOOFED_RESPONSE, SPOOFED_LOGIN);
             intent.putExtra(HTTPGetService.SOURCE_INTENT, ACTION_LOGIN);
 
             startService(intent);

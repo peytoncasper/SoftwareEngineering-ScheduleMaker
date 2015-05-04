@@ -449,9 +449,14 @@ public class SelectBlockoutTimes extends ActionBarActivity {
     protected void onPause() {
         super.onPause();
 
-        /**
-         * Saves all blockout times in the list of times user wants saved to file
-         */
+        saveBlockoutCoursesToFile();
+
+    }
+
+    /**
+     * Saves all blockout times in the list of times user wants saved to file
+     *
+     */public void saveBlockoutCoursesToFile(){
         ArrayList<String> savedBlockoutCourseString = new ArrayList<>(savedBlockoutCourses.size());
         for (Course course : savedBlockoutCourses){
             savedBlockoutCourseString.add(course.toJSON().toString());
@@ -501,7 +506,7 @@ public class SelectBlockoutTimes extends ActionBarActivity {
         final EditText blockoutNameEditTextDialog = new EditText(this);
         saveName.setView(blockoutNameEditTextDialog);
 
-        saveName.setPositiveButton("ok", new DialogInterface.OnClickListener() {
+        saveName.setPositiveButton("SAVE", new DialogInterface.OnClickListener() {
 
             /**
              * This method will be invoked when a button in the dialog is clicked.
@@ -513,13 +518,16 @@ public class SelectBlockoutTimes extends ActionBarActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 blockoutSetName = blockoutNameEditTextDialog.getText().toString();
-                currentBlockoutCourse = new Course("BLOCKOUT", blockoutSetName, currentBlockoutTimes);
+                currentBlockoutCourse = new Course("BLOCKOUT", blockoutSetName, new ArrayList<Section>(currentBlockoutTimes));
                 savedBlockoutCourses.add(currentBlockoutCourse);
+                saveBlockoutCoursesToFile();
+                currentBlockoutTimes.clear();
+                blockoutTimesListAdapter.notifyDataSetChanged();
                 Log.d("BlockoutTimes", currentBlockoutCourse.toJSON().toString());
             }
         });
 
-        saveName.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+        saveName.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
 
             /**
              * This method will be invoked when a button in the dialog is clicked.

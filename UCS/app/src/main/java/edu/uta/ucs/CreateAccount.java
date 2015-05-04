@@ -19,7 +19,7 @@ import org.json.JSONObject;
 public class CreateAccount extends ActionBarActivity {
     public static final String ACTION_CREATE_ACCOUNT ="edu.uta.ucs.intent.action.CREATE_ACCOUNT";
     private static final String SPOOF_ACCOUNT_CREATION = "{\"Success\":true,\"Email\":\"b@b.b\",\"Username\":\"b\",\"Message\":\"Account Added.\"}";
-    public static final String baseURL[] = {"http://ucs-scheduler.cloudapp.net/UTA/CreateAccount?","username=","&password=","&email="};
+    public static final String baseURL[] = {"http://ucs.azurewebsites.net/UTA/CreateAccount?","username=","&password=","&email="};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
