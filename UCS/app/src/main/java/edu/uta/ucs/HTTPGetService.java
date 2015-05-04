@@ -63,6 +63,7 @@ public class HTTPGetService extends IntentService {
         String response;
 
         String url = intent.getStringExtra(URL_REQUEST);    // Get url
+        url = url.replace(" ", "");                         // Remove any whitespace
         String source = intent.getStringExtra(SOURCE_INTENT);
 
         Log.d("HTTPGetService SOURCE", source);

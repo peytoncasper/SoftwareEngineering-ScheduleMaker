@@ -1,5 +1,6 @@
 package edu.uta.ucs;
 
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -21,13 +22,12 @@ import org.json.JSONObject;
 public class CreateAccount extends ActionBarActivity {
     public static final String ACTION_CREATE_ACCOUNT ="edu.uta.ucs.intent.action.CREATE_ACCOUNT";
     private static final String SPOOF_ACCOUNT_CREATION = "{\"Success\":true,\"Email\":\"b@b.b\",\"Username\":\"b\",\"Message\":\"Account Added.\"}";
-<<<<<<< HEAD
-    public static final String baseURL[] = {"http://ucs.azurewebsites.net/UTA/CreateAccount?","username=","&password=","&email="};
-=======
 
-    private static final String CREATE_ACCOUNT_URL = "http://ucs-scheduler.cloudapp.net/UTA/CreateAccount?";
-    private static final String[] CREATE_ACCOUNT_PARAMS = {"username=","&password=","&email="};
->>>>>>> origin/Create-Account
+    public static final String CREATE_ACCOUNT_URL[] = {"http://ucs.azurewebsites.net/UTA/CreateAccount?","username=","&password=","&email="};
+
+    boolean spoofData = false;
+
+    ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,7 +92,7 @@ public class CreateAccount extends ActionBarActivity {
         }
 
         // Build url from user given fields
-        url = CREATE_ACCOUNT_URL+CREATE_ACCOUNT_PARAMS[0]+username+CREATE_ACCOUNT_PARAMS[1]+password+CREATE_ACCOUNT_PARAMS[2]+email;
+        url = CREATE_ACCOUNT_URL[0]+CREATE_ACCOUNT_URL[1]+username+CREATE_ACCOUNT_URL[2]+password+CREATE_ACCOUNT_URL[3]+email;
 
         // Create activity intent
         Intent intent = new Intent(this, HTTPGetService.class);
@@ -106,7 +106,7 @@ public class CreateAccount extends ActionBarActivity {
         }
         else {
             // Spoof data switch
-            if (true) {
+            if (spoofData) {
                 // Put spoof request instead of url in intent extras
                 intent.putExtra(HTTPGetService.URL_REQUEST, HTTPGetService.SPOOF_SERVER);
                 intent.putExtra(HTTPGetService.SPOOFED_RESPONSE, SPOOF_ACCOUNT_CREATION);
@@ -116,6 +116,10 @@ public class CreateAccount extends ActionBarActivity {
 
             // Launch service
             startService(intent);
+
+            progressDialog = new ProgressDialog(CreateAccount.this);
+            progressDialog.setTitle("Attempting to create account");
+            progressDialog.setMessage("please wait for server response...");
         }
 
     }
@@ -168,8 +172,11 @@ public class CreateAccount extends ActionBarActivity {
                     finish();
                 }
                 else {
+                    String message = response.getString("Message");
+                    Toast.makeText(CreateAccount.this, "Error: " + message, Toast.LENGTH_LONG).show();
                     ((EditText) findViewById(R.id.create_account_password)).setText("");
                     ((EditText) findViewById(R.id.create_account_confirm_password)).setText("");
+
                 }
             } catch (JSONException e) {
                 e.printStackTrace();

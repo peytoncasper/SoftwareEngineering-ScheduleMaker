@@ -828,12 +828,13 @@ public class SelectCourses extends ActionBarActivity {
             ArrayList<SemesterInfo> semesterInfo;
             try {
                 response = new JSONObject(intent.getStringExtra(HTTPGetService.SERVER_RESPONSE));
+
                 success = response.getBoolean("Success");
-                if (!success){
+                /*if (!success){
                     Toast.makeText(getApplicationContext(), "Semester update failed, try again", Toast.LENGTH_LONG).show();
                     progressDialog.dismiss();
                     return;
-                }
+                }*/
                 semesterInfo = SemesterInfo.SemesterInfoFactory(response);
                 for (SemesterInfo semester : semesterInfo){
                     Log.i("Semster number", ((Integer) semester.getSemesterNumber()).toString());

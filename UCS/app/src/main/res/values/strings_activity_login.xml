@@ -14,7 +14,7 @@
     <string name="error_invalid_email">This email address is invalid</string>
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_password_mismatch">These passwords do not match</string>
-    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_incorrect_password">This password was incorrect</string>
     <string name="error_field_required">This field is required</string>
 
 </resources>
