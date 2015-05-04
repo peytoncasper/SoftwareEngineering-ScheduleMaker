@@ -15,7 +15,9 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.InputType;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -97,12 +99,21 @@ public class DetailedSchedule extends Activity {
 
         final AlertDialog.Builder saveNameDialog = new AlertDialog.Builder(this);
 
+        /*
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.save_alertdialog, null);
+
+        EditText blockoutNameEditText = (EditText) dialogView.findViewById(R.id.schedule_name_edittext);
+        String scheduleName = blockoutNameEditText.getText().toString();
+        */
+
         saveNameDialog.setTitle("Save as");
         saveNameDialog.setMessage("What do you want to save this set of times as?");
 
-        EditText blockoutNameEditTextDialog = new EditText(this);
-        final String scheduleSaveName = ((EditText) blockoutNameEditTextDialog).getText().toString().toUpperCase();
-        saveNameDialog.setView(blockoutNameEditTextDialog);
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
+        saveNameDialog.setView(input);
+
 
         saveNameDialog.setPositiveButton("SAVE", new DialogInterface.OnClickListener() {
 
@@ -115,7 +126,10 @@ public class DetailedSchedule extends Activity {
              */
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                scheduleToShow.setName(scheduleSaveName);
+                String scheduleName = input.getText().toString();
+                Log.i("Setting Schedule Name", scheduleName);
+                scheduleToShow.setName(scheduleName);
+                setTitle(scheduleName);
                 saveScheduleToFile(scheduleToShow);
             }
         });
