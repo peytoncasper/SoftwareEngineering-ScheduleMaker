@@ -84,6 +84,12 @@ public class MainActivity extends ActionBarActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        Schedule.loadSchedulesFromFile(MainActivity.this);
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
     }
