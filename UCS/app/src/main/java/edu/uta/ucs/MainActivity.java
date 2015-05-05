@@ -21,6 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -40,6 +41,7 @@ public class MainActivity extends ActionBarActivity {
     private MySectionArrayAdapter adapter;
 
     ArrayList<Section> sectionArrayList;
+    ArrayList<Schedule> scheduleArrayList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,7 +102,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void generateSchedule(View view){
-        Log.d("MainActivity","Opening Generate Schedule");
+        Log.d("MainActivity", "Opening Generate Schedule");
         Intent startSelectCoursesActivity = new Intent(MainActivity.this, SelectCourses.class);
         MainActivity.this.startActivity(startSelectCoursesActivity);
     }
@@ -129,9 +131,6 @@ public class MainActivity extends ActionBarActivity {
         intent.putExtra(HTTPGetService.SOURCE_INTENT, ACTION_RESP);
 
         startService(intent);
-    }
-
-    public void stopMethod(){
     }
 
     private class ResponseReceiver extends BroadcastReceiver{
