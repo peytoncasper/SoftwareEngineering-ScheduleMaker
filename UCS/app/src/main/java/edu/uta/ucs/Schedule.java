@@ -83,6 +83,35 @@ public class Schedule {
         return result;
     }
 
+
+    public static ArrayList<Schedule> loadSchedulesFromFile(Context context){
+
+        SharedPreferences scheduleFile = context.getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, context.MODE_PRIVATE);
+
+        Set<String> scheduleNames = scheduleFile.getStringSet(Schedule.SCHEDULE_NAMES, null);
+        ArrayList<Schedule> scheduleArrayList = new ArrayList<>(scheduleNames.size());
+        for (String string : scheduleNames){
+
+            String scheduleName = Schedule.SCHEDULE_NAMES + "_" + string;
+            Log.i("Load Schedules", "Schedule Name" + scheduleName);
+
+            String scheduleString = scheduleFile.getString(scheduleName, null);
+            Log.i("Load Schedules", "Schedule String" + scheduleString);
+
+            try {
+                JSONObject scheduleJSON = new JSONObject(scheduleString);
+                Schedule schedule = new Schedule(scheduleJSON);
+                Log.i("Load Schedules", "Schedule JSON" + schedule.toJSON().toString());
+                scheduleArrayList.add(schedule);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        return scheduleArrayList;
+    }
+
     public static ArrayList<Section> scheduleGenerator(int index, ArrayList<Course> courseArrayList, ArrayList<Section> sectionArrayList, ArrayList<Section> blockOutTimesList) throws NoSchedulesPossibleException{
 
         Log.i("schedule Factory", "Loop Counter:" + ((Integer) index).toString());
