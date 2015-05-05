@@ -104,28 +104,18 @@ public class Course {
                 courseJSON = jsonCourses.getJSONObject(index - 1);
             }
             catch (JSONException e){
-                e.printStackTrace();
+                Log.i("New Course JSON","JSON Construction failed. Attempting to construct JSON from String");
                 String courseString = jsonCourses.getString(index - 1);
                 courseJSON = new JSONObject(courseString);
             }
 
-            Log.i("New Course JSON test: ", courseJSON.toString() );
+            Log.i("New Course JSON", "test: " + courseJSON.toString() );
             courseList.add( new Course(courseJSON));
         }
         Collections.reverse(courseList);
 
         return courseList;
     }
-
-    /*
-    public String getCourseDepartment() {
-        return courseDepartment;
-    }
-
-    public void setCourseDepartment(String courseDepartment) {
-        this.courseDepartment = courseDepartment;
-    }
-    */
 
     public String getCourseID() {
         return courseID;

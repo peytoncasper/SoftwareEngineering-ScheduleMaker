@@ -115,7 +115,7 @@ public class DetailedSchedule extends Activity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String scheduleSaveName = blockoutNameEditTextDialog.getEditableText().toString();
-                scheduleToShow.setName(scheduleSaveName);
+                setName(scheduleSaveName);
                 saveScheduleToFile(scheduleToShow);
             }
         });
@@ -143,7 +143,8 @@ public class DetailedSchedule extends Activity {
     }
 
     public void deleteSchedule(View view){
-
+        this.removeScheduleFromFile(this.scheduleToShow.getName());
+        finish();
     }
 
     public void editSchedule(View view){
@@ -165,6 +166,11 @@ public class DetailedSchedule extends Activity {
             }
         });
         builder.show();
+    }
+
+    private void setName(String name){
+        scheduleToShow.setName(name);
+        this.setTitle(name);
     }
 
     private void saveScheduleToFile(Schedule schedule){

@@ -59,6 +59,7 @@ public class Schedule {
     }
 
     public void setName(String name) {
+
         this.name = name;
     }
 
@@ -87,7 +88,6 @@ public class Schedule {
 
         return result;
     }
-
 
     public static ArrayList<Schedule> loadSchedulesFromFile(Context context){
 
