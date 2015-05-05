@@ -100,8 +100,7 @@ public class DetailedSchedule extends Activity {
         saveNameDialog.setTitle("Save as");
         saveNameDialog.setMessage("What do you want to save this set of times as?");
 
-        EditText blockoutNameEditTextDialog = new EditText(this);
-        final String scheduleSaveName = ((EditText) blockoutNameEditTextDialog).getText().toString().toUpperCase();
+        final EditText blockoutNameEditTextDialog = new EditText(DetailedSchedule.this);
         saveNameDialog.setView(blockoutNameEditTextDialog);
 
         saveNameDialog.setPositiveButton("SAVE", new DialogInterface.OnClickListener() {
@@ -115,6 +114,7 @@ public class DetailedSchedule extends Activity {
              */
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                String scheduleSaveName = blockoutNameEditTextDialog.getEditableText().toString();
                 scheduleToShow.setName(scheduleSaveName);
                 saveScheduleToFile(scheduleToShow);
             }
