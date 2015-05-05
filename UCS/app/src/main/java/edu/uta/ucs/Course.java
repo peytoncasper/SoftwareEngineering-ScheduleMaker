@@ -11,37 +11,43 @@ import java.util.Collections;
 
 /**
  * Created by arunk_000 on 4/5/2015.
+ *
+ * Contains 4 objects
+ *
+ * String Course Department, a 3 or more character string which represents the department
+ * String Course ID, 4 digit number which represents the course identifier
+ * String Course Name, University designation for a given course
  */
 public class Course {
     //private String courseDepartment;
-    private String courseID;
+    private String courseNumber;
     private String courseName;
     private String courseDepartment;
     private ArrayList<Section> sectionList;
 
     Course() {
-        this.setCourseID(null);
+        this.setCourseNumber(null);
         this.setCourseName(null);
         this.setSectionList(null);
     }
 
-    Course(String courseID, String name, ArrayList<Section> sectionList) {
-        this(courseID, name);
+    Course(String courseNumber, String name, ArrayList<Section> sectionList) {
+        this(courseNumber, name);
         this.setSectionList(sectionList);
         for (Section section : sectionList){
             section.setSourceCourse(this);
         }
     }
 
-    Course(String courseID, String name) {
-        this.setCourseID(courseID);
+    Course(String courseNumber, String name) {
+        this.setCourseNumber(courseNumber);
         this.setCourseName(name);
     }
 
     Course(JSONObject jsonObject) throws JSONException {
         this.setCourseName(jsonObject.getString("CourseName"));
         Log.i("New Course Name", getCourseName());
-        this.setCourseID(jsonObject.getString("CourseId"));
+        this.setCourseNumber(jsonObject.getString("CourseId"));
         Log.i("New Course Department", jsonObject.getString("Department"));
         this.setCourseDepartment(jsonObject.getString("Department"));
         JSONArray jsonSectionList = jsonObject.getJSONArray("CourseResults");
@@ -58,7 +64,7 @@ public class Course {
     public JSONObject toJSON() {
         JSONObject course = new JSONObject();
         try {
-            course.put("CourseId", getCourseID());
+            course.put("CourseId", getCourseNumber());
             course.put("CourseName", getCourseName());
             course.put("Department", getCourseDepartment());
             ArrayList<JSONObject> courseResults = new ArrayList<>();
@@ -79,7 +85,7 @@ public class Course {
     public JSONObject toJSON(Section section) {
         JSONObject course = new JSONObject();
         try {
-            course.put("CourseId", getCourseID());
+            course.put("CourseId", getCourseNumber());
             course.put("CourseName", getCourseName());
             course.put("Department", getCourseDepartment());
             ArrayList<JSONObject> courseResults = new ArrayList<>();
@@ -125,12 +131,12 @@ public class Course {
         return courseList;
     }
 
-    public String getCourseID() {
-        return courseID;
+    public String getCourseNumber() {
+        return courseNumber;
     }
 
-    public void setCourseID(String courseID) {
-        this.courseID = courseID;
+    public void setCourseNumber(String courseNumber) {
+        this.courseNumber = courseNumber;
     }
 
     public String getCourseName() {

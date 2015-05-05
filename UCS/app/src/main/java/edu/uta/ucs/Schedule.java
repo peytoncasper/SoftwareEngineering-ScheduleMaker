@@ -136,16 +136,16 @@ public class Schedule {
                 continue;
             for (Section sectionToCompare : sectionArrayList){
                 if (section.conflictsWith(sectionToCompare)){
-                    StringBuilder errorBuilder = new StringBuilder("Conflict between " + section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseID() + "-" + section.getSectionNumber());
-                    errorBuilder.append(" and " + sectionToCompare.getSourceCourse().getCourseName() + " " + sectionToCompare.getSourceCourse().getCourseID() + "-" + sectionToCompare.getSectionNumber());
+                    StringBuilder errorBuilder = new StringBuilder("Conflict between " + section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseNumber() + "-" + section.getSectionNumber());
+                    errorBuilder.append(" and " + sectionToCompare.getSourceCourse().getCourseName() + " " + sectionToCompare.getSourceCourse().getCourseNumber() + "-" + sectionToCompare.getSectionNumber());
                     Log.e("Schedule Conflict Error", errorBuilder.toString());
                     continue checkPossibleSections;
                 }
             }
             for (Section sectionToCompare : blockOutTimesList){
                 if (section.conflictsWith(sectionToCompare)){
-                    StringBuilder errorBuilder = new StringBuilder("Conflict between " + section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseID() + "-" + section.getSectionNumber());
-                    errorBuilder.append(" and " + sectionToCompare.getSourceCourse().getCourseID() + " "  + sectionToCompare.getInstructors());
+                    StringBuilder errorBuilder = new StringBuilder("Conflict between " + section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseNumber() + "-" + section.getSectionNumber());
+                    errorBuilder.append(" and " + sectionToCompare.getSourceCourse().getCourseNumber() + " "  + sectionToCompare.getInstructors());
                     Log.e("Schedule Conflict Error", errorBuilder.toString());
                     continue checkPossibleSections;
                 }
@@ -188,7 +188,7 @@ class NoSchedulesPossibleException extends Exception {
         super();
         StringBuilder message = new StringBuilder("Could not build a schedule from this combination of courses:\n" + course.getCourseName() + "\n");
 
-        message.append("\t" + section.getSourceCourse().getCourseName() + " - " + section.getSourceCourse().getCourseID());
+        message.append("\t" + section.getSourceCourse().getCourseName() + " - " + section.getSourceCourse().getCourseNumber());
 
         message.append("\nError - Unrecognized Course");
 

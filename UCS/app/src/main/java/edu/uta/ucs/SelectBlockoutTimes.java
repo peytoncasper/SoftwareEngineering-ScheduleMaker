@@ -243,7 +243,7 @@ class BlockoutCoursesAdapter extends BaseExpandableListAdapter {
 
             if (courseText != null) {
                 if(childSection.getSourceCourse()!=null) {
-                    if ((childSection.getSourceCourse().getCourseName() == null && childSection.getInstructors() != null) || (childSection.getSourceCourse().getCourseID().equalsIgnoreCase("BLOCKOUT")) ){
+                    if ((childSection.getSourceCourse().getCourseName() == null && childSection.getInstructors() != null) || (childSection.getSourceCourse().getCourseNumber().equalsIgnoreCase("BLOCKOUT")) ){
                         courseText.setText(childSection.getInstructors());
                         instructorsText.setVisibility(View.GONE);
                     }

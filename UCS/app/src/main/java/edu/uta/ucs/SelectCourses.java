@@ -1025,7 +1025,7 @@ public class SelectCourses extends ActionBarActivity {
                 if (fetchedCourses != null)
                     sectionArrayList = Schedule.scheduleGenerator(0, fetchedCourses, new ArrayList<Section>(), blockoutSections);
                 for (Section section : sectionArrayList){
-                    Log.i("Built Schedule Sections",section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseID() + "-" + section.getSectionNumber() + "\t" + section.toJSON().toString());
+                    Log.i("Built Schedule Sections",section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseNumber() + "-" + section.getSectionNumber() + "\t" + section.toJSON().toString());
                 }
 
                 Schedule schedule = new Schedule("Schedule Name", selectedSemester.getSemesterNumber(), sectionArrayList);

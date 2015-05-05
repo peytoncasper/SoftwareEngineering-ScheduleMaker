@@ -158,7 +158,7 @@ public class DetailedSchedule extends Activity {
                 Section section = scheduleToShow.getSelectedSections().get(which);
                 scheduleToShow.getSelectedSections().remove(which);
                 setSelection(which);
-                getAlternativeSections(section.getSourceCourse().getCourseDepartment(), section.getSourceCourse().getCourseID());
+                getAlternativeSections(section.getSourceCourse().getCourseDepartment(), section.getSourceCourse().getCourseNumber());
                 progressDialog = new ProgressDialog(DetailedSchedule.this);
                 progressDialog.setTitle("");
                 progressDialog.setMessage("");

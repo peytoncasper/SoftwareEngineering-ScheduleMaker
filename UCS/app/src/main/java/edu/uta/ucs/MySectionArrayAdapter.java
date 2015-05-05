@@ -74,7 +74,7 @@ public class MySectionArrayAdapter extends ArrayAdapter<Section> {
 
             if (courseText != null) {
                 if(p.getSourceCourse()!=null) {
-                    if ((p.getSourceCourse().getCourseName() == null && p.getInstructors() != null) || (p.getSourceCourse().getCourseID().equalsIgnoreCase("BLOCKOUT")) ){
+                    if ((p.getSourceCourse().getCourseName() == null && p.getInstructors() != null) || (p.getSourceCourse().getCourseNumber().equalsIgnoreCase("BLOCKOUT")) ){
                         courseText.setText(p.getInstructors());
                         instructorsText.setVisibility(View.GONE);
                     }
