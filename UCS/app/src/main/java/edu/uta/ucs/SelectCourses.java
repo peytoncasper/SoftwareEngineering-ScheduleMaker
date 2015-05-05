@@ -33,11 +33,14 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Holds all course info for an entire semester for AutoComplete and filtering of courses for validity
  */
 class SemesterInfo{
+
+    public static String SEMESTER_INFO = "SEMESTER_INFO";
 
     private int semesterNumber;
     private ArrayList<DepartmentInfo> departmentArrayList;
@@ -555,6 +558,7 @@ public class SelectCourses extends ActionBarActivity {
 
     private static final String SHARED_PREFS = "SHARED_PREFS";
 
+
     public static final String URL_GET_COURSE_SECTIONS ="http://ucs.azurewebsites.net/UTA/GetCourseInfo?";
     public static final String URL_GET_COURSE_SECTIONS_PARAM_SEMESTER ="semester=";
     public static final String URL_GET_COURSE_SECTIONS_PARAM_DEPARTMENT ="&department=";
@@ -585,6 +589,7 @@ public class SelectCourses extends ActionBarActivity {
     private long lastFetchTime;
 
     private SemesterInfo.DepartmentInfo.CourseInfo tempCourseInfo;
+    private ArrayList<SemesterInfo> fetchedSemesters;
     private SemesterInfo selectedSemester;
 
     private ProgressDialog progressDialog;
@@ -836,6 +841,8 @@ public class SelectCourses extends ActionBarActivity {
                     return;
                 }*/
                 semesterInfo = SemesterInfo.SemesterInfoFactory(response);
+                saveSemestersToFile(semesterInfo);
+                fetchedSemesters = loadSemestersFromFile();
                 for (SemesterInfo semester : semesterInfo){
                     Log.i("Semster number", ((Integer) semester.getSemesterNumber()).toString());
                     if (semester.getSemesterNumber() == 2152){
@@ -995,5 +1002,40 @@ public class SelectCourses extends ActionBarActivity {
             getSemesterInfo(this.getCurrentFocus());
 
 
+    }
+
+    public void saveSemestersToFile(ArrayList <SemesterInfo> semestersToSave){
+        SharedPreferences.Editor savedSemesters = getSharedPreferences(SemesterInfo.SEMESTER_INFO, MODE_PRIVATE).edit();
+        for (SemesterInfo semesterInfo : semestersToSave){
+            try {
+                Log.i("Semester Info Save", "Saving Semester Number: " + semesterInfo.getSemesterNumber());
+                String semesterInfoJSON = semesterInfo.toJSON().toString();
+                savedSemesters.putString(SemesterInfo.SEMESTER_INFO + "_" + semesterInfo.getSemesterNumber(), semesterInfoJSON);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        savedSemesters.apply();
+    }
+
+    public ArrayList<SemesterInfo> loadSemestersFromFile(){
+        SharedPreferences savedSemesters = getSharedPreferences(SemesterInfo.SEMESTER_INFO, MODE_PRIVATE);
+
+        Map<String, ?> allEntries = savedSemesters.getAll();
+        ArrayList<SemesterInfo> semesterInfoArrayList = new ArrayList<>(allEntries.size());
+        for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
+            String semesterInfoString = entry.getValue().toString();
+            try {
+                JSONObject semesterInfoJSON = new JSONObject(semesterInfoString);
+                SemesterInfo semesterInfo = new SemesterInfo(semesterInfoJSON);
+                semesterInfoArrayList.add(semesterInfo);
+            } catch (JSONException e) {
+                e.printStackTrace();
+                Log.e("Load Semesters", "Failed to load Semester: " + entry.getKey());
+            }
+            Log.d("map values", entry.getKey() + ": " + entry.getValue().toString());
+        }
+
+        return semesterInfoArrayList;
     }
 }
