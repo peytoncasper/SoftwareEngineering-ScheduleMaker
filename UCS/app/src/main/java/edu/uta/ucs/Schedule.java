@@ -1,6 +1,7 @@
 package edu.uta.ucs;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
 
@@ -117,6 +118,16 @@ public class Schedule {
         }
 
         return scheduleArrayList;
+    }
+
+    public void showDetailedView(Context context){
+        try {
+            Intent scheduleIntent = new Intent(context, DetailedSchedule.class);
+            scheduleIntent.putExtra("Schedule Data", toJSON().toString());
+            context.startActivity(scheduleIntent);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     public static ArrayList<Section> scheduleGenerator(int index, ArrayList<Course> courseArrayList, ArrayList<Section> sectionArrayList, ArrayList<Section> blockOutTimesList) throws NoSchedulesPossibleException{
