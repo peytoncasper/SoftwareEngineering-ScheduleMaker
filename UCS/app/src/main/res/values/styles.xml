@@ -1,8 +1,11 @@
 <resources>
 
+    <!-- Custom Color -->
+    <color name="custom_theme_color">#ff0067b1</color>
+
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
+        <item name="android:windowBackground">@color/custom_theme_color</item>
     </style>
 
     <style name="FullscreenTheme" parent="android:Theme.NoTitleBar">
