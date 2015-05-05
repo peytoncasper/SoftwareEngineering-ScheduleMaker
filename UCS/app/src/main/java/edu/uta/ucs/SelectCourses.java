@@ -24,7 +24,6 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.Filter;
 import android.widget.Filterable;
-import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,7 +32,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -44,9 +42,10 @@ import java.util.Map;
  */
 class SemesterInfo{
 
-    public static String SEMESTER_INFO = "SEMESTER_INFO";
+    private static String SEMESTER_INFO = "SEMESTER_INFO";
 
     private int semesterNumber;
+    private String semesterName;
     private ArrayList<DepartmentInfo> departmentArrayList;
 
 
@@ -62,7 +61,16 @@ class SemesterInfo{
         }
         Collections.reverse(results);
 
+        Log.i("SemesterInfo","Built Semester Info Arraylist");
         return results;
+    }
+
+    public static String getSEMESTER_INFO() {
+        return SEMESTER_INFO;
+    }
+
+    public String getSemesterName() {
+        return semesterName;
     }
 
     private class SemesterInfoFactoryASYNC extends AsyncTask<JSONObject, Void, ArrayList>{
@@ -100,26 +108,28 @@ class SemesterInfo{
      */
     SemesterInfo(JSONObject semesterInfoRaw) throws JSONException {
         this.semesterNumber = semesterInfoRaw.getInt("SemesterNumber");
-        Log.i("Semester Number", ((Integer) semesterNumber).toString());
+        this.semesterName = semesterInfoRaw.getString("SemesterName");
+        Log.i("Semester Number", ((Integer) getSemesterNumber()).toString());
         JSONArray departmentJSONArrayRaw = semesterInfoRaw.getJSONArray("Departments");
         this.departmentArrayList = new ArrayList<>(departmentJSONArrayRaw.length());
 
         for(int index = departmentJSONArrayRaw.length(); index != 0;index--){
-            this.departmentArrayList.add(new DepartmentInfo(departmentJSONArrayRaw.getJSONObject(index - 1)));
+            this.getDepartmentArrayList().add(new DepartmentInfo(departmentJSONArrayRaw.getJSONObject(index - 1)));
             }
 
     }
 
     public JSONObject toJSON() throws JSONException {
 
-        ArrayList<JSONObject> departmentInfoArray = new ArrayList<>(departmentArrayList.size());
-        for(DepartmentInfo departmentInfo : departmentArrayList){
+        ArrayList<JSONObject> departmentInfoArray = new ArrayList<>(getDepartmentArrayList().size());
+        for(DepartmentInfo departmentInfo : getDepartmentArrayList()){
             departmentInfoArray.add(departmentInfo.toJSON());
         }
         JSONArray departmentInfoJSONArray = new JSONArray(departmentInfoArray);
 
         JSONObject semesterInfoJSON = new JSONObject();
-        semesterInfoJSON.put("SemesterNumber", semesterNumber);
+        semesterInfoJSON.put("SemesterNumber", ((Integer) this.getSemesterNumber()).toString());
+        semesterInfoJSON.put("SemesterName", this.semesterName);
         semesterInfoJSON.put("Departments", departmentInfoJSONArray);
         return semesterInfoJSON;
     }
@@ -166,7 +176,7 @@ class SemesterInfo{
         public DepartmentInfo(JSONObject departmentInfoRaw) throws JSONException {
             this.setDepartmentID(departmentInfoRaw.getInt("Id"));
             this.setDepartmentAcronym(departmentInfoRaw.getString("DepartmentAcronym"));
-            this.setDepartmentTitle(null);//departmentInfoRaw.getString("Title");
+            this.setDepartmentTitle(departmentInfoRaw.getString("DepartmentName"));//departmentInfoRaw.getString("Title");
             JSONArray courseJSONArrayRaw = departmentInfoRaw.getJSONArray("CourseNumbers");
             this.courses = new ArrayList<>(courseJSONArrayRaw.length());
 
@@ -196,6 +206,7 @@ class SemesterInfo{
 
             departmentInfoJSON.put("Id", departmentID);
             departmentInfoJSON.put("DepartmentAcronym",departmentAcronym);
+            departmentInfoJSON.put("DepartmentName", departmentTitle);
             departmentInfoJSON.put("CourseNumbers", courseInfoJSONArray);
 
             return departmentInfoJSON;
@@ -255,7 +266,7 @@ class SemesterInfo{
             public CourseInfo(JSONObject courseInfoJSONObject, DepartmentInfo departmentInfo) throws JSONException {
                 this.courseNumber = courseInfoJSONObject.getInt("CourseNumber");
                 this.courseTitle = courseInfoJSONObject.getString("CourseName");
-                Log.i("Course Details", "New Course Added:" + " " + this.courseNumber + " " + this.courseTitle);
+                //Log.i("Course Details", "New Course Added:" + " " + this.courseNumber + " " + this.courseTitle);
                 this.departmentInfo = departmentInfo;
             }
 
@@ -379,9 +390,9 @@ class DepartmentInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInf
                         if(departmentInfo.getDepartmentAcronym().toUpperCase().startsWith(constraint.toString().toUpperCase())){
                             results.add(departmentInfo);
                         }
-                        /*if(departmentInfo.getDepartmentTitle().contains(constraint.toString())){
+                        if(departmentInfo.getDepartmentTitle().contains(constraint.toString())){
                             results.add(departmentInfo);
-                        }*/
+                        }
                     }
                 }
                 filterResults.values = results;
@@ -688,7 +699,7 @@ public class SelectCourses extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        SharedPreferences preferences = getSharedPreferences(SemesterInfo.SEMESTER_INFO, MODE_PRIVATE);
+        SharedPreferences preferences = getSharedPreferences(SemesterInfo.getSEMESTER_INFO(), MODE_PRIVATE);
 
         // Load Semester Info from previous session
         String selectedSemesterString = preferences.getString("selectedSemester", null);
@@ -737,7 +748,7 @@ public class SelectCourses extends ActionBarActivity {
     protected void onPause() {
         super.onPause();
         String selectedSemesterString = null;
-        SharedPreferences.Editor editor = getSharedPreferences(SemesterInfo.SEMESTER_INFO, MODE_PRIVATE).edit();
+        SharedPreferences.Editor editor = getSharedPreferences(SemesterInfo.getSEMESTER_INFO(), MODE_PRIVATE).edit();
         if (selectedSemester != null){
             try {
                 selectedSemesterString = selectedSemester.toJSON().toString();
@@ -835,9 +846,10 @@ public class SelectCourses extends ActionBarActivity {
 
     public void getSemesterInfo(View view){
 
-        Log.i("Get Semesters", "Select a Semester");
+        Log.i("Get Semesters", "Getting Semesters");
 
-        ArrayList <SemesterInfo> fileSemesters = loadSemestersFromFile();
+        ArrayList <SemesterInfo> fileSemesters = loadSemesterInfoFromFile();
+        Log.i("Get Semesters", "Semesters found on file: " + fileSemesters.size());
 
         if (fileSemesters.size() == 0)
             fetchSemesters();
@@ -872,7 +884,7 @@ public class SelectCourses extends ActionBarActivity {
         ArrayList<String> semesterTitles = new ArrayList<>(semesterOptions.size());
 
         for (SemesterInfo semesterInfo : semesterOptions){
-            semesterTitles.add(semesterInfo.getSemesterNumber() + " - ");
+            semesterTitles.add(semesterInfo.getSemesterNumber() + " - " + semesterInfo.getSemesterName());
         }
 
         ArrayAdapter<String> semesterTitlesAdapter = new ArrayAdapter<String>(SelectCourses.this, android.R.layout.simple_selectable_list_item, semesterTitles);
@@ -954,7 +966,9 @@ public class SelectCourses extends ActionBarActivity {
 
                 success = response.getBoolean("Success");
                 fetchedSemesters = SemesterInfo.SemesterInfoFactory(response);
+                Log.i("Get Semesters", "Semesters found in fetch: " + fetchedSemesters.size());
                 saveSemestersToFile(fetchedSemesters);
+
                 selectSemester(fetchedSemesters);
                 if(success){
                     // enable text field
@@ -1049,12 +1063,13 @@ public class SelectCourses extends ActionBarActivity {
     }
 
     public void saveSemestersToFile(ArrayList <SemesterInfo> semestersToSave){
-        SharedPreferences.Editor savedSemesters = getSharedPreferences(SemesterInfo.SEMESTER_INFO, MODE_PRIVATE).edit();
+        SharedPreferences.Editor savedSemesters = getSharedPreferences(SemesterInfo.getSEMESTER_INFO(), MODE_PRIVATE).edit();
+        savedSemesters.clear();
         for (SemesterInfo semesterInfo : semestersToSave){
             try {
                 Log.i("Semester Info Save", "Saving Semester Number: " + semesterInfo.getSemesterNumber());
                 String semesterInfoJSON = semesterInfo.toJSON().toString();
-                savedSemesters.putString(SemesterInfo.SEMESTER_INFO + "_" + semesterInfo.getSemesterNumber(), semesterInfoJSON);
+                savedSemesters.putString( "SEMESTER_INFO_" + semesterInfo.getSemesterNumber() + "", semesterInfoJSON);//SemesterInfo.getSEMESTER_INFO() + "_" +
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -1062,11 +1077,11 @@ public class SelectCourses extends ActionBarActivity {
         savedSemesters.apply();
     }
 
-    public ArrayList<SemesterInfo> loadSemestersFromFile(){
+    public ArrayList<SemesterInfo> loadSemesterInfoFromFile(){
 
         Log.i("Load Semester", "Preparing to load");
 
-        SharedPreferences savedSemesters = getSharedPreferences(SemesterInfo.SEMESTER_INFO, MODE_PRIVATE);
+        SharedPreferences savedSemesters = getSharedPreferences(SemesterInfo.getSEMESTER_INFO(), MODE_PRIVATE);
 
         Map<String, ?> allEntries = savedSemesters.getAll();
 

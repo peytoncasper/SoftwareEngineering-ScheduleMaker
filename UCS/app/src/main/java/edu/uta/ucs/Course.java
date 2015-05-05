@@ -70,7 +70,6 @@ public class Course {
         return course;
     }
 
-
     public JSONObject toJSON(Section section) {
         JSONObject course = new JSONObject();
         try {

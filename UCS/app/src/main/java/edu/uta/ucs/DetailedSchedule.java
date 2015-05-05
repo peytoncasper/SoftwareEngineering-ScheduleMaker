@@ -361,7 +361,8 @@ public class DetailedSchedule extends Activity {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            progressDialog.dismiss();
+            if(progressDialog != null)
+                progressDialog.dismiss();
 
             AlertDialog.Builder builder = new AlertDialog.Builder(DetailedSchedule.this);
             final MySectionArrayAdapter arrayAdapter = new MySectionArrayAdapter(DetailedSchedule.this,R.layout.section_list_display,fetchedCourses.get(0).getSectionList());
