@@ -1,12 +1,15 @@
 package edu.uta.ucs;
 
 import android.annotation.TargetApi;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
@@ -30,6 +33,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -47,8 +51,8 @@ class SemesterInfo{
 
 
     public static ArrayList<SemesterInfo> SemesterInfoFactory(JSONObject SemesterRaw) throws JSONException {
-        if(SemesterRaw.getBoolean("Success"))
-            return null;
+        /*if(SemesterRaw.getBoolean("Success"))
+            return null;*/
         JSONArray semestersArray = SemesterRaw.getJSONArray("Semesters");
         ArrayList<SemesterInfo> results = new ArrayList<>(semestersArray.length());
 
@@ -59,6 +63,28 @@ class SemesterInfo{
         Collections.reverse(results);
 
         return results;
+    }
+
+    private class SemesterInfoFactoryASYNC extends AsyncTask<JSONObject, Void, ArrayList>{
+
+        /**
+         * Override this method to perform a computation on a background thread. The
+         * specified parameters are the parameters passed to {@link #execute}
+         * by the caller of this task.
+         * <p/>
+         * This method can call {@link #publishProgress} to publish updates
+         * on the UI thread.
+         *
+         * @param params The parameters of the task.
+         * @return A result, defined by the subclass of this task.
+         * @see #onPreExecute()
+         * @see #onPostExecute
+         * @see #publishProgress
+         */
+        @Override
+        protected ArrayList doInBackground(JSONObject... params) {
+            return null;
+        }
     }
 
     /**
@@ -751,8 +777,60 @@ public class SelectCourses extends ActionBarActivity {
     }
 
     public void getSemesterInfo(View view){
-        String url = null;
 
+        Log.i("Get Semesters", "Select a Semester");
+
+        ArrayList <SemesterInfo> fileSemesters = loadSemestersFromFile();
+
+        if (fileSemesters.size() == 0)
+            fetchSemesters();
+        else
+            selectSemester(fileSemesters);
+
+    }
+
+    private void selectSemester(final ArrayList<SemesterInfo> semesterOptions){
+
+        ArrayList<String> semesterTitles = new ArrayList<>(semesterOptions.size());
+
+        for (SemesterInfo semesterInfo : semesterOptions){
+            semesterTitles.add(semesterInfo.getSemesterNumber() + " - ");
+        }
+
+        ArrayAdapter<String> semesterTitlesAdapter = new ArrayAdapter<String>(SelectCourses.this, android.R.layout.simple_selectable_list_item, semesterTitles);
+
+        AlertDialog.Builder getDesiredSemester = new AlertDialog.Builder(SelectCourses.this);
+        getDesiredSemester.setTitle("Please Select A Semester");
+        getDesiredSemester.setAdapter(semesterTitlesAdapter, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                setSelectedSemester(semesterOptions.get(which));
+                dialog.dismiss();
+            }
+        });
+        getDesiredSemester.setNeutralButton("UPDATE SEMESTERS", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                fetchSemesters();
+                dialog.dismiss();
+            }
+        });
+        getDesiredSemester.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        getDesiredSemester.show();
+    }
+
+    public void setSelectedSemester(SemesterInfo semesterInfo){
+        this.selectedSemester = semesterInfo;
+        updateDepartmentInfoAdapter(semesterInfo.getDepartmentArrayList());
+    }
+
+    private void fetchSemesters(){
         Intent intent = new Intent(this, HTTPGetService.class);
         if(spoofServerSwitch) {
             intent.putExtra(HTTPGetService.URL_REQUEST, HTTPGetService.SPOOF_SERVER);
@@ -798,14 +876,12 @@ public class SelectCourses extends ActionBarActivity {
     private void updateDepartmentInfoAdapter(ArrayList<SemesterInfo.DepartmentInfo> departmentInfo){
         departmentInfoArrayAdapter = new DepartmentInfoArrayAdapter(this,R.layout.desired_courses_listview, departmentInfo);
         courseDepartment.setAdapter(departmentInfoArrayAdapter);
-        //courseDepartment.setDropDownWidth(FrameLayout.LayoutParams.WRAP_CONTENT);
         Toast.makeText(getBaseContext(), "Semester Data Updated", Toast.LENGTH_LONG).show();
     }
 
     private void updateCourseInfoAdapter(ArrayList<SemesterInfo.DepartmentInfo.CourseInfo> courseInfo){
         courseInfoArrayAdapter = new CourseInfoArrayAdapter(this,R.layout.desired_courses_listview, courseInfo);
         courseNumber.setAdapter(courseInfoArrayAdapter);
-        //courseNumber.setDropDownWidth(FrameLayout.LayoutParams.WRAP_CONTENT);
         Toast.makeText(getBaseContext(), "Department Data Updated", Toast.LENGTH_LONG).show();
     }
 
@@ -830,32 +906,13 @@ public class SelectCourses extends ActionBarActivity {
         public void onReceive(Context context, Intent intent) {
             JSONObject response = null;
             boolean success = false;
-            ArrayList<SemesterInfo> semesterInfo;
             try {
                 response = new JSONObject(intent.getStringExtra(HTTPGetService.SERVER_RESPONSE));
 
                 success = response.getBoolean("Success");
-                /*if (!success){
-                    Toast.makeText(getApplicationContext(), "Semester update failed, try again", Toast.LENGTH_LONG).show();
-                    progressDialog.dismiss();
-                    return;
-                }*/
-                semesterInfo = SemesterInfo.SemesterInfoFactory(response);
-                saveSemestersToFile(semesterInfo);
-                fetchedSemesters = loadSemestersFromFile();
-                for (SemesterInfo semester : semesterInfo){
-                    Log.i("Semster number", ((Integer) semester.getSemesterNumber()).toString());
-                    if (semester.getSemesterNumber() == 2152){
-                        Log.i("Semester Fetch", ((Integer) semester.getSemesterNumber()).toString());
-                        selectedSemester = semester;
-                    }
-                }
-                ArrayList<String> departmentList = new ArrayList<>(selectedSemester.getDepartmentArrayList().size());
-                for(SemesterInfo.DepartmentInfo departmentInfo : selectedSemester.getDepartmentArrayList()){
-                    departmentList.add(departmentInfo.getDepartmentAcronym());
-                }
-                updateDepartmentInfoAdapter(selectedSemester.getDepartmentArrayList());
-
+                fetchedSemesters = SemesterInfo.SemesterInfoFactory(response);
+                saveSemestersToFile(fetchedSemesters);
+                selectSemester(fetchedSemesters);
                 if(success){
                     // enable text field
                 }
@@ -877,7 +934,6 @@ public class SelectCourses extends ActionBarActivity {
             ArrayList<Section> sectionArrayList = null;
             String response = intent.getStringExtra(HTTPGetService.SERVER_RESPONSE);
             Log.d("Received: ", response);
-            int numberOfSectionsTotal = 0;
 
             try {
                 JSONObject rawResult = new JSONObject(response);
@@ -894,7 +950,7 @@ public class SelectCourses extends ActionBarActivity {
 
             } catch (JSONException e) {
                 e.printStackTrace();
-                Toast.makeText(getApplicationContext(), "Couldn't contact server. Please try again in a few minutes", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Error: Received Invalid Data", Toast.LENGTH_LONG).show();
                 progressDialog.dismiss();
                 return;
             }
@@ -935,7 +991,7 @@ public class SelectCourses extends ActionBarActivity {
     protected void onPause() {
         super.onPause();
         String selectedSemesterString = null;
-        SharedPreferences.Editor editor = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE).edit();
+        SharedPreferences.Editor editor = getSharedPreferences(SemesterInfo.SEMESTER_INFO, MODE_PRIVATE).edit();
         if (selectedSemester != null){
             try {
                 selectedSemesterString = selectedSemester.toJSON().toString();
@@ -963,46 +1019,50 @@ public class SelectCourses extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        SharedPreferences preferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+        SharedPreferences preferences = getSharedPreferences(SemesterInfo.SEMESTER_INFO, MODE_PRIVATE);
+
+        // Load Semester Info from previous session
         String selectedSemesterString = preferences.getString("selectedSemester", null);
         JSONObject selectedSemesterJSON = null;
         if (selectedSemesterString != null) {
             try {
-                selectedSemesterJSON = new JSONObject(selectedSemesterString);
-                selectedSemester = new SemesterInfo(selectedSemesterJSON);
+                selectedSemester = new SemesterInfo(new JSONObject(selectedSemesterString));
             } catch (JSONException e) {
                 e.printStackTrace();
-            }
-            ArrayList<String> departmentList = new ArrayList<>(selectedSemester.getDepartmentArrayList().size());
-            for(SemesterInfo.DepartmentInfo departmentInfo : selectedSemester.getDepartmentArrayList()){
-                departmentList.add(departmentInfo.getDepartmentAcronym());
+                Toast.makeText(getApplicationContext(), "Error: Received Invalid Data", Toast.LENGTH_LONG).show();
+                fetchSemesters();
+                return;
             }
             updateDepartmentInfoAdapter(selectedSemester.getDepartmentArrayList());
+        }
+        else {
+            fetchSemesters();
+            return;
+        }
 
-            String desiredCoursesString = preferences.getString("desiredCourses", null);
-            if (desiredCoursesString != null){
-                String[] desiredCoursesArray = desiredCoursesString.split(",");
-                for (String string : desiredCoursesArray){
-                    String[] courseInfoStrings = string.split("-");
-                    SemesterInfo.DepartmentInfo.CourseInfo courseInfo = getCourseInfo(courseInfoStrings[0], courseInfoStrings[1]);
-                    desiredCoursesArrayList.add(courseInfo);
-                    Log.i("Desired Course", string);
-                    try {
-                        Log.i("Desired Course", courseInfo.toJSON().toString());
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+        // Load list of desired courses from previous session
+        String desiredCoursesString = preferences.getString("desiredCourses", null);
+        if (desiredCoursesString != null){
+            String[] desiredCoursesArray = desiredCoursesString.split(",");
+            for (String string : desiredCoursesArray){
+                String[] courseInfoStrings = string.split("-");
+                SemesterInfo.DepartmentInfo.CourseInfo courseInfo = getCourseInfo(courseInfoStrings[0], courseInfoStrings[1]);
+                desiredCoursesArrayList.add(courseInfo);
+                Log.i("Desired Course", string);
+                try {
+                    Log.i("Desired Course", courseInfo.toJSON().toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-                desiredCoursesArrayAdapter.notifyDataSetChanged();
             }
-            else
-                Log.i("Desired Course", "No Desired Courses Found");
+            desiredCoursesArrayAdapter.notifyDataSetChanged();
         }
         else
-            getSemesterInfo(this.getCurrentFocus());
+            Log.i("Desired Course", "No Desired Courses Found");
 
 
     }
+
 
     public void saveSemestersToFile(ArrayList <SemesterInfo> semestersToSave){
         SharedPreferences.Editor savedSemesters = getSharedPreferences(SemesterInfo.SEMESTER_INFO, MODE_PRIVATE).edit();
@@ -1019,16 +1079,23 @@ public class SelectCourses extends ActionBarActivity {
     }
 
     public ArrayList<SemesterInfo> loadSemestersFromFile(){
+
+        Log.i("Load Semester", "Preparing to load");
+
         SharedPreferences savedSemesters = getSharedPreferences(SemesterInfo.SEMESTER_INFO, MODE_PRIVATE);
 
         Map<String, ?> allEntries = savedSemesters.getAll();
+
         ArrayList<SemesterInfo> semesterInfoArrayList = new ArrayList<>(allEntries.size());
+
         for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
+
             String semesterInfoString = entry.getValue().toString();
             try {
                 JSONObject semesterInfoJSON = new JSONObject(semesterInfoString);
                 SemesterInfo semesterInfo = new SemesterInfo(semesterInfoJSON);
                 semesterInfoArrayList.add(semesterInfo);
+                Log.i("Semester from File", entry.getKey() + " : " + semesterInfo.getSemesterNumber() + " : " + semesterInfoString);
             } catch (JSONException e) {
                 e.printStackTrace();
                 Log.e("Load Semesters", "Failed to load Semester: " + entry.getKey());
@@ -1037,5 +1104,6 @@ public class SelectCourses extends ActionBarActivity {
         }
 
         return semesterInfoArrayList;
+
     }
 }
