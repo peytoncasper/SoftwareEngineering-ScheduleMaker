@@ -685,6 +685,84 @@ public class SelectCourses extends ActionBarActivity {
         lastFetchTime = 0;
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        SharedPreferences preferences = getSharedPreferences(SemesterInfo.SEMESTER_INFO, MODE_PRIVATE);
+
+        // Load Semester Info from previous session
+        String selectedSemesterString = preferences.getString("selectedSemester", null);
+        JSONObject selectedSemesterJSON = null;
+        if (selectedSemesterString != null) {
+            try {
+                selectedSemester = new SemesterInfo(new JSONObject(selectedSemesterString));
+            } catch (JSONException e) {
+                e.printStackTrace();
+                Toast.makeText(getApplicationContext(), "Error: Received Invalid Data", Toast.LENGTH_LONG).show();
+                fetchSemesters();
+                return;
+            }
+            updateDepartmentInfoAdapter(selectedSemester.getDepartmentArrayList());
+        }
+        else {
+            fetchSemesters();
+            return;
+        }
+
+        // Load list of desired courses from previous session
+        String desiredCoursesString = preferences.getString("desiredCourses", null);
+        if (desiredCoursesString != null){
+            String[] desiredCoursesArray = desiredCoursesString.split(",");
+            for (String string : desiredCoursesArray){
+                String[] courseInfoStrings = string.split("-");
+                SemesterInfo.DepartmentInfo.CourseInfo courseInfo = getCourseInfo(courseInfoStrings[0], courseInfoStrings[1]);
+                desiredCoursesArrayList.add(courseInfo);
+                Log.i("Desired Course", string);
+                try {
+                    Log.i("Desired Course", courseInfo.toJSON().toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            desiredCoursesArrayAdapter.notifyDataSetChanged();
+        }
+        else
+            Log.i("Desired Course", "No Desired Courses Found");
+
+
+    }
+
+    @TargetApi(Build.VERSION_CODES.GINGERBREAD)
+    @Override
+    protected void onPause() {
+        super.onPause();
+        String selectedSemesterString = null;
+        SharedPreferences.Editor editor = getSharedPreferences(SemesterInfo.SEMESTER_INFO, MODE_PRIVATE).edit();
+        if (selectedSemester != null){
+            try {
+                selectedSemesterString = selectedSemester.toJSON().toString();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            editor.putString("selectedSemester", selectedSemesterString);
+            editor.apply();
+            Log.i("Selected Semester Info", selectedSemesterString );
+        }
+
+        if (desiredCoursesArrayList != null)
+            if (desiredCoursesArrayList.size() > 0){
+                StringBuilder desiredCoursesString = new StringBuilder();
+                for (SemesterInfo.DepartmentInfo.CourseInfo courseInfo : desiredCoursesArrayList){
+                    desiredCoursesString.append(courseInfo.getDepartmentInfo().getDepartmentAcronym() + "-" + courseInfo.getCourseNumber() + ",");
+                }
+                Log.i("Desired Courses Builder", desiredCoursesString.length() > 0 ? desiredCoursesString.substring( 0, desiredCoursesString.length() - 1 ): null);
+                editor.putString("desiredCourses", desiredCoursesString.length() > 0 ? desiredCoursesString.substring( 0, desiredCoursesString.length() - 1 ): null);
+                editor.apply();
+            }
+        desiredCoursesArrayList.clear();
+    }
+
+
     public void addCourse(View view){
 
         if(selectedSemester == null){
@@ -721,27 +799,6 @@ public class SelectCourses extends ActionBarActivity {
             courseDepartment.requestFocus();
         }
 
-    }
-
-    public SemesterInfo.DepartmentInfo.CourseInfo getCourseInfo(String department, String number){
-
-        SemesterInfo.DepartmentInfo departmentInfo = getDepartmentInfo(department);
-                for (SemesterInfo.DepartmentInfo.CourseInfo courseInfo : departmentInfo.getCourses()){
-                    if (((Integer) courseInfo.getCourseNumber()).toString().equals(number)){
-                        return courseInfo;
-                    }
-                }
-        return null;
-    }
-
-    public SemesterInfo.DepartmentInfo getDepartmentInfo(String department){
-
-        for(SemesterInfo.DepartmentInfo departmentInfo : selectedSemester.getDepartmentArrayList()){
-            if(departmentInfo.getDepartmentAcronym().toUpperCase().equals(department.toUpperCase())){
-                return departmentInfo;
-            }
-        }
-        return null;
     }
 
     public void getCourseSections(View view){
@@ -787,6 +844,27 @@ public class SelectCourses extends ActionBarActivity {
         else
             selectSemester(fileSemesters);
 
+    }
+
+    public SemesterInfo.DepartmentInfo.CourseInfo getCourseInfo(String department, String number){
+
+        SemesterInfo.DepartmentInfo departmentInfo = getDepartmentInfo(department);
+        for (SemesterInfo.DepartmentInfo.CourseInfo courseInfo : departmentInfo.getCourses()){
+            if (((Integer) courseInfo.getCourseNumber()).toString().equals(number)){
+                return courseInfo;
+            }
+        }
+        return null;
+    }
+
+    public SemesterInfo.DepartmentInfo getDepartmentInfo(String department){
+
+        for(SemesterInfo.DepartmentInfo departmentInfo : selectedSemester.getDepartmentArrayList()){
+            if(departmentInfo.getDepartmentAcronym().toUpperCase().equals(department.toUpperCase())){
+                return departmentInfo;
+            }
+        }
+        return null;
     }
 
     private void selectSemester(final ArrayList<SemesterInfo> semesterOptions){
@@ -853,26 +931,6 @@ public class SelectCourses extends ActionBarActivity {
         SelectCourses.this.startActivityForResult(startSelectCoursesActivity, 0);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        String blockoutTimes;
-        if (data == null)
-            return;
-        if (data.hasExtra("BLOCKOUT"))
-            blockoutTimes = data.getStringExtra("BLOCKOUT");
-        else
-            return;
-        try {
-            JSONObject jsonBlockoutTimes = new JSONObject(blockoutTimes);
-            this.blockoutTimes = new Course(jsonBlockoutTimes);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        if (this.blockoutTimes != null)
-        Log.d("test", this.blockoutTimes.toJSON().toString());
-    }
-
     private void updateDepartmentInfoAdapter(ArrayList<SemesterInfo.DepartmentInfo> departmentInfo){
         departmentInfoArrayAdapter = new DepartmentInfoArrayAdapter(this,R.layout.desired_courses_listview, departmentInfo);
         courseDepartment.setAdapter(departmentInfoArrayAdapter);
@@ -883,21 +941,6 @@ public class SelectCourses extends ActionBarActivity {
         courseInfoArrayAdapter = new CourseInfoArrayAdapter(this,R.layout.desired_courses_listview, courseInfo);
         courseNumber.setAdapter(courseInfoArrayAdapter);
         Toast.makeText(getBaseContext(), "Department Data Updated", Toast.LENGTH_LONG).show();
-    }
-
-    private void showProgressDialog(String title){
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setTitle(title);
-        progressDialog.setMessage("Please wait while data is fetched...");
-        progressDialog.show();
-    }
-
-    private boolean coursesNeedUpdating(){
-        boolean needsUpdating = (System.currentTimeMillis() - lastFetchTime) > 180000;
-        if(needsUpdating) return needsUpdating;
-        if (fetchedCourses == null) return true;
-        if (desiredCoursesArrayList.size() != fetchedCourses.size()) return true;
-        return true;
     }
 
     private class DepartmentCoursesReceiver extends BroadcastReceiver {
@@ -925,7 +968,6 @@ public class SelectCourses extends ActionBarActivity {
             progressDialog.dismiss();
         }
     }
-
 
     private class DesiredSectionsReceiver extends BroadcastReceiver {
 
@@ -986,83 +1028,25 @@ public class SelectCourses extends ActionBarActivity {
 
     }
 
-    @TargetApi(Build.VERSION_CODES.GINGERBREAD)
     @Override
-    protected void onPause() {
-        super.onPause();
-        String selectedSemesterString = null;
-        SharedPreferences.Editor editor = getSharedPreferences(SemesterInfo.SEMESTER_INFO, MODE_PRIVATE).edit();
-        if (selectedSemester != null){
-            try {
-                selectedSemesterString = selectedSemester.toJSON().toString();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            editor.putString("selectedSemester", selectedSemesterString);
-            editor.apply();
-            Log.i("Selected Semester Info", selectedSemesterString );
-        }
-
-        if (desiredCoursesArrayList != null)
-        if (desiredCoursesArrayList.size() > 0){
-            StringBuilder desiredCoursesString = new StringBuilder();
-            for (SemesterInfo.DepartmentInfo.CourseInfo courseInfo : desiredCoursesArrayList){
-                desiredCoursesString.append(courseInfo.getDepartmentInfo().getDepartmentAcronym() + "-" + courseInfo.getCourseNumber() + ",");
-            }
-            Log.i("Desired Courses Builder", desiredCoursesString.length() > 0 ? desiredCoursesString.substring( 0, desiredCoursesString.length() - 1 ): null);
-            editor.putString("desiredCourses", desiredCoursesString.length() > 0 ? desiredCoursesString.substring( 0, desiredCoursesString.length() - 1 ): null);
-            editor.apply();
-        }
-        desiredCoursesArrayList.clear();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        SharedPreferences preferences = getSharedPreferences(SemesterInfo.SEMESTER_INFO, MODE_PRIVATE);
-
-        // Load Semester Info from previous session
-        String selectedSemesterString = preferences.getString("selectedSemester", null);
-        JSONObject selectedSemesterJSON = null;
-        if (selectedSemesterString != null) {
-            try {
-                selectedSemester = new SemesterInfo(new JSONObject(selectedSemesterString));
-            } catch (JSONException e) {
-                e.printStackTrace();
-                Toast.makeText(getApplicationContext(), "Error: Received Invalid Data", Toast.LENGTH_LONG).show();
-                fetchSemesters();
-                return;
-            }
-            updateDepartmentInfoAdapter(selectedSemester.getDepartmentArrayList());
-        }
-        else {
-            fetchSemesters();
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        String blockoutTimes;
+        if (data == null)
             return;
-        }
-
-        // Load list of desired courses from previous session
-        String desiredCoursesString = preferences.getString("desiredCourses", null);
-        if (desiredCoursesString != null){
-            String[] desiredCoursesArray = desiredCoursesString.split(",");
-            for (String string : desiredCoursesArray){
-                String[] courseInfoStrings = string.split("-");
-                SemesterInfo.DepartmentInfo.CourseInfo courseInfo = getCourseInfo(courseInfoStrings[0], courseInfoStrings[1]);
-                desiredCoursesArrayList.add(courseInfo);
-                Log.i("Desired Course", string);
-                try {
-                    Log.i("Desired Course", courseInfo.toJSON().toString());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-            desiredCoursesArrayAdapter.notifyDataSetChanged();
-        }
+        if (data.hasExtra("BLOCKOUT"))
+            blockoutTimes = data.getStringExtra("BLOCKOUT");
         else
-            Log.i("Desired Course", "No Desired Courses Found");
-
-
+            return;
+        try {
+            JSONObject jsonBlockoutTimes = new JSONObject(blockoutTimes);
+            this.blockoutTimes = new Course(jsonBlockoutTimes);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        if (this.blockoutTimes != null)
+            Log.d("test", this.blockoutTimes.toJSON().toString());
     }
-
 
     public void saveSemestersToFile(ArrayList <SemesterInfo> semestersToSave){
         SharedPreferences.Editor savedSemesters = getSharedPreferences(SemesterInfo.SEMESTER_INFO, MODE_PRIVATE).edit();
@@ -1091,19 +1075,30 @@ public class SelectCourses extends ActionBarActivity {
         for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
 
             String semesterInfoString = entry.getValue().toString();
-            try {
-                JSONObject semesterInfoJSON = new JSONObject(semesterInfoString);
-                SemesterInfo semesterInfo = new SemesterInfo(semesterInfoJSON);
-                semesterInfoArrayList.add(semesterInfo);
-                Log.i("Semester from File", entry.getKey() + " : " + semesterInfo.getSemesterNumber() + " : " + semesterInfoString);
-            } catch (JSONException e) {
-                e.printStackTrace();
-                Log.e("Load Semesters", "Failed to load Semester: " + entry.getKey());
+            if (entry.getKey().startsWith("SEMESTER_INFO_")) {
+                try {
+                    JSONObject semesterInfoJSON = new JSONObject(semesterInfoString);
+                    SemesterInfo semesterInfo = new SemesterInfo(semesterInfoJSON);
+                    semesterInfoArrayList.add(semesterInfo);
+                    Log.i("Semester from File", entry.getKey() + " : " + semesterInfo.getSemesterNumber() + " : " + semesterInfoString);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    Log.e("Load Semesters", "Failed to load Semester: " + entry.getKey());
+                }
+                Log.d("map values", entry.getKey() + ": " + entry.getValue().toString());
             }
-            Log.d("map values", entry.getKey() + ": " + entry.getValue().toString());
+
         }
 
         return semesterInfoArrayList;
 
     }
+
+    private void showProgressDialog(String title){
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle(title);
+        progressDialog.setMessage("Please wait while data is fetched...");
+        progressDialog.show();
+    }
+
 }
