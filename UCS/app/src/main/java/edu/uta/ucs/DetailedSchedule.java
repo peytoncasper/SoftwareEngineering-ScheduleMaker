@@ -40,11 +40,14 @@ import java.util.Set;
 public class DetailedSchedule extends Activity {
 
     public static final String URL_GET_COURSE_SECTIONS ="http://ucs.azurewebsites.net/UTA/GetCourseInfo?";
+    public static final String URL_VALIDATE_COURSES ="http://ucs.azurewebsites.net/UTA/ValidateCourses?";
     public static final String URL_GET_COURSE_SECTIONS_PARAM_SEMESTER ="semester=";
     public static final String URL_GET_COURSE_SECTIONS_PARAM_DEPARTMENT ="&department=";
     public static final String URL_GET_COURSE_SECTIONS_PARAM_COURSENUMBER ="&courseNumber=";
+    public static final String URL_GET_COURSE_SECTIONS_PARAM_CLASSNUMBER ="&classNumbers=";
 
     private static final String ACTION_GET_COURSE_SECTIONS = "ACTION_GET_COURSE_SECTIONS";
+    private static final String ACTION_VERIFY_SCHEDULE = "ACTION_VERIFY_SCHEDULE";
 
     ListView scheduleSections;
     Schedule scheduleToShow;
@@ -81,6 +84,7 @@ public class DetailedSchedule extends Activity {
             finish();
 
         LocalBroadcastManager.getInstance(this).registerReceiver(new CouresAlternatesReciever(), new IntentFilter(ACTION_GET_COURSE_SECTIONS));
+        LocalBroadcastManager.getInstance(this).registerReceiver(new VerifyScheduleReciever(), new IntentFilter(ACTION_VERIFY_SCHEDULE));
     }
 
     @Override
@@ -139,7 +143,7 @@ public class DetailedSchedule extends Activity {
     }
 
     public void verifySchedule(View view){
-
+        getVerifySchedule();
     }
 
     public void deleteSchedule(View view){
@@ -166,6 +170,40 @@ public class DetailedSchedule extends Activity {
             }
         });
         builder.show();
+    }
+
+    private void getVerifySchedule(){
+
+        Log.i("Verify Schedule", "About to attempt verify schedule");
+        ArrayList<Section> sectionsToUpdate = this.scheduleToShow.getSelectedSections();
+
+        StringBuilder semesterParam = new StringBuilder(URL_GET_COURSE_SECTIONS_PARAM_SEMESTER);
+        StringBuilder departmentParam = new StringBuilder(URL_GET_COURSE_SECTIONS_PARAM_DEPARTMENT);
+        StringBuilder classNumberParam = new StringBuilder(URL_GET_COURSE_SECTIONS_PARAM_CLASSNUMBER);
+
+        for (Section section : sectionsToUpdate){
+
+            semesterParam.append(this.scheduleToShow.getSemesterNumber() + ",");
+            departmentParam.append(section.getSourceCourse().getCourseDepartment() + ",");
+            classNumberParam.append(section.getSectionID() + ",");
+        }
+
+        String semesterParamFinal = semesterParam.length() > 0 ? semesterParam.substring( 0, semesterParam.length() - 1 ): "";
+        String departmentParamFinal = departmentParam.length() > 0 ? departmentParam.substring( 0, departmentParam.length() - 1 ): "";
+        String courseNumberParamFinal = classNumberParam.length() > 0 ? classNumberParam.substring( 0, classNumberParam.length() - 1 ): "";
+
+        String urlFinal = URL_VALIDATE_COURSES + semesterParamFinal + departmentParamFinal + courseNumberParamFinal;
+
+        Intent intent = new Intent(this, HTTPGetService.class);
+
+        intent.putExtra(HTTPGetService.URL_REQUEST, urlFinal);
+        intent.putExtra(HTTPGetService.SOURCE_INTENT, ACTION_VERIFY_SCHEDULE);
+        startService(intent);
+
+        progressDialog = new ProgressDialog(DetailedSchedule.this);
+        progressDialog.setTitle("");
+        progressDialog.setMessage("");
+        progressDialog.show();
     }
 
     private void setName(String name){
@@ -296,6 +334,11 @@ public class DetailedSchedule extends Activity {
         intent.putExtra(HTTPGetService.URL_REQUEST, url);
         intent.putExtra(HTTPGetService.SOURCE_INTENT, ACTION_GET_COURSE_SECTIONS);
         startService(intent);
+
+        progressDialog = new ProgressDialog(DetailedSchedule.this);
+        progressDialog.setTitle("");
+        progressDialog.setMessage("");
+        progressDialog.show();
     }
 
     class CouresAlternatesReciever extends BroadcastReceiver{
@@ -382,6 +425,86 @@ public class DetailedSchedule extends Activity {
                 }
             });
             builder.show();
+        }
+    }
+
+    class VerifyScheduleReciever extends BroadcastReceiver{
+
+        /**
+         * This method is called when the BroadcastReceiver is receiving an Intent
+         * broadcast.  During this time you can use the other methods on
+         * BroadcastReceiver to view/modify the current result values.  This method
+         * is always called within the main thread of its process, unless you
+         * explicitly asked for it to be scheduled on a different thread using
+         * {@link Context#registerReceiver(BroadcastReceiver,
+         * IntentFilter, String, Handler)}. When it runs on the main
+         * thread you should
+         * never perform long-running operations in it (there is a timeout of
+         * 10 seconds that the system allows before considering the receiver to
+         * be blocked and a candidate to be killed). You cannot launch a popup dialog
+         * in your implementation of onReceive().
+         * <p/>
+         * <p><b>If this BroadcastReceiver was launched through a &lt;receiver&gt; tag,
+         * then the object is no longer alive after returning from this
+         * function.</b>  This means you should not perform any operations that
+         * return a result to you asynchronously -- in particular, for interacting
+         * with services, you should use
+         * {@link Context#startService(Intent)} instead of
+         * {@link Context#bindService(Intent, ServiceConnection, int)}.  If you wish
+         * to interact with a service that is already running, you can use
+         * {@link #peekService}.
+         * <p/>
+         * <p>The Intent filters used in {@link Context#registerReceiver}
+         * and in application manifests are <em>not</em> guaranteed to be exclusive. They
+         * are hints to the operating system about how to find suitable recipients. It is
+         * possible for senders to force delivery to specific recipients, bypassing filter
+         * resolution.  For this reason, {@link #onReceive(Context, Intent) onReceive()}
+         * implementations should respond only to known actions, ignoring any unexpected
+         * Intents that they may receive.
+         *
+         * @param context The Context in which the receiver is running.
+         * @param intent  The Intent being received.
+         */
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            ArrayList<Course> fetchedCourses = null;
+
+            String response = intent.getStringExtra(HTTPGetService.SERVER_RESPONSE);
+            Log.d("HTTPGet Received: ", response);
+
+            try {
+                JSONObject rawResult = new JSONObject(response);
+                Log.i("Verify Schedule", rawResult.toString());
+                if (!rawResult.getBoolean("Success")){
+                    if(progressDialog != null)
+                        progressDialog.dismiss();
+                    Toast.makeText(getApplicationContext(), "Couldn't contact server. Please try again in a few minutes", Toast.LENGTH_LONG).show();
+                    return;
+                }
+                JSONArray jsonCourses = rawResult.getJSONArray("Results");
+                float timeTaken = Float.parseFloat(rawResult.getString("TimeTaken"));
+                Log.d("New Request Time Taken:", Float.toString(timeTaken));
+
+                fetchedCourses = Course.buildCourseList(jsonCourses);
+
+                ArrayList<Section> fetchedSections = new ArrayList<>(fetchedCourses.size());
+                for (Course course : fetchedCourses){
+                    fetchedSections.addAll(course.getSectionList());
+                }
+
+                scheduleToShow.setSelectedSections(fetchedSections);
+                adapter.notifyDataSetChanged();
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+                Toast.makeText(getApplicationContext(), "Couldn't contact server. Please try again in a few minutes", Toast.LENGTH_LONG).show();
+                if(progressDialog != null)
+                    progressDialog.dismiss();
+                return;
+            }
+            if(progressDialog != null)
+                progressDialog.dismiss();
         }
     }
 }
