@@ -28,8 +28,9 @@
             android:id="@+id/course_department_edittext"
             android:hint="@string/hint_course_department"
             android:layout_weight=".5"
-            android:inputType="textCapCharacters"
-            android:dropDownWidth="150dp"/>
+            android:inputType="text"
+            android:dropDownWidth="300dp"
+            android:dropDownHeight="wrap_content" />
 
         <AutoCompleteTextView
             android:layout_width="0dp"
@@ -40,7 +41,8 @@
             android:layout_weight="1"
             android:inputType="text"
             android:dropDownWidth="match_parent"
-            android:dropDownHorizontalOffset = "-150dp"/>
+            android:dropDownHorizontalOffset = "-200dp"
+            android:dropDownHeight="wrap_content" />
 
         <Button
             android:layout_width="wrap_content"

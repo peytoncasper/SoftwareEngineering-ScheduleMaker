@@ -370,7 +370,7 @@ class DepartmentInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInf
 
         departmentID.setText(departmentInfo.getDepartmentAcronym());
         departmentNumber.setText("");
-        departmentTitle.setText("\t");// + departmentInfo.getDepartmentTitle());
+        departmentTitle.setText("\t" + departmentInfo.getDepartmentTitle());
 
         convertView.findViewById(R.id.desiredCourseButton).setVisibility(View.GONE);
 
@@ -390,7 +390,7 @@ class DepartmentInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInf
                         if(departmentInfo.getDepartmentAcronym().toUpperCase().startsWith(constraint.toString().toUpperCase())){
                             results.add(departmentInfo);
                         }
-                        if(departmentInfo.getDepartmentTitle().contains(constraint.toString())){
+                        if(departmentInfo.getDepartmentTitle().toUpperCase().contains(constraint.toString().toUpperCase())){
                             results.add(departmentInfo);
                         }
                     }
