@@ -38,7 +38,9 @@
             android:id="@+id/course_number_edittext"
             android:hint="@string/hint_course_number"
             android:layout_weight="1"
-            android:inputType="text"/>
+            android:inputType="text"
+            android:dropDownWidth="match_parent"
+            android:dropDownHorizontalOffset = "-150dp"/>
 
         <Button
             android:layout_width="wrap_content"
