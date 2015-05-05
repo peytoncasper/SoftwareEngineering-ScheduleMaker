@@ -99,8 +99,18 @@ public class Course {
         ArrayList<Course> courseList = new ArrayList<Course>(jsonCourses.length());
 
         for(int index = jsonCourses.length(); index != 0;index--){
-            Log.d("New Course: ", jsonCourses.getJSONObject(index - 1).toString());
-            courseList.add( new Course(jsonCourses.getJSONObject(index - 1)));
+            JSONObject courseJSON;
+            try {
+                courseJSON = jsonCourses.getJSONObject(index - 1);
+            }
+            catch (JSONException e){
+                e.printStackTrace();
+                String courseString = jsonCourses.getString(index - 1);
+                courseJSON = new JSONObject(courseString);
+            }
+
+            Log.i("New Course JSON test: ", courseJSON.toString() );
+            courseList.add( new Course(courseJSON));
         }
         Collections.reverse(courseList);
 
