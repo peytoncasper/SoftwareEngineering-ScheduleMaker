@@ -388,10 +388,12 @@ class DepartmentInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInf
                 if (constraint != null){
                     for(SemesterInfo.DepartmentInfo departmentInfo : departmentInfoArrayList){
                         if(departmentInfo.getDepartmentAcronym().toUpperCase().startsWith(constraint.toString().toUpperCase())){
-                            results.add(departmentInfo);
+                            if (!results.contains(departmentInfo))
+                                results.add(departmentInfo);
                         }
                         if(departmentInfo.getDepartmentTitle().toUpperCase().contains(constraint.toString().toUpperCase())){
-                            results.add(departmentInfo);
+                            if (!results.contains(departmentInfo))
+                                results.add(departmentInfo);
                         }
                     }
                 }
@@ -1007,7 +1009,8 @@ public class SelectCourses extends ActionBarActivity {
             } catch (JSONException e) {
                 e.printStackTrace();
                 Toast.makeText(getApplicationContext(), "Error: Received Invalid Data", Toast.LENGTH_LONG).show();
-                progressDialog.dismiss();
+                if(progressDialog != null)
+                    progressDialog.dismiss();
                 return;
             }
             progressDialog.dismiss();

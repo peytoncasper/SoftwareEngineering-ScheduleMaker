@@ -16,6 +16,7 @@ public class Course {
     //private String courseDepartment;
     private String courseID;
     private String courseName;
+    private String courseDepartment;
     private ArrayList<Section> sectionList;
 
     Course() {
@@ -41,6 +42,8 @@ public class Course {
         this.setCourseName(jsonObject.getString("CourseName"));
         Log.i("New Course Name", getCourseName());
         this.setCourseID(jsonObject.getString("CourseId"));
+        Log.i("New Course Department", jsonObject.getString("Department"));
+        this.setCourseDepartment(jsonObject.getString("Department"));
         JSONArray jsonSectionList = jsonObject.getJSONArray("CourseResults");
         sectionList = new ArrayList<Section>(jsonSectionList.length());
 
@@ -57,6 +60,7 @@ public class Course {
         try {
             course.put("CourseId", getCourseID());
             course.put("CourseName", getCourseName());
+            course.put("Department", getCourseDepartment());
             ArrayList<JSONObject> courseResults = new ArrayList<>();
             for(Section section : sectionList){
                 courseResults.add(section.toJSON());
@@ -67,6 +71,8 @@ public class Course {
             e.printStackTrace();
         }
 
+        Log.i("New Course JSON", "Course JSON built: " + course.toString());
+
         return course;
     }
 
@@ -75,6 +81,7 @@ public class Course {
         try {
             course.put("CourseId", getCourseID());
             course.put("CourseName", getCourseName());
+            course.put("Department", getCourseDepartment());
             ArrayList<JSONObject> courseResults = new ArrayList<>();
             courseResults.add(section.toJSON());
             JSONArray sectionJSON = new JSONArray(courseResults);
@@ -82,6 +89,8 @@ public class Course {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
+        Log.i("New Course JSON", "Course JSON built: " + course.toString());
 
         return course;
     }
@@ -103,13 +112,13 @@ public class Course {
                 courseJSON = jsonCourses.getJSONObject(index - 1);
             }
             catch (JSONException e){
-                Log.i("New Course JSON","JSON Construction failed. Attempting to construct JSON from String");
+                Log.i("New Course JSON", "JSON Construction failed. Attempting to construct JSON from String");
                 String courseString = jsonCourses.getString(index - 1);
                 courseJSON = new JSONObject(courseString);
             }
 
             Log.i("New Course JSON", "test: " + courseJSON.toString() );
-            courseList.add( new Course(courseJSON));
+            courseList.add(new Course(courseJSON));
         }
         Collections.reverse(courseList);
 
@@ -138,5 +147,13 @@ public class Course {
 
     public void setSectionList(ArrayList<Section> sectionList) {
         this.sectionList = sectionList;
+    }
+
+    public String getCourseDepartment() {
+        return courseDepartment;
+    }
+
+    public void setCourseDepartment(String courseDepartment) {
+        this.courseDepartment = courseDepartment;
     }
 }
