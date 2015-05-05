@@ -94,6 +94,8 @@ public class Schedule {
         SharedPreferences scheduleFile = context.getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, context.MODE_PRIVATE);
 
         Set<String> scheduleNames = scheduleFile.getStringSet(Schedule.SCHEDULE_NAMES, null);
+        if (scheduleNames == null)
+            return  new ArrayList<Schedule>();
         ArrayList<Schedule> scheduleArrayList = new ArrayList<>(scheduleNames.size());
         for (String string : scheduleNames){
 
@@ -130,6 +132,8 @@ public class Schedule {
         // Shuffle sectionArrayList
         checkPossibleSections:
         for (Section section : possibleSections){
+            if(section.getStatus() != ClassStatus.OPEN)
+                continue;
             for (Section sectionToCompare : sectionArrayList){
                 if (section.conflictsWith(sectionToCompare)){
                     StringBuilder errorBuilder = new StringBuilder("Conflict between " + section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseID() + "-" + section.getSectionNumber());
