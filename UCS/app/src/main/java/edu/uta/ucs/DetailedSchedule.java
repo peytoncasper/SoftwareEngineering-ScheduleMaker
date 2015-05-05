@@ -147,7 +147,7 @@ public class DetailedSchedule extends Activity {
     }
 
     public void deleteSchedule(View view){
-        this.removeScheduleFromFile(this.scheduleToShow.getName());
+        removeScheduleFromFile(this.scheduleToShow.getName());
         finish();
     }
 
