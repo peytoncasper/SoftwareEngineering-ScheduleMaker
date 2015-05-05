@@ -1,5 +1,7 @@
 package edu.uta.ucs;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -8,6 +10,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Set;
 
 /**
  * Created by arunk_000 on 4/5/2015.
@@ -37,14 +40,16 @@ public class Schedule {
     }
 
     Schedule(JSONObject scheduleJSON) throws JSONException {
+
         name = scheduleJSON.getString("ScheduleName");
         semesterNumber = scheduleJSON.getInt("ScheduleSemester");
+        Log.i("Schedule Course", scheduleJSON.getString("ScheduleCourses"));
+
         JSONArray scheduleCoursesJSONArray = scheduleJSON.getJSONArray("ScheduleCourses");
-        ArrayList<JSONObject> scheduleCoursesString = new ArrayList<>(scheduleCoursesJSONArray.length());
-        selectedSections = new ArrayList<>();
-        for (int index = 0; index < scheduleCoursesJSONArray.length(); index++){
-            JSONObject courseJSON = new JSONObject(scheduleCoursesJSONArray.getString(index));
-            Course course = new Course(courseJSON);
+
+        ArrayList<Course> semesterCourses = Course.buildCourseList(scheduleCoursesJSONArray);
+        selectedSections = new ArrayList<>(semesterCourses.size());
+        for (Course course : semesterCourses){
             selectedSections.addAll(course.getSectionList());
         }
     }
