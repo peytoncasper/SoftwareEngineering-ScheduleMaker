@@ -158,7 +158,7 @@ public class DetailedSchedule extends Activity {
                 Section section = scheduleToShow.getSelectedSections().get(which);
                 scheduleToShow.getSelectedSections().remove(which);
                 setSelection(which);
-                getSections( section.getSourceCourse().getCourseName(), section.getSourceCourse().getCourseID());
+                getAlternativeSections(section.getSourceCourse().getCourseDepartment(), section.getSourceCourse().getCourseID());
                 progressDialog = new ProgressDialog(DetailedSchedule.this);
                 progressDialog.setTitle("");
                 progressDialog.setMessage("");
@@ -245,11 +245,13 @@ public class DetailedSchedule extends Activity {
 
             SharedPreferences scheduleNames = getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, MODE_PRIVATE);
             Set<String> scheduleNameSet = scheduleNames.getStringSet(Schedule.SCHEDULE_NAMES, null);
-            for (String string : scheduleNameSet){
-                Log.i("Schedule Names:", string);
-            }
             HashSet<String> result = null;
-            if (scheduleNameSet != null) result = new HashSet<>(scheduleNameSet);
+            if (scheduleNameSet != null){
+                for (String string : scheduleNameSet){
+                    Log.i("Schedule Names:", string);
+                }
+                result = new HashSet<>(scheduleNameSet);
+            }
 
             ArrayList<String> scheduleNamesArrayList;
             if(result != null) {
@@ -283,7 +285,7 @@ public class DetailedSchedule extends Activity {
         adapter.notifyDataSetChanged();
     }
 
-    public void getSections(String department, String courseNumber){
+    public void getAlternativeSections(String department, String courseNumber){
         String url = URL_GET_COURSE_SECTIONS
                 + URL_GET_COURSE_SECTIONS_PARAM_SEMESTER + scheduleToShow.getSemesterNumber()
                 + URL_GET_COURSE_SECTIONS_PARAM_DEPARTMENT + department
@@ -344,7 +346,8 @@ public class DetailedSchedule extends Activity {
             try {
                 JSONObject rawResult = new JSONObject(response);
                 if (!rawResult.getBoolean("Success")){
-                    progressDialog.dismiss();
+                    if(progressDialog != null)
+                        progressDialog.dismiss();
                     Toast.makeText(getApplicationContext(), "Couldn't contact server. Please try again in a few minutes", Toast.LENGTH_LONG).show();
                     return;
                 }
@@ -360,12 +363,17 @@ public class DetailedSchedule extends Activity {
 
             } catch (JSONException e) {
                 e.printStackTrace();
+                Toast.makeText(getApplicationContext(), "Couldn't contact server. Please try again in a few minutes", Toast.LENGTH_LONG).show();
+                if(progressDialog != null)
+                    progressDialog.dismiss();
+                return;
             }
             if(progressDialog != null)
                 progressDialog.dismiss();
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(DetailedSchedule.this);
             final MySectionArrayAdapter arrayAdapter = new MySectionArrayAdapter(DetailedSchedule.this,R.layout.section_list_display,fetchedCourses.get(0).getSectionList());
+            AlertDialog.Builder builder = new AlertDialog.Builder(DetailedSchedule.this);
+            builder.setTitle("Select a replacement course");
             builder.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
