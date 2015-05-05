@@ -1029,9 +1029,7 @@ public class SelectCourses extends ActionBarActivity {
                 }
 
                 Schedule schedule = new Schedule("Schedule Name", selectedSemester.getSemesterNumber(), sectionArrayList);
-                Intent scheduleIntent = new Intent(getApplicationContext(), DetailedSchedule.class);
-                scheduleIntent.putExtra("Schedule Data", schedule.toJSON().toString());
-                startActivity(scheduleIntent);
+                schedule.showDetailedView(SelectCourses.this);
                 Log.i("Built Schedule", schedule.toJSON().toString());
                 Schedule scheduleTest = new Schedule(schedule.toJSON());
             } catch (NoSchedulesPossibleException e) {

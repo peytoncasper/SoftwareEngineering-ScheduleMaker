@@ -65,6 +65,7 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Log.i("Main Activity", "Showing Schedule Named: " + scheduleArrayList.get(position).getName());
+                scheduleArrayList.get(position).showDetailedView(MainActivity.this);
             }
         });
 
