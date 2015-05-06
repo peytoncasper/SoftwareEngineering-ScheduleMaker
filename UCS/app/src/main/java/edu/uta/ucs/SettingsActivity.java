@@ -74,30 +74,32 @@ public class SettingsActivity extends PreferenceActivity {
         // Add 'general' preferences.
         addPreferencesFromResource(R.xml.pref_general);
 
+        if(UserData.getEmail() != null) {
 
-        // Add 'notifications' preferences, and a corresponding header.
-        PreferenceCategory fakeHeader = new PreferenceCategory(this);
-        fakeHeader.setTitle(R.string.pref_header_account_settings);
-        getPreferenceScreen().addPreference(fakeHeader);
-        addPreferencesFromResource(R.xml.pref_data_sync);
+            // Add 'notifications' preferences, and a corresponding header.
+            PreferenceCategory fakeHeader = new PreferenceCategory(this);
+            fakeHeader.setTitle(R.string.pref_header_account_settings);
+            getPreferenceScreen().addPreference(fakeHeader);
+            addPreferencesFromResource(R.xml.pref_data_sync);
 
-        Preference updatePasswordButton = findPreference(getString(R.string.pref_key_update_password));
-        updatePasswordButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                updateElementDialog("Password");
-                return false;
-            }
-        });
+            Preference updatePasswordButton = findPreference(getString(R.string.pref_key_update_password));
+            updatePasswordButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    updateElementDialog("Password");
+                    return false;
+                }
+            });
 
-        Preference updateEmailButton = findPreference(getString(R.string.pref_key_update_email));
-        updateEmailButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                updateElementDialog("Email");
-                return false;
-            }
-        });
+            Preference updateEmailButton = findPreference(getString(R.string.pref_key_update_email));
+            updateEmailButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    updateElementDialog("Email");
+                    return false;
+                }
+            });
+        }
 
         /*
         // Add 'notifications' preferences, and a corresponding header.

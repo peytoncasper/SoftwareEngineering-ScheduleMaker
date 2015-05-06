@@ -13,7 +13,7 @@ public class UserData extends Application{
 
     private static Context context;
     private static String email;
-    private static Boolean militaryTime = false;
+    private static boolean militaryTime;
 
     public static Context getContext(){
         return UserData.context;
@@ -23,6 +23,8 @@ public class UserData extends Application{
     public void onCreate() {
         super.onCreate();
         UserData.context = getApplicationContext();
+        UserData.setEmail(null);
+        UserData.setMilitaryTime(false);
     }
 
     public UserData() {
@@ -30,8 +32,6 @@ public class UserData extends Application{
     }
 
     UserData (String email, Boolean militaryTime){
-        UserData.setEmail(email);
-        UserData.setMilitaryTime(militaryTime);
     }
 
     UserData(JSONObject userDataJSON) throws JSONException {

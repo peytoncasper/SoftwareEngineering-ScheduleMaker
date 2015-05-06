@@ -11,6 +11,8 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -377,6 +379,28 @@ public class SelectBlockoutTimes extends ActionBarActivity {
 
         sectionListView = ((ListView) findViewById(R.id.show_blockout_times_listView));
 
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        switch (id){
+            case R.id.action_settings:
+                SettingsActivity.startActivity(SelectBlockoutTimes.this);
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
