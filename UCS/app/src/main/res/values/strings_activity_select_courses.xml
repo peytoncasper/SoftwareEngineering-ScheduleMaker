@@ -17,5 +17,5 @@
     <string name="action_add_course">ADD</string>
     <string name="hint_course_number">COURSE NUMBER</string>
     <string name="hint_course_department">DEPT</string>
-    <string name="action_set_blockout_times">SET BLOCK-OUT TIMES</string>
+    <string name="action_set_blockout_times">BLOCK-OUT TIMES</string>
 </resources>
