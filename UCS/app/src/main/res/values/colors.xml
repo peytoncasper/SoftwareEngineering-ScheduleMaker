@@ -4,6 +4,7 @@
 
     <!-- resourse colors -->
     <color name="frameContainerColor">#FFFFFF</color>
+    <color name="white">#ffffff</color>
 
     <!-- UTA Colors -->
     <color name="utaBlue">#FF0067B1</color>
