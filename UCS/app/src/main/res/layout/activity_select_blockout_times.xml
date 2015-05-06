@@ -89,21 +89,24 @@
         </LinearLayout>
 
         <HorizontalScrollView
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:fadeScrollbars="false"
             android:id="@+id/timepicker_scrollview">
 
             <LinearLayout
                 android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_gravity="center">
 
                 <LinearLayout
                     android:orientation="vertical"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1">
+                    android:layout_weight="1"
+                    android:gravity="start">
 
                     <TimePicker
                         android:id="@+id/start_timePicker"
@@ -120,17 +123,19 @@
                         android:id="@+id/starting_time_textView"
                         android:layout_gravity="center_horizontal" />
 
-                    <LinearLayout
-                        android:orientation="vertical"
+                    <Space
                         android:layout_width="match_parent"
-                        android:layout_height="10dp"/>
+                        android:layout_height="20px" />
+
                 </LinearLayout>
 
                 <LinearLayout
                     android:orientation="vertical"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1">
+                    android:layout_weight="1"
+                    android:layout_gravity="right"
+                    android:gravity="right">
 
                     <TimePicker
                         android:id="@+id/end_timePicker"
@@ -147,10 +152,10 @@
                         android:id="@+id/ending_time_textView"
                         android:layout_gravity="center_horizontal"/>
 
-                    <LinearLayout
-                        android:orientation="vertical"
+                    <Space
                         android:layout_width="match_parent"
-                        android:layout_height="10dp" />
+                        android:layout_height="20px" />
+
                 </LinearLayout>
 
             </LinearLayout>
