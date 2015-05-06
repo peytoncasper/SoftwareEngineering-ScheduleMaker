@@ -21,6 +21,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
+import android.widget.HorizontalScrollView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -355,6 +356,8 @@ public class SelectBlockoutTimes extends ActionBarActivity {
     ToggleButton mondayToggleButton, tuesdayToggleButton, wednesdayToggleButton, thursdayToggleButton, fridayToggleButton, saturdayToggleButton;
     TimePicker startTimePicker, endTimePicker;
     ListView sectionListView;
+    Button toggleTimePickersButton;
+    HorizontalScrollView timePickerView;
 
     String blockoutSetName = null;
     MySectionArrayAdapter blockoutTimesListAdapter;
@@ -382,6 +385,9 @@ public class SelectBlockoutTimes extends ActionBarActivity {
 
         startTimePicker = ((TimePicker) findViewById(R.id.start_timePicker));
         endTimePicker = ((TimePicker) findViewById(R.id.end_timePicker));
+
+        toggleTimePickersButton = (Button) findViewById(R.id.toggle_timepickers_button);
+        timePickerView = (HorizontalScrollView) findViewById(R.id.timepicker_scrollview);
 
         sectionListView = ((ListView) findViewById(R.id.show_blockout_times_listView));
 
@@ -647,15 +653,22 @@ public class SelectBlockoutTimes extends ActionBarActivity {
                         builderInner.setNegativeButton("CANCEL",
                                 new DialogInterface.OnClickListener() {
 
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-                                }
-                        });
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                });
                         builderInner.show();
                     }
                 });
         builderSingle.show();
+    }
+
+    public void toggleTimepickers(View view){
+        if(timePickerView.getVisibility() == View.GONE)
+            timePickerView.setVisibility(View.VISIBLE);
+        else
+            timePickerView.setVisibility(View.GONE);
     }
 
     private TimeShort getTime(TimePicker timePicker){
