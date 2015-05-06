@@ -18,7 +18,9 @@ import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
+import android.text.InputType;
 import android.text.TextUtils;
+import android.text.method.PasswordTransformationMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -88,7 +90,14 @@ public class SettingsActivity extends PreferenceActivity {
             }
         });
 
-
+        Preference updateEmailButton = findPreference(getString(R.string.pref_key_update_email));
+        updateEmailButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                updateElementDialog("Email");
+                return false;
+            }
+        });
 
         /*
         // Add 'notifications' preferences, and a corresponding header.
@@ -288,10 +297,12 @@ public class SettingsActivity extends PreferenceActivity {
     /**
      * Creates a dialog which prompts user for password and element to change
      */
-    private void updateElementDialog(final String updateElement){
+    private void updateElementDialog(String updateElement){
 
         LayoutInflater inflater = getLayoutInflater();
         View changeElement = inflater.inflate(R.layout.dialog_change_element, null);
+
+        final String baseURl = "http://ucs.azurewebsites.net/UTA/Change" + updateElement;
 
         TextView newElement = (TextView) changeElement.findViewById(R.id.textview_new_type);
         TextView confirmElement = (TextView) changeElement.findViewById(R.id.textview_confirm_type);
@@ -302,6 +313,7 @@ public class SettingsActivity extends PreferenceActivity {
         final EditText oldEditText = (EditText) changeElement.findViewById(R.id.edittext_current_type);
         final EditText newEditText = (EditText) changeElement.findViewById(R.id.edittext_new_type);
         final EditText confirmEditText = (EditText) changeElement.findViewById(R.id.edittext_confirm_type);
+
 
         final AlertDialog.Builder changeElementDialog = new AlertDialog.Builder(SettingsActivity.this);
         changeElementDialog.setTitle("Change " + updateElement);
@@ -334,7 +346,7 @@ public class SettingsActivity extends PreferenceActivity {
 
                 }
 
-                String changeElementURL = "http://ucs.azurewebsites.net/UTA/Change" + updateElement + "?email=" + UserData.getEmail() + "?password=" + oldElement + "?confirm=" + newElement;
+                String changeElementURL = baseURl + "?email=" + UserData.getEmail() + "?password=" + oldElement + "?confirm=" + newElement;
                 HTTPGetService.FetchURL(changeElementURL, "null", SettingsActivity.this);
                 dialog.dismiss();
             }
@@ -346,6 +358,24 @@ public class SettingsActivity extends PreferenceActivity {
                 dialog.dismiss();
             }
         });
+
+        if(updateElement.toUpperCase().contains("PASSWORD")){
+            newEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
+            confirmEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
+
+            newEditText.setTransformationMethod(new PasswordTransformationMethod());
+            confirmEditText.setTransformationMethod(new PasswordTransformationMethod());
+        }
+        else {
+            newEditText.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+            confirmEditText.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+
+            newEditText.setTransformationMethod(null);
+            confirmEditText.setTransformationMethod(null);
+
+        }
+
+
 
         changeElementDialog.create().show();
 

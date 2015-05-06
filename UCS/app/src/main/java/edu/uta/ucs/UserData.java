@@ -1,14 +1,33 @@
 package edu.uta.ucs;
 
+import android.app.Application;
+import android.content.Context;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
  * Created by Owner on 5/5/2015.
  */
-public class UserData {
+public class UserData extends Application{
+
+    private static Context context;
     private static String email;
     private static Boolean militaryTime = false;
+
+    public static Context getContext(){
+        return UserData.context;
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        UserData.context = getApplicationContext();
+    }
+
+    public UserData() {
+        super();
+    }
 
     UserData (String email, Boolean militaryTime){
         UserData.setEmail(email);

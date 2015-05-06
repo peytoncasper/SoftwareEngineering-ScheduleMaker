@@ -266,7 +266,7 @@ class BlockoutCoursesAdapter extends BaseExpandableListAdapter {
             else
                 instructorsText.setText(childSection.getInstructors());
 
-            timesText.setText("  " + childSection.getTimeString(Section.h12));
+            timesText.setText("  " + childSection.getTimeString());
 
             if (childSection.getSectionID()<0)
                 sectionIDText.setVisibility(View.GONE);
@@ -588,7 +588,7 @@ public class SelectBlockoutTimes extends ActionBarActivity {
 
         final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(SelectBlockoutTimes.this,android.R.layout.select_dialog_singlechoice);
         for(Section section : currentBlockoutTimes){
-            arrayAdapter.add(section.getInstructors()+"\t"+section.getDaysString()+" "+section.getTimeString(Section.h12));
+            arrayAdapter.add(section.getInstructors()+"\t"+section.getDaysString()+" "+section.getTimeString());
         }
 
         AlertDialog.Builder builderSingle = new AlertDialog.Builder(SelectBlockoutTimes.this);

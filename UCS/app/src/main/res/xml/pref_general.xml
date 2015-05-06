@@ -1,9 +1,13 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <SwitchPreference
+        android:key="@string/pref_key_spoof_server"
+        android:title="@string/pref_title_spoof_server"
+        android:defaultValue="false"/>
+
+    <SwitchPreference
         android:key="@string/pref_key_military_time"
         android:title="@string/pref_title_military_time"
         android:defaultValue="false"/>
-
 
 </PreferenceScreen>

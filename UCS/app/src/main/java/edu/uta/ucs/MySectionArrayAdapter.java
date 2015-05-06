@@ -106,7 +106,7 @@ public class MySectionArrayAdapter extends ArrayAdapter<Section> {
             }
 
             if (timesText != null) {
-                timesText.setText("  "+p.getTimeString(Section.h12));
+                timesText.setText("  "+p.getTimeString());
             }
             if (sectionIDText != null) {
                 if (p.getSectionID()<0)
