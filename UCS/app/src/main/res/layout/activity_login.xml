@@ -21,7 +21,7 @@
         android:layout_marginBottom="16dp"
         android:layout_weight="0.19" />
 
-    <ScrollView android:id="@+id/login_form" android:layout_width="265dp"
+    <ScrollView android:id="@+id/login_form" android:layout_width="300dp"
         android:layout_height="wrap_content">
 
         <LinearLayout android:id="@+id/email_login_form" android:layout_width="match_parent"
