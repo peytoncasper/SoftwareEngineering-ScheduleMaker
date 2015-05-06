@@ -23,7 +23,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/horizontalScrollView"
-        android:background="#20000000">
+        android:background="@color/utaBlue">
 
         <LinearLayout
             android:orientation="horizontal"

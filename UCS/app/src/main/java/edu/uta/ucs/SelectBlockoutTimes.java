@@ -439,6 +439,7 @@ public class SelectBlockoutTimes extends ActionBarActivity {
         if(!(newDayList.size()>0)){
             AlertDialog.Builder noDaysErrorDialog = new AlertDialog.Builder(SelectBlockoutTimes.this);
             noDaysErrorDialog.setTitle("Can't block out a time with no days");
+            //noDaysErrorDialog.setPositiveButton("OKAY", null);
             noDaysErrorDialog.show();
             return;
         }
@@ -709,7 +710,7 @@ public class SelectBlockoutTimes extends ActionBarActivity {
      * @return ArrayList of blockout times in course format
      */
     public static ArrayList<Course> loadBlockoutTimesFromFile(Context context){
-        ArrayList<Course> blockoutTimes = null;
+        ArrayList<Course> blockoutTimes = new ArrayList<>();
 
         SharedPreferences blockoutTimesSaver = context.getSharedPreferences(BLOCKOUT_TIMES, MODE_PRIVATE);
 
@@ -730,8 +731,6 @@ public class SelectBlockoutTimes extends ActionBarActivity {
                 e.printStackTrace();
             }
         }
-        else
-            blockoutTimes = new ArrayList<>();
 
         return blockoutTimes;
     }
