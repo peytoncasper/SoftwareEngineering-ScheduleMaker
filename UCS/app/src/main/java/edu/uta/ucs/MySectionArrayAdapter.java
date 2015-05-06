@@ -76,50 +76,40 @@ public class MySectionArrayAdapter extends ArrayAdapter<Section> {
             sectionIDText.setTextColor(Color.BLACK);
             designationText.setTextColor(Color.BLACK);
 
-            if (courseText != null) {
-                if(p.getSourceCourse()!=null) {
-                    if ((p.getSourceCourse().getCourseName() == null && p.getInstructors() != null) || (p.getSourceCourse().getCourseNumber().equalsIgnoreCase("BLOCKOUT")) ){
-                        courseText.setText(p.getInstructors());
-                        instructorsText.setVisibility(View.GONE);
-                    }
-                    else if (p.getSourceCourse().getCourseName().contains("-"))
-                        courseText.setText(p.getSourceCourse().getCourseName().split("-")[1].substring(1));
-                    else
-                        courseText.setText(p.getSourceCourse().getCourseName());
-                }
-            }
-
-            if (daysText != null) {
-                daysText.setText(p.getDaysString());
-            }
-            if (roomText != null) {
-                if (p.getRoom().equals(""))
-                    roomText.setVisibility(View.GONE);
-                else
-                    roomText.setText("Room: "+p.getRoom());
-            }
-            if (instructorsText != null){
-                if (p.getInstructors().equals(""))
+            if(p.getSourceCourse()!=null) {
+                if ((p.getSourceCourse().getCourseName() == null && p.getInstructors() != null) || (p.getSourceCourse().getCourseNumber().equalsIgnoreCase("BLOCKOUT")) ){
+                    courseText.setText(p.getInstructors());
                     instructorsText.setVisibility(View.GONE);
+                }
+                else if (p.getSourceCourse().getCourseName().contains("-"))
+                    courseText.setText(p.getSourceCourse().getCourseName().split("-")[1].substring(1));
                 else
-                    instructorsText.setText(p.getInstructors());
+                    courseText.setText(p.getSourceCourse().getCourseName());
             }
 
-            if (timesText != null) {
-                timesText.setText("  "+p.getTimeString());
-            }
-            if (sectionIDText != null) {
-                if (p.getSectionID()<0)
-                    sectionIDText.setVisibility(View.GONE);
-                else
-                    sectionIDText.setText("UTA Class Number: "+((Integer) p.getSectionID()).toString());
-            }
-            if (designationText != null) {
-                if (p.getSectionNumber()<0 || p.getSectionNumber() == 0)
-                    designationText.setVisibility(View.GONE);
-                else
-                    designationText.setText(p.getSourceCourse().getCourseName().split("-")[0] + "- " + String.format("%03d", p.getSectionNumber()));
-            }
+            daysText.setVisibility(View.GONE);
+
+            if (p.getRoom().equals(""))
+                roomText.setVisibility(View.GONE);
+            else
+                roomText.setText("Room: "+p.getRoom());
+
+            if (p.getInstructors().equals(""))
+                instructorsText.setVisibility(View.GONE);
+            else
+                instructorsText.setText(p.getInstructors());
+
+            timesText.setText(p.getDaysString() + " " +p.getTimeString());
+
+            if (p.getSectionID()<0)
+                sectionIDText.setVisibility(View.GONE);
+            else
+                sectionIDText.setText("UTA Class Number: "+((Integer) p.getSectionID()).toString());
+
+            if (p.getSectionNumber()<0 || p.getSectionNumber() == 0)
+                designationText.setVisibility(View.GONE);
+            else
+                designationText.setText(p.getSourceCourse().getCourseDepartment() + " " + p.getSourceCourse().getCourseNumber() + "-" + String.format("%03d", p.getSectionNumber()));
 
             switch (p.getStatus()){
                 case OPEN:
