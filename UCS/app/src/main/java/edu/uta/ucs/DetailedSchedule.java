@@ -65,6 +65,8 @@ public class DetailedSchedule extends Activity {
         setContentView(R.layout.activity_detailed_schedule);
 
         scheduleSections = (ListView) findViewById(R.id.schedule_section_listview);
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(new LogoutReciever(), new IntentFilter(UserData.ACTION_LOGOUT));
     }
 
 
@@ -83,6 +85,10 @@ public class DetailedSchedule extends Activity {
         switch (id){
             case R.id.action_settings:
                 SettingsActivity.startActivity(DetailedSchedule.this);
+                break;
+            case R.id.action_logout:
+                UserData.logout(DetailedSchedule.this);
+                signOut();
                 break;
         }
 
@@ -531,5 +537,30 @@ public class DetailedSchedule extends Activity {
             if(progressDialog != null)
                 progressDialog.dismiss();
         }
+    }
+
+    private class LogoutReciever extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.i("Detailed View", "Logging out");
+            DetailedSchedule.this.finish();
+        }
+    }
+
+    void signOut() {
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.putExtra("finish", true); // if you are checking for this in your other Activities
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
+        /*
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.putExtra("finish", true);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // To clean up all activities
+        startActivity(intent);
+        finish();*/
     }
 }

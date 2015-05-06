@@ -25,6 +25,7 @@
             </intent-filter>
         </activity>
         <activity
+            android:launchMode= "singleInstance"
             android:name=".MainActivity"
             android:label="@string/title_activity_main" >
         </activity>
@@ -35,6 +36,7 @@
         </service>
 
         <activity
+            android:launchMode= "singleInstance"
             android:name=".SelectCourses"
             android:label="@string/title_activity_select_courses"
             android:parentActivityName=".MainActivity" >
@@ -43,6 +45,7 @@
                 android:value="edu.uta.ucs.MainActivity" />
         </activity>
         <activity
+            android:launchMode= "singleTask"
             android:name=".SelectBlockoutTimes"
             android:label="@string/title_activity_select_blockout_times"
             android:parentActivityName=".SelectCourses" >
@@ -51,6 +54,7 @@
                 android:value="edu.uta.ucs.SelectCourses" />
         </activity>
         <activity
+            android:launchMode= "singleTask"
             android:name=".CreateAccount"
             android:label="@string/title_activity_create_account" >
         </activity>
@@ -61,6 +65,7 @@
             android:theme="@android:style/Theme.Dialog" >
         </activity>
         <activity
+            android:launchMode= "singleInstance"
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings" >
         </activity>

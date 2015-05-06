@@ -115,6 +115,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
         LocalBroadcastManager.getInstance(this).registerReceiver(new LoginReceiver(), new IntentFilter(ACTION_LOGIN));
         LocalBroadcastManager.getInstance(this).registerReceiver(new ResetPasswordReceiver(), new IntentFilter(ACTION_RESET_PASSWORD));
+
     }
 
 

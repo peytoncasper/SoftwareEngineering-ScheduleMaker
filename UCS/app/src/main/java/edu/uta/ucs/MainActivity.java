@@ -1,7 +1,11 @@
 package edu.uta.ucs;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -31,6 +35,7 @@ public class MainActivity extends ActionBarActivity {
 
         scheduleListView = (ListView) findViewById(R.id.schedule_listview);
 
+        LocalBroadcastManager.getInstance(this).registerReceiver(new LogoutReciever(), new IntentFilter(UserData.ACTION_LOGOUT));
     }
 
     @Override
@@ -74,6 +79,10 @@ public class MainActivity extends ActionBarActivity {
             case R.id.action_settings:
                 SettingsActivity.startActivity(MainActivity.this);
                 break;
+            case R.id.action_logout:
+                UserData.logout(MainActivity.this);
+                signOut();
+                break;
         }
 
         return super.onOptionsItemSelected(item);
@@ -84,10 +93,42 @@ public class MainActivity extends ActionBarActivity {
         super.onStop();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        UserData.logout(MainActivity.this);
+    }
+
     public void generateSchedule(View view){
         Log.d("MainActivity", "Opening Generate Schedule");
         Intent startSelectCoursesActivity = new Intent(MainActivity.this, SelectCourses.class);
         MainActivity.this.startActivity(startSelectCoursesActivity);
+    }
+
+
+    private class LogoutReciever extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.i("Main Activity", "Logging out");
+            finish();
+        }
+    }
+
+    void signOut() {
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.putExtra("finish", true); // if you are checking for this in your other Activities
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
+        /*
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.putExtra("finish", true);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // To clean up all activities
+        startActivity(intent);
+        finish();*/
     }
 
 }

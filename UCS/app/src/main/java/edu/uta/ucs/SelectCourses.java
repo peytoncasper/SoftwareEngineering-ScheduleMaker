@@ -645,6 +645,7 @@ public class SelectCourses extends ActionBarActivity {
 
         LocalBroadcastManager.getInstance(this).registerReceiver(new DepartmentCoursesReceiver(), new IntentFilter(ACTION_GET_SEMESTER));
         LocalBroadcastManager.getInstance(this).registerReceiver(new DesiredSectionsReceiver(), new IntentFilter(ACTION_GET_DESIRED_COURSE_SECTIONS));
+        LocalBroadcastManager.getInstance(this).registerReceiver(new LogoutReciever(), new IntentFilter(UserData.ACTION_LOGOUT));
 
         departmentInfoArrayAdapter = new DepartmentInfoArrayAdapter(this,R.layout.desired_courses_listview, departmentInfoArrayList);
         courseInfoArrayAdapter = new CourseInfoArrayAdapter(this,R.layout.desired_courses_listview, courseInfoArrayList);
@@ -671,6 +672,10 @@ public class SelectCourses extends ActionBarActivity {
         switch (id){
             case R.id.action_settings:
                 SettingsActivity.startActivity(SelectCourses.this);
+                break;
+            case R.id.action_logout:
+                UserData.logout(SelectCourses.this);
+                signOut();
                 break;
         }
 
@@ -915,6 +920,7 @@ public class SelectCourses extends ActionBarActivity {
 
     public SemesterInfo.DepartmentInfo getDepartmentInfo(String department){
 
+        if (selectedSemester != null)
         for(SemesterInfo.DepartmentInfo departmentInfo : selectedSemester.getDepartmentArrayList()){
             if(departmentInfo.getDepartmentAcronym().toUpperCase().equals(department.toUpperCase())){
                 return departmentInfo;
@@ -997,6 +1003,15 @@ public class SelectCourses extends ActionBarActivity {
         courseInfoArrayAdapter = new CourseInfoArrayAdapter(this,R.layout.desired_courses_listview, courseInfo);
         courseNumber.setAdapter(courseInfoArrayAdapter);
         Toast.makeText(getBaseContext(), "Department Data Updated", Toast.LENGTH_LONG).show();
+    }
+
+    private class LogoutReciever extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.i("Select Courses", "Logging out");
+            finish();
+        }
     }
 
     private class DepartmentCoursesReceiver extends BroadcastReceiver {
@@ -1166,6 +1181,22 @@ public class SelectCourses extends ActionBarActivity {
         progressDialog.setTitle(title);
         progressDialog.setMessage("Please wait while data is fetched...");
         progressDialog.show();
+    }
+
+    void signOut() {
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.putExtra("finish", true); // if you are checking for this in your other Activities
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
+        /*
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.putExtra("finish", true);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // To clean up all activities
+        startActivity(intent);
+        finish();*/
     }
 
 }

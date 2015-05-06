@@ -1,12 +1,15 @@
 package edu.uta.ucs;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -361,6 +364,8 @@ public class SelectBlockoutTimes extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_blockout_times);
 
+        LocalBroadcastManager.getInstance(this).registerReceiver(new LogoutReciever(), new IntentFilter(UserData.ACTION_LOGOUT));
+
         nameBlockoutTime = ((EditText) findViewById(R.id.blockout_time_name_edittext));
 
         mondayToggleButton = ((ToggleButton) findViewById(R.id.monday_toggleButton));
@@ -397,6 +402,10 @@ public class SelectBlockoutTimes extends ActionBarActivity {
         switch (id){
             case R.id.action_settings:
                 SettingsActivity.startActivity(SelectBlockoutTimes.this);
+                break;
+            case R.id.action_logout:
+                UserData.logout(SelectBlockoutTimes.this);
+                signOut();
                 break;
         }
 
@@ -748,15 +757,40 @@ public class SelectBlockoutTimes extends ActionBarActivity {
                 JSONArray savedBlockoutCourseJSONArray = new JSONArray();
                 for(int index = savedBlockoutCourseJSONArrayString.length(); index != 0;index--){
                     JSONObject courseJSONObject = new JSONObject(savedBlockoutCourseJSONArrayString.getString(index-1));
-                    savedBlockoutCourseJSONArray.put(courseJSONObject);
-                }
-                blockoutTimes = Course.buildCourseList(savedBlockoutCourseJSONArray);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+    savedBlockoutCourseJSONArray.put(courseJSONObject);
+}
+blockoutTimes = Course.buildCourseList(savedBlockoutCourseJSONArray);
+        } catch (JSONException e) {
+        e.printStackTrace();
+        }
         }
 
         return blockoutTimes;
+        }
+
+    private class LogoutReciever extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.i("Select Blockout", "Logging out");
+            SelectBlockoutTimes.this.finish();
+        }
+    }
+
+    void signOut() {
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.putExtra("finish", true); // if you are checking for this in your other Activities
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
+        /*
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.putExtra("finish", true);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // To clean up all activities
+        startActivity(intent);
+        finish();*/
     }
 
 }

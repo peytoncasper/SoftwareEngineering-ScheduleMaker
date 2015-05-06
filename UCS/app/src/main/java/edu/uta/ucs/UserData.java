@@ -2,6 +2,8 @@ package edu.uta.ucs;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,6 +16,8 @@ public class UserData extends Application{
     private static Context context;
     private static String email;
     private static boolean militaryTime;
+
+    public static final String ACTION_LOGOUT = "ACTION_LOGOUT";
 
     public static Context getContext(){
         return UserData.context;
@@ -44,6 +48,17 @@ public class UserData extends Application{
         userDataJSON.put("Email", UserData.getEmail());
 
         return userDataJSON;
+    }
+
+    public static void logout(Context context){
+
+        Intent broadcastIntent = new Intent();
+        broadcastIntent.setAction(ACTION_LOGOUT);
+        Log.i("USER DATA", "Logging Out");
+        context.sendBroadcast(broadcastIntent);
+
+        UserData.setEmail(null);
+        UserData.setMilitaryTime(false);
     }
 
 
