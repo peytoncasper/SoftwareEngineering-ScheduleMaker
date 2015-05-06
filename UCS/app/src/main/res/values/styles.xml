@@ -1,9 +1,5 @@
 <resources>
 
-    <!-- UTA Colors -->
-    <color name="utaBlue">#ff0067b1</color>
-    <color name="utaOrange">#f58025</color>
-
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="android:windowBackground">@color/utaBlue</item>

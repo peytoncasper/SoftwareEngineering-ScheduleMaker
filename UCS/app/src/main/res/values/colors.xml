@@ -1,5 +1,10 @@
 <resources>
 
     <color name="black_overlay">#66000000</color>
+    
+    <!-- UTA Colors -->
+    <color name="utaBlue">#ff0067b1</color>
+    <color name="utaOrange">#f58025</color>
+
 
 </resources>
