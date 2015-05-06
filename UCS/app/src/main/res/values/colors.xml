@@ -1,7 +1,9 @@
 <resources>
 
     <color name="black_overlay">#66000000</color>
-    <color name="white">#FFFFFF</color>
+
+    <!-- resourse colors -->
+    <color name="frameContainerColor">#FFFFFF</color>
 
     <!-- UTA Colors -->
     <color name="utaBlue">#FF0067B1</color>
