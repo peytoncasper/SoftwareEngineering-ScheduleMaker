@@ -59,6 +59,10 @@
             android:label="@string/title_activity_detailed_schedule"
             android:theme="@android:style/Theme.Dialog" >
         </activity>
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings" >
+        </activity>
     </application>
 
 </manifest>
