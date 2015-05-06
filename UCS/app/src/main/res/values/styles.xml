@@ -4,13 +4,9 @@
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="android:windowBackground">@color/utaBlue</item>
         <item name="android:listViewStyle">@color/white</item>
-        <item name="android:buttonStyle">@style/Orange_Buttons</item>
     </style>
 
     <style name="Orange_Buttons" parent="@android:style/Widget.Button">
-        <item name="android:background">@color/utaOrange</item>
-        <item name="android:paddingTop">5dp</item>
-        <item name="android:paddingBottom">5dp</item>
     </style>
 
     <style name="FullscreenTheme" parent="android:Theme.NoTitleBar">
