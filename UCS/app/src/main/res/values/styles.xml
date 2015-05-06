@@ -4,9 +4,10 @@
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="android:windowBackground">@color/utaBlue</item>
         <item name="android:listViewStyle">@color/white</item>
+        <item name="android:buttonStyle">@style/Orange_Buttons</item>
     </style>
 
-    <style name="Orange_Buttons" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="Orange_Buttons" parent="@android:style/Widget.Button">
         <item name="android:background">@color/utaOrange</item>
     </style>
 
