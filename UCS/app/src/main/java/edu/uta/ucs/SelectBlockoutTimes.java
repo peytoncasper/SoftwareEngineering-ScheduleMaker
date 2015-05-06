@@ -166,7 +166,7 @@ class BlockoutCoursesAdapter extends BaseExpandableListAdapter {
         String courseName = ((Course) getGroup(groupPosition)).getCourseName();
         if (convertView == null){
             LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.list_group_course, parent);
+            convertView = inflater.inflate(R.layout.list_group_course, null);
         }
 
         TextView courseNameTextView = (TextView) convertView.findViewById(R.id.courseExpandableListViewTitle);
@@ -217,7 +217,7 @@ class BlockoutCoursesAdapter extends BaseExpandableListAdapter {
         if (convertView == null) {
 
             LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.section_list_display, parent);
+            convertView = inflater.inflate(R.layout.section_list_display, null);
 
         }
 
