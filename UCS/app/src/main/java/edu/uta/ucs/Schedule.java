@@ -130,6 +130,10 @@ public class Schedule {
         }
     }
 
+    public static ArrayList<Section> scheduleGenerator( ArrayList<Course> courseArrayList, ArrayList<Section> sectionArrayList, ArrayList<Section> blockOutTimesList) throws NoSchedulesPossibleException{
+        return scheduleGenerator(0, courseArrayList,sectionArrayList,blockOutTimesList);
+    }
+
     public static ArrayList<Section> scheduleGenerator(int index, ArrayList<Course> courseArrayList, ArrayList<Section> sectionArrayList, ArrayList<Section> blockOutTimesList) throws NoSchedulesPossibleException{
 
         NoSchedulesPossibleException scheduleConflict = null; //new NoSchedulesPossibleException();
@@ -220,7 +224,7 @@ class NoSchedulesPossibleException extends Exception {
     public NoSchedulesPossibleException(Section sourceSection, Section conflictingSection){
         if(conflictingSection.getSourceCourse().getCourseDepartment().equalsIgnoreCase("BLOCKOUT")){
             this.message = "Conflict between " + sourceSection.getSourceCourse().getCourseDepartment() +  " " + sourceSection.getSourceCourse().getCourseNumber() + "-" + sourceSection.getSectionNumber()
-                    + " and " + conflictingSection.getSourceCourse().getCourseDepartment() +  " time:" + conflictingSection.getInstructors();
+                    + " and " + conflictingSection.getSourceCourse().getCourseDepartment() +  ": " + conflictingSection.getInstructors();
         }
         else
             this.message = "Conflict between " + sourceSection.getSourceCourse().getCourseDepartment() +  " " + sourceSection.getSourceCourse().getCourseNumber() + "-" + sourceSection.getSectionNumber()
@@ -232,7 +236,7 @@ class NoSchedulesPossibleException extends Exception {
         if(conflictingSection.getSourceCourse().getCourseDepartment().equalsIgnoreCase("BLOCKOUT")){
             this.message = this.message + "\n" +
                     "Conflict between " + sourceSection.getSourceCourse().getCourseDepartment() +  " " + sourceSection.getSourceCourse().getCourseNumber() + "-" + sourceSection.getSectionNumber()
-                    + " and " + conflictingSection.getSourceCourse().getCourseDepartment() +  " time:" + conflictingSection.getInstructors();
+                    + " and " + conflictingSection.getSourceCourse().getCourseDepartment() +  ": " + conflictingSection.getInstructors();
         }
         else
             this.message = this.message + "\n" +

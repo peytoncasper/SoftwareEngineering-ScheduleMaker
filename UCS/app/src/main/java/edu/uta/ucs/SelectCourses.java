@@ -1065,7 +1065,7 @@ public class SelectCourses extends ActionBarActivity {
                     blockoutSections = new ArrayList<Section>();
 
                 if (fetchedCourses != null)
-                    sectionArrayList = Schedule.scheduleGenerator(0, fetchedCourses, new ArrayList<Section>(), blockoutSections);
+                    sectionArrayList = Schedule.scheduleGenerator(fetchedCourses, new ArrayList<Section>(), blockoutSections);
                 for (Section section : sectionArrayList){
                     Log.i("Built Schedule Sections",section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseNumber() + "-" + section.getSectionNumber() + "\t" + section.toJSON().toString());
                 }
@@ -1076,7 +1076,16 @@ public class SelectCourses extends ActionBarActivity {
                 Schedule scheduleTest = new Schedule(schedule.toJSON());
             } catch (NoSchedulesPossibleException e) {
                 e.printStackTrace();
-                e.getConflict();
+                AlertDialog.Builder noSchedulesPossible = new AlertDialog.Builder(SelectCourses.this);
+                noSchedulesPossible.setTitle("Schedule Could be generated. Issues:");
+                noSchedulesPossible.setMessage(e.printConflict());
+                noSchedulesPossible.setNeutralButton("OKAY", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+                noSchedulesPossible.create().show();
             } catch (JSONException e) {
                 e.printStackTrace();
             }
