@@ -11,6 +11,8 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -22,6 +24,7 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.HorizontalScrollView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -242,50 +245,40 @@ class BlockoutCoursesAdapter extends BaseExpandableListAdapter {
             sectionIDText.setTextColor(Color.BLACK);
             designationText.setTextColor(Color.BLACK);
 
-            if (courseText != null) {
-                if(childSection.getSourceCourse()!=null) {
-                    if ((childSection.getSourceCourse().getCourseName() == null && childSection.getInstructors() != null) || (childSection.getSourceCourse().getCourseNumber().equalsIgnoreCase("BLOCKOUT")) ){
-                        courseText.setText(childSection.getInstructors());
-                        instructorsText.setVisibility(View.GONE);
-                    }
-                    else if (childSection.getSourceCourse().getCourseName().contains("-"))
-                        courseText.setText(childSection.getSourceCourse().getCourseName().split("-")[1].substring(1));
-                    else
-                        courseText.setText(childSection.getSourceCourse().getCourseName());
-                }
-            }
-
-            if (daysText != null) {
-                daysText.setText(childSection.getDaysString());
-            }
-            if (roomText != null) {
-                if (childSection.getRoom().equals(""))
-                    roomText.setVisibility(View.GONE);
-                else
-                    roomText.setText("Room: "+childSection.getRoom());
-            }
-            if (instructorsText != null){
-                if (childSection.getInstructors().equals(""))
+            if(childSection.getSourceCourse()!=null) {
+                if ((childSection.getSourceCourse().getCourseName() == null && childSection.getInstructors() != null) || (childSection.getSourceCourse().getCourseNumber().equalsIgnoreCase("BLOCKOUT")) ){
+                    courseText.setText(childSection.getInstructors());
                     instructorsText.setVisibility(View.GONE);
+                }
+                else if (childSection.getSourceCourse().getCourseName().contains("-"))
+                    courseText.setText(childSection.getSourceCourse().getCourseName().split("-")[1].substring(1));
                 else
-                    instructorsText.setText(childSection.getInstructors());
+                    courseText.setText(childSection.getSourceCourse().getCourseName());
             }
 
-            if (timesText != null) {
-                timesText.setText("  " + childSection.getTimeString(Section.h12));
-            }
-            if (sectionIDText != null) {
-                if (childSection.getSectionID()<0)
-                    sectionIDText.setVisibility(View.GONE);
-                else
-                    sectionIDText.setText("UTA Class Number: "+((Integer) childSection.getSectionID()).toString());
-            }
-            if (designationText != null) {
-                if (childSection.getSectionNumber()<0 || childSection.getSectionNumber() == 0)
-                    designationText.setVisibility(View.GONE);
-                else
-                    designationText.setText(childSection.getSourceCourse().getCourseName().split("-")[0] + "- " + String.format("%03d", childSection.getSectionNumber()));
-            }
+            daysText.setText(childSection.getDaysString());
+
+            if (childSection.getRoom().equals(""))
+                roomText.setVisibility(View.GONE);
+            else
+                roomText.setText("Room: "+childSection.getRoom());
+
+            if (childSection.getInstructors().equals(""))
+                instructorsText.setVisibility(View.GONE);
+            else
+                instructorsText.setText(childSection.getInstructors());
+
+            timesText.setText("  " + childSection.getTimeString());
+
+            if (childSection.getSectionID()<0)
+                sectionIDText.setVisibility(View.GONE);
+            else
+                sectionIDText.setText("UTA Class Number: "+((Integer) childSection.getSectionID()).toString());
+
+            if (childSection.getSectionNumber()<0 || childSection.getSectionNumber() == 0)
+                designationText.setVisibility(View.GONE);
+            else
+                designationText.setText(childSection.getSourceCourse().getCourseName().split("-")[0] + "- " + String.format("%03d", childSection.getSectionNumber()));
 
             switch (childSection.getStatus()){
                 case OPEN:
@@ -319,9 +312,6 @@ class BlockoutCoursesAdapter extends BaseExpandableListAdapter {
         return checked;
     }
 
-    public void setChecked(Boolean[] checked) {
-        this.checked = checked;
-    }
 
     class CheckListener implements CompoundButton.OnCheckedChangeListener {
 
@@ -349,7 +339,6 @@ class BlockoutCoursesAdapter extends BaseExpandableListAdapter {
 
 public class SelectBlockoutTimes extends ActionBarActivity {
 
-    private static final String BLOCKOUT_NAME = "BLOCKOUT_NAME";
     private static final String BLOCKOUT_TIMES = "BLOCKOUT_TIMES";
 
     EditText nameBlockoutTime;
@@ -358,6 +347,7 @@ public class SelectBlockoutTimes extends ActionBarActivity {
     ListView sectionListView;
     Button toggleTimePickersButton;
     HorizontalScrollView timePickerView;
+    LinearLayout toggleDaysLayout;
 
     String blockoutSetName = null;
     MySectionArrayAdapter blockoutTimesListAdapter;
@@ -365,9 +355,6 @@ public class SelectBlockoutTimes extends ActionBarActivity {
     ArrayList<Section> currentBlockoutTimes;
     Course currentBlockoutCourse;
     ArrayList<Course> savedBlockoutCourses;
-
-    SharedPreferences blockoutTimesSaver;
-    SharedPreferences.Editor blockoutTimesEditor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -382,6 +369,7 @@ public class SelectBlockoutTimes extends ActionBarActivity {
         thursdayToggleButton = ((ToggleButton) findViewById(R.id.thursday_toggleButton));
         fridayToggleButton = ((ToggleButton) findViewById(R.id.friday_toggleButton));
         saturdayToggleButton = ((ToggleButton) findViewById(R.id.saturday_toggleButton));
+        toggleDaysLayout = (LinearLayout) findViewById(R.id.toggle_days_layout);
 
         startTimePicker = ((TimePicker) findViewById(R.id.start_timePicker));
         endTimePicker = ((TimePicker) findViewById(R.id.end_timePicker));
@@ -391,7 +379,28 @@ public class SelectBlockoutTimes extends ActionBarActivity {
 
         sectionListView = ((ListView) findViewById(R.id.show_blockout_times_listView));
 
+    }
 
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        switch (id){
+            case R.id.action_settings:
+                SettingsActivity.startActivity(SelectBlockoutTimes.this);
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -401,11 +410,10 @@ public class SelectBlockoutTimes extends ActionBarActivity {
         currentBlockoutTimes = new ArrayList<>();
 
         blockoutTimesListAdapter = new MySectionArrayAdapter(SelectBlockoutTimes.this, R.layout.section_list_display, currentBlockoutTimes);
+        blockoutTimesListAdapter.setDeleteButtonVisibility(true);
         blockoutTimesListAdapter.setNotifyOnChange(true);
         sectionListView.setAdapter(blockoutTimesListAdapter);
 
-        blockoutTimesSaver = getSharedPreferences(BLOCKOUT_TIMES, MODE_PRIVATE);
-        blockoutTimesEditor = getSharedPreferences(BLOCKOUT_TIMES, MODE_PRIVATE).edit();
 
         Intent intent = getIntent();
         if (intent.hasExtra("BLOCKOUT TIMES")){
@@ -432,57 +440,49 @@ public class SelectBlockoutTimes extends ActionBarActivity {
         /**
          * Loads all blockout times from memory to make runtime tasks faster
          */
-        String savedBlockoutCourseString = blockoutTimesSaver.getString(BLOCKOUT_TIMES, "");
-        Log.i("Blockout Times", savedBlockoutCourseString);
-        if (!savedBlockoutCourseString.equals("")){
-            try {
-                JSONArray savedBlockoutCourseJSONArrayString = new JSONArray(savedBlockoutCourseString);
-                JSONArray savedBlockoutCourseJSONArray = new JSONArray();
-                for(int index = savedBlockoutCourseJSONArrayString.length(); index != 0;index--){
-                    JSONObject courseJSONObject = new JSONObject(savedBlockoutCourseJSONArrayString.getString(index-1));
-                    savedBlockoutCourseJSONArray.put(courseJSONObject);
-                }
-                savedBlockoutCourses = Course.buildCourseList(savedBlockoutCourseJSONArray);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-        else
-            savedBlockoutCourses = new ArrayList<>();
+            savedBlockoutCourses = SelectBlockoutTimes.loadBlockoutTimesFromFile(SelectBlockoutTimes.this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
 
-        saveBlockoutCoursesToFile();
+        saveBlockoutCoursesToFile(SelectBlockoutTimes.this, savedBlockoutCourses);
 
     }
 
-    /**
-     * Saves all blockout times in the list of times user wants saved to file
-     *
-     */public void saveBlockoutCoursesToFile(){
-        ArrayList<String> savedBlockoutCourseString = new ArrayList<>(savedBlockoutCourses.size());
-        for (Course course : savedBlockoutCourses){
-            savedBlockoutCourseString.add(course.toJSON().toString());
-        }
-        JSONArray savedBlockoutCourseJSONArray = new JSONArray(savedBlockoutCourseString);
-        blockoutTimesEditor.putString(BLOCKOUT_TIMES, savedBlockoutCourseJSONArray.toString());
-        blockoutTimesEditor.apply();
-    }
 
     public void addBlockoutTime(View view){
 
-        TimeShort newStartTime = null, newEndTime = null;
+        TimeShort newStartTime, newEndTime;
 
         newStartTime = getTime(startTimePicker);
         newEndTime = getTime(endTimePicker);
-        ArrayList<Day> newDayList = getDays();
-        Course newBlockoutCourse = new Course();
 
-        Section newBlockoutTime = new Section(-1, nameBlockoutTime.getText().toString(), "", newStartTime, newEndTime, newDayList, ClassStatus.OPEN, newBlockoutCourse);
-        nameBlockoutTime.setText("");
+        ArrayList<Day> newDayList = getDays();
+        if(!(newDayList.size()>0)){
+            AlertDialog.Builder noDaysErrorDialog = new AlertDialog.Builder(SelectBlockoutTimes.this);
+            noDaysErrorDialog.setTitle("Can't block out a time with no days");
+            //noDaysErrorDialog.setPositiveButton("OKAY", null);
+            noDaysErrorDialog.show();
+            return;
+        }
+
+        String blockoutTimeName = nameBlockoutTime.getText().toString();
+        if(blockoutTimeName.equals("")){
+            nameBlockoutTime.setError("Please give this a name");
+            nameBlockoutTime.requestFocus();
+            return;
+        }
+        else {
+            nameBlockoutTime.setError(null);
+            nameBlockoutTime.setText("");
+        }
+
+        Course newBlockoutCourse = new Course("BLOCKOUT","BLOCKOUT", "BLOCKOUT");
+        Section newBlockoutTime = new Section(-1, blockoutTimeName , "", newStartTime, newEndTime, newDayList, ClassStatus.OPEN, newBlockoutCourse);
+        newBlockoutCourse.addSection(newBlockoutTime);
+
         currentBlockoutTimes.add(newBlockoutTime);
         blockoutTimesListAdapter.notifyDataSetChanged();
 
@@ -492,7 +492,7 @@ public class SelectBlockoutTimes extends ActionBarActivity {
 
         if (blockoutSetName == null)
             blockoutSetName = "";
-        currentBlockoutCourse = new Course("BLOCKOUT", blockoutSetName, currentBlockoutTimes);
+        currentBlockoutCourse = new Course("BLOCKOUT", "BLOCKOUT", blockoutSetName, currentBlockoutTimes);
         Log.d("BlockoutTimes", currentBlockoutCourse.toJSON().toString());
 
         Intent intent = new Intent(this, SelectBlockoutTimes.class);
@@ -524,9 +524,9 @@ public class SelectBlockoutTimes extends ActionBarActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 blockoutSetName = blockoutNameEditTextDialog.getText().toString();
-                currentBlockoutCourse = new Course("BLOCKOUT", blockoutSetName, new ArrayList<Section>(currentBlockoutTimes));
+                currentBlockoutCourse = new Course("BLOCKOUT", "BLOCKOUT", blockoutSetName, new ArrayList<>(currentBlockoutTimes));
                 savedBlockoutCourses.add(currentBlockoutCourse);
-                saveBlockoutCoursesToFile();
+                saveBlockoutCoursesToFile(SelectBlockoutTimes.this, savedBlockoutCourses);
                 currentBlockoutTimes.clear();
                 blockoutTimesListAdapter.notifyDataSetChanged();
                 Log.d("BlockoutTimes", currentBlockoutCourse.toJSON().toString());
@@ -553,15 +553,15 @@ public class SelectBlockoutTimes extends ActionBarActivity {
 
     public void loadBlockoutTimes(View view){
 
-        AlertDialog.Builder saveName = new AlertDialog.Builder(this);
-        saveName.setTitle("Load");
-
         ExpandableListView blockoutListView = new ExpandableListView(this);
-        final BlockoutCoursesAdapter blockoutCoursesAdapter = new BlockoutCoursesAdapter(savedBlockoutCourses, getApplicationContext());
+
+        final BlockoutCoursesAdapter blockoutCoursesAdapter = new BlockoutCoursesAdapter(loadBlockoutTimesFromFile(SelectBlockoutTimes.this), getApplicationContext());
+
         blockoutListView.setAdapter(blockoutCoursesAdapter);
 
+        AlertDialog.Builder saveName = new AlertDialog.Builder(this);
+        saveName.setTitle("Load");
         saveName.setView(blockoutListView);
-
         saveName.setPositiveButton("load", new DialogInterface.OnClickListener() {
 
             /**
@@ -592,7 +592,6 @@ public class SelectBlockoutTimes extends ActionBarActivity {
                 }
             }
         });
-
         saveName.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
 
             /**
@@ -607,20 +606,18 @@ public class SelectBlockoutTimes extends ActionBarActivity {
                 dialog.dismiss();
             }
         });
-        AlertDialog dialog = saveName.create();
-
-        dialog.show();
+        saveName.show();
     }
 
     public void removeBlockoutTimes(View view){
-        AlertDialog.Builder builderSingle = new AlertDialog.Builder(SelectBlockoutTimes.this);
-        //builderSingle.setIcon(R.drawable.ic_launcher);
 
-        builderSingle.setTitle("Select Time to Remove:-");
-        final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(SelectBlockoutTimes.this,android.R.layout.select_dialog_singlechoice);
+        final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(SelectBlockoutTimes.this,android.R.layout.select_dialog_singlechoice);
         for(Section section : currentBlockoutTimes){
-            arrayAdapter.add(section.getInstructors()+"\t"+section.getDaysString()+" "+section.getTimeString(Section.h12));
+            arrayAdapter.add(section.getInstructors()+"\t"+section.getDaysString()+" "+section.getTimeString());
         }
+
+        AlertDialog.Builder builderSingle = new AlertDialog.Builder(SelectBlockoutTimes.this);
+        builderSingle.setTitle("Select Time to Remove:-");
         builderSingle.setNegativeButton("CANCEL",
                 new DialogInterface.OnClickListener() {
 
@@ -629,7 +626,6 @@ public class SelectBlockoutTimes extends ActionBarActivity {
                         dialog.dismiss();
                     }
                 });
-
         builderSingle.setAdapter(arrayAdapter,
                 new DialogInterface.OnClickListener() {
 
@@ -665,6 +661,12 @@ public class SelectBlockoutTimes extends ActionBarActivity {
     }
 
     public void toggleTimepickers(View view){
+
+        if(toggleDaysLayout.getVisibility() == View.GONE)
+            toggleDaysLayout.setVisibility(View.VISIBLE);
+        else
+            toggleDaysLayout.setVisibility(View.GONE);
+
         if(timePickerView.getVisibility() == View.GONE)
             timePickerView.setVisibility(View.VISIBLE);
         else
@@ -702,5 +704,59 @@ public class SelectBlockoutTimes extends ActionBarActivity {
         return results;
     }
 
+
+    /**
+     * Saves all blockout times in the list of blockout times provided to a sharedPreferance file. This will overwrite all blockout times currently in that file.
+     *
+     * @param context Context to save with. Usually will be the calling class followed by ".this"
+     *                EX: SelectBlockoutTimes.this
+     * @param coursesToSave ArrayList of blockout times in course format
+     */
+    public static void saveBlockoutCoursesToFile(Context context, ArrayList<Course> coursesToSave){
+
+        SharedPreferences.Editor blockoutTimesEditor;
+        blockoutTimesEditor = context.getSharedPreferences(BLOCKOUT_TIMES, MODE_PRIVATE).edit();
+
+        ArrayList<String> savedBlockoutCourseString = new ArrayList<>(coursesToSave.size());
+        for (Course course : coursesToSave){
+            savedBlockoutCourseString.add(course.toJSON().toString());
+        }
+        JSONArray savedBlockoutCourseJSONArray = new JSONArray(savedBlockoutCourseString);
+        blockoutTimesEditor.putString(BLOCKOUT_TIMES, savedBlockoutCourseJSONArray.toString());
+        blockoutTimesEditor.apply();
+
+    }
+
+    /**
+     * Loads all blockout times saved to sharedPreferences file.
+     * @param context Context to save with. Usually will be the calling class followed by ".this"
+     *                EX: SelectBlockoutTimes.this
+     * @return ArrayList of blockout times in course format
+     */
+    public static ArrayList<Course> loadBlockoutTimesFromFile(Context context){
+        ArrayList<Course> blockoutTimes = new ArrayList<>();
+
+        SharedPreferences blockoutTimesSaver = context.getSharedPreferences(BLOCKOUT_TIMES, MODE_PRIVATE);
+
+        String savedBlockoutCourseString = blockoutTimesSaver.getString(BLOCKOUT_TIMES, null);
+
+
+        if (savedBlockoutCourseString != null){
+            Log.i("Blockout Times", savedBlockoutCourseString);
+            try {
+                JSONArray savedBlockoutCourseJSONArrayString = new JSONArray(savedBlockoutCourseString);
+                JSONArray savedBlockoutCourseJSONArray = new JSONArray();
+                for(int index = savedBlockoutCourseJSONArrayString.length(); index != 0;index--){
+                    JSONObject courseJSONObject = new JSONObject(savedBlockoutCourseJSONArrayString.getString(index-1));
+                    savedBlockoutCourseJSONArray.put(courseJSONObject);
+                }
+                blockoutTimes = Course.buildCourseList(savedBlockoutCourseJSONArray);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return blockoutTimes;
+    }
 
 }

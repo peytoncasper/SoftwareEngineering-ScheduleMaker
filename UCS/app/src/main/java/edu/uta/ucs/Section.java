@@ -1,5 +1,9 @@
 package edu.uta.ucs;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -112,6 +116,7 @@ class TimeShort {
  * Created by arunk_000 on 4/5/2015.
  */
 public class Section {
+
     private int sectionID;                                                                          // Class Number in UTA system
     private int sectionNumber;                                                                      // Section number as part of class
     private String instructors;
@@ -226,7 +231,7 @@ public class Section {
         JSONObject section = new JSONObject();
         JSONArray days = new JSONArray(getDays());
         try {
-            section.put("MeetingTime", getTimeString(h12));
+            section.put("MeetingTime", getTimeString());
             section.put("CourseNumber", getSectionID());
             section.put("Section", getSectionNumber());
             section.put("Instructor", getInstructors());
@@ -270,14 +275,16 @@ public class Section {
         return (startTime.getMinAfterMidnight() - endTime.getMinAfterMidnight()) != 0;
     }
 
-    public String getTimeString(int timeFormat){
-        if(this.hasTimes()){
-            if (timeFormat == h24)
-                return startTime.toString24h() + "-" + endTime.toString24h();
-            if (timeFormat == h12)
-                return startTime.toString12h() + "-" + endTime.toString12h();
+    public String getTimeString(){
+
+        Context context = UserData.getContext();
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        boolean useMilTime = settings.getBoolean(context.getResources().getString(R.string.pref_key_military_time), false);
+
+        if(useMilTime){
+            return startTime.toString24h() + "-" + endTime.toString24h();
         }
-        return "UNKNOWN/TBA";
+        return startTime.toString12h() + "-" + endTime.toString12h();
     }
 
     public ArrayList<Day> getDays() {

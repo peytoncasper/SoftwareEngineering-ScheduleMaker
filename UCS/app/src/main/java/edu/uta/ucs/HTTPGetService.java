@@ -2,6 +2,7 @@ package edu.uta.ucs;
 
 import android.app.IntentService;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Binder;
@@ -24,6 +25,9 @@ import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
@@ -93,7 +97,7 @@ public class HTTPGetService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
-        Toast.makeText(getBaseContext(), "HTTPGetService has been created", Toast.LENGTH_LONG).show();
+        //Toast.makeText(getBaseContext(), "HTTPGetService has been created", Toast.LENGTH_LONG).show();
         Log.d("Service Test", "HTTPGetService has been created");
         //messenger = new Messenger(new MessageHandler());
     }
@@ -101,7 +105,7 @@ public class HTTPGetService extends IntentService {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Toast.makeText(getBaseContext(), "HTTPGetService has been stopped", Toast.LENGTH_LONG).show();
+        //Toast.makeText(getBaseContext(), "HTTPGetService has been stopped", Toast.LENGTH_LONG).show();
         Log.d("Service Test", "HTTPGetService has been stopped");
     }
 
@@ -148,4 +152,29 @@ public class HTTPGetService extends IntentService {
         Log.d("Server reply:", response);
         return response;
     }
+
+    /**
+     * Starts a service for URL
+     *
+     * @param urlToFetch
+     * @param reciever
+     * @param context
+     * @throws MalformedURLException
+     */
+    public static void FetchURL(String urlToFetch, String reciever, Context context){
+        URL url = null;
+        try {
+            url = new URL(urlToFetch);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return;
+        }
+        Intent intent = new Intent(context, HTTPGetService.class);
+        intent.putExtra(HTTPGetService.URL_REQUEST, url.toString());
+
+        intent.putExtra(HTTPGetService.SOURCE_INTENT, reciever);
+        context.startService(intent);
+    }
+
+
 }

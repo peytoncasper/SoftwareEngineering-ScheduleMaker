@@ -1,36 +1,22 @@
 package edu.uta.ucs;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.Switch;
-import android.widget.TextView;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 
 
 public class MainActivity extends ActionBarActivity {
-    public static final String ACTION_RESP ="edu.uta.ucs.intent.action.MAIN_ACTIVITY";
 
-
-    String[] desiredCourseList = {};//{"ENGL-1301","MATH-1426","PHYS-1443","CSE-1105"};
-    String baseURL = "http://ucs.azurewebsites.net/UTA/ClassStatus?classes=";
     private ListView scheduleListView;
 
     ArrayList<Schedule> scheduleArrayList;
@@ -39,11 +25,9 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Intent intent = getIntent();
         setContentView(R.layout.activity_main);
 
         setTitle("Saved Schedules");
-
 
         scheduleListView = (ListView) findViewById(R.id.schedule_listview);
 
@@ -58,7 +42,7 @@ public class MainActivity extends ActionBarActivity {
         for (Schedule schedule : scheduleArrayList){
             scheduleNameArrayList.add(schedule.getName());
         }
-        scheduleNameAdapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_selectable_list_item, scheduleNameArrayList);
+        scheduleNameAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_selectable_list_item, scheduleNameArrayList);
 
         scheduleListView.setAdapter(scheduleNameAdapter);
         scheduleListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -73,14 +57,26 @@ public class MainActivity extends ActionBarActivity {
 
     }
 
+
     @Override
-    protected void onResume() {
-        super.onResume();
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        switch (id){
+            case R.id.action_settings:
+                SettingsActivity.startActivity(MainActivity.this);
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

@@ -25,23 +25,28 @@ public class Course {
     private String courseDepartment;
     private ArrayList<Section> sectionList;
 
-    Course() {
-        this.setCourseNumber(null);
-        this.setCourseName(null);
-        this.setSectionList(null);
-    }
-
-    Course(String courseNumber, String name, ArrayList<Section> sectionList) {
-        this(courseNumber, name);
+    /**
+     *
+     * @param courseNumber
+     * @param name
+     * @param department
+     * @param sectionList
+     */
+    Course(String courseNumber, String department, String name, ArrayList<Section> sectionList) {
+        this.setCourseNumber(courseNumber);
+        this.setCourseName(name);
+        this.setCourseDepartment(department);
         this.setSectionList(sectionList);
         for (Section section : sectionList){
             section.setSourceCourse(this);
         }
     }
 
-    Course(String courseNumber, String name) {
+    Course(String courseNumber, String department, String name) {
         this.setCourseNumber(courseNumber);
         this.setCourseName(name);
+        this.setCourseDepartment(department);
+        this.setSectionList(new ArrayList<Section>());
     }
 
     Course(JSONObject jsonObject) throws JSONException {

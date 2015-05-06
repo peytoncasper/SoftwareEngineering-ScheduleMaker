@@ -27,6 +27,8 @@ import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
@@ -115,20 +117,32 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         LocalBroadcastManager.getInstance(this).registerReceiver(new ResetPasswordReceiver(), new IntentFilter(ACTION_RESET_PASSWORD));
     }
 
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        switch (id){
+            case R.id.action_settings:
+                SettingsActivity.startActivity(LoginActivity.this);
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
     private void populateAutoComplete() {
         getLoaderManager().initLoader(0, null, this);
     }
 
-
-    public void onResume(){
-        super.onResume();
-        TimeShort testTime = new TimeShort("5:25PM");
-        Log.d("TimeTest24", testTime.toString24h());
-        Log.d("TimeTest12", testTime.toString12h());
-
-        Day day = Day.valueOf("M");
-        Log.d("DayTest", day.toString());
-    }
     /**
      * Attempts to sign in or register the account specified by the login form.
      * If there are form errors (invalid email, missing fields, etc.), the
@@ -367,22 +381,25 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             try {
                 response = new JSONObject(intent.getStringExtra(HTTPGetService.SERVER_RESPONSE));
                 success = response.getBoolean("Success");
+
+                if (success) {
+                    mEmailView.setText("");
+                    mPasswordView.setText("");
+                    new UserData(response);
+                    Intent launchMainActivity = new Intent(LoginActivity.this, MainActivity.class);
+                    LoginActivity.this.startActivity(launchMainActivity);
+                } else {
+                    mPasswordView.setText("");
+                    mPasswordView.setError(getString(R.string.error_incorrect_password));
+                    mPasswordView.requestFocus();
+                    return;
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
             Log.d("Login Receiver","Launched Receiver");
             Log.d("Received: ",response.toString());
 
-            if (success) {
-                mEmailView.setText("");
-                mPasswordView.setText("");
-                Intent launchMainActivity = new Intent(LoginActivity.this, MainActivity.class);
-                LoginActivity.this.startActivity(launchMainActivity);
-            } else {
-                mPasswordView.setText("");
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
-            }
         }
     }
 }

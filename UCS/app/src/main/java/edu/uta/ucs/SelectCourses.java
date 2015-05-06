@@ -16,6 +16,8 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -653,6 +655,28 @@ public class SelectCourses extends ActionBarActivity {
         courseNumber = ((AutoCompleteTextView) findViewById(R.id.course_number_edittext));
     }
 
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        switch (id){
+            case R.id.action_settings:
+                SettingsActivity.startActivity(SelectCourses.this);
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -785,6 +809,18 @@ public class SelectCourses extends ActionBarActivity {
         String department = courseDepartment.getText().toString().toUpperCase();
         String number = courseNumber.getText().toString();
 
+        if (department.equals("")){
+            courseDepartment.setError("Department cannot be blank");
+            courseDepartment.requestFocus();
+            return;
+        }
+        if (number.equals("")){
+
+            courseNumber.setError("Course number cannot be blank");
+            courseNumber.requestFocus();
+            return;
+        }
+
         SemesterInfo.DepartmentInfo.CourseInfo selectedCourse = getCourseInfo(department, number);
 
         if (selectedCourse != null) {
@@ -794,7 +830,7 @@ public class SelectCourses extends ActionBarActivity {
             if(!desiredCoursesArrayList.contains(selectedCourse))
                 desiredCoursesArrayList.add(selectedCourse);
             else
-                Toast.makeText(getApplicationContext(), "Class already selected", Toast.LENGTH_LONG).show();
+                Toast.makeText(SelectCourses.this, "Class already selected", Toast.LENGTH_LONG).show();
 
             desiredCoursesArrayAdapter.notifyDataSetChanged();
 
@@ -804,7 +840,7 @@ public class SelectCourses extends ActionBarActivity {
             courseDepartment.requestFocus();
         }
         else {
-            Toast.makeText(getApplicationContext(), "Class not found", Toast.LENGTH_LONG).show();
+            Toast.makeText(SelectCourses.this, "Class not found", Toast.LENGTH_LONG).show();
 
             courseDepartment.setText("");
             courseNumber.setText("");
@@ -815,6 +851,12 @@ public class SelectCourses extends ActionBarActivity {
     }
 
     public void getCourseSections(View view){
+
+        if(!(desiredCoursesArrayList.size()>0)){
+            courseDepartment.setError("You must have at least once course to build a schedule");
+            courseDepartment.requestFocus();
+            return;
+        }
 
         StringBuilder semesterParam = new StringBuilder(URL_GET_COURSE_SECTIONS_PARAM_SEMESTER);
         StringBuilder departmentParam = new StringBuilder(URL_GET_COURSE_SECTIONS_PARAM_DEPARTMENT);
@@ -1023,7 +1065,7 @@ public class SelectCourses extends ActionBarActivity {
                     blockoutSections = new ArrayList<Section>();
 
                 if (fetchedCourses != null)
-                    sectionArrayList = Schedule.scheduleGenerator(0, fetchedCourses, new ArrayList<Section>(), blockoutSections);
+                    sectionArrayList = Schedule.scheduleGenerator(fetchedCourses, new ArrayList<Section>(), blockoutSections);
                 for (Section section : sectionArrayList){
                     Log.i("Built Schedule Sections",section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseNumber() + "-" + section.getSectionNumber() + "\t" + section.toJSON().toString());
                 }
@@ -1034,7 +1076,16 @@ public class SelectCourses extends ActionBarActivity {
                 Schedule scheduleTest = new Schedule(schedule.toJSON());
             } catch (NoSchedulesPossibleException e) {
                 e.printStackTrace();
-                e.getConflict();
+                AlertDialog.Builder noSchedulesPossible = new AlertDialog.Builder(SelectCourses.this);
+                noSchedulesPossible.setTitle("Schedule Could be generated. Issues:");
+                noSchedulesPossible.setMessage(e.printConflict());
+                noSchedulesPossible.setNeutralButton("OKAY", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+                noSchedulesPossible.create().show();
             } catch (JSONException e) {
                 e.printStackTrace();
             }
