@@ -6,6 +6,10 @@
         <item name="android:listViewStyle">@color/white</item>
     </style>
 
+    <style name="Orange_Buttons" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:background">@color/utaOrange</item>
+    </style>
+
     <style name="FullscreenTheme" parent="android:Theme.NoTitleBar">
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowBackground">@null</item>
