@@ -367,22 +367,25 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             try {
                 response = new JSONObject(intent.getStringExtra(HTTPGetService.SERVER_RESPONSE));
                 success = response.getBoolean("Success");
+
+                if (success) {
+                    mEmailView.setText("");
+                    mPasswordView.setText("");
+                    new UserData(response);
+                    Intent launchMainActivity = new Intent(LoginActivity.this, MainActivity.class);
+                    LoginActivity.this.startActivity(launchMainActivity);
+                } else {
+                    mPasswordView.setText("");
+                    mPasswordView.setError(getString(R.string.error_incorrect_password));
+                    mPasswordView.requestFocus();
+                    return;
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
             Log.d("Login Receiver","Launched Receiver");
             Log.d("Received: ",response.toString());
 
-            if (success) {
-                mEmailView.setText("");
-                mPasswordView.setText("");
-                Intent launchMainActivity = new Intent(LoginActivity.this, MainActivity.class);
-                LoginActivity.this.startActivity(launchMainActivity);
-            } else {
-                mPasswordView.setText("");
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
-            }
         }
     }
 }

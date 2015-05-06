@@ -785,6 +785,18 @@ public class SelectCourses extends ActionBarActivity {
         String department = courseDepartment.getText().toString().toUpperCase();
         String number = courseNumber.getText().toString();
 
+        if (department.equals("")){
+            courseDepartment.setError("Department cannot be blank");
+            courseDepartment.requestFocus();
+            return;
+        }
+        if (number.equals("")){
+
+            courseNumber.setError("Course number cannot be blank");
+            courseNumber.requestFocus();
+            return;
+        }
+
         SemesterInfo.DepartmentInfo.CourseInfo selectedCourse = getCourseInfo(department, number);
 
         if (selectedCourse != null) {
@@ -794,7 +806,7 @@ public class SelectCourses extends ActionBarActivity {
             if(!desiredCoursesArrayList.contains(selectedCourse))
                 desiredCoursesArrayList.add(selectedCourse);
             else
-                Toast.makeText(getApplicationContext(), "Class already selected", Toast.LENGTH_LONG).show();
+                Toast.makeText(SelectCourses.this, "Class already selected", Toast.LENGTH_LONG).show();
 
             desiredCoursesArrayAdapter.notifyDataSetChanged();
 
@@ -804,7 +816,7 @@ public class SelectCourses extends ActionBarActivity {
             courseDepartment.requestFocus();
         }
         else {
-            Toast.makeText(getApplicationContext(), "Class not found", Toast.LENGTH_LONG).show();
+            Toast.makeText(SelectCourses.this, "Class not found", Toast.LENGTH_LONG).show();
 
             courseDepartment.setText("");
             courseNumber.setText("");
@@ -815,6 +827,12 @@ public class SelectCourses extends ActionBarActivity {
     }
 
     public void getCourseSections(View view){
+
+        if(!(desiredCoursesArrayList.size()>0)){
+            courseDepartment.setError("You must have at least once course to build a schedule");
+            courseDepartment.requestFocus();
+            return;
+        }
 
         StringBuilder semesterParam = new StringBuilder(URL_GET_COURSE_SECTIONS_PARAM_SEMESTER);
         StringBuilder departmentParam = new StringBuilder(URL_GET_COURSE_SECTIONS_PARAM_DEPARTMENT);

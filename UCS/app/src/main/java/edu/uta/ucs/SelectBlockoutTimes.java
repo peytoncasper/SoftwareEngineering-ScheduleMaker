@@ -25,6 +25,7 @@ import android.widget.HorizontalScrollView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import org.json.JSONArray;
@@ -391,7 +392,6 @@ public class SelectBlockoutTimes extends ActionBarActivity {
 
         sectionListView = ((ListView) findViewById(R.id.show_blockout_times_listView));
 
-
     }
 
     @Override
@@ -478,10 +478,25 @@ public class SelectBlockoutTimes extends ActionBarActivity {
 
         newStartTime = getTime(startTimePicker);
         newEndTime = getTime(endTimePicker);
+
         ArrayList<Day> newDayList = getDays();
+        if(!(newDayList.size()>0)){
+            AlertDialog.Builder noDaysErrorDialog = new AlertDialog.Builder(SelectBlockoutTimes.this);
+            noDaysErrorDialog.setTitle("Can't block out a time with no days");
+            noDaysErrorDialog.show();
+            return;
+        }
+
+        String blockoutTimeName = nameBlockoutTime.getText().toString();
+        if(blockoutTimeName.equals("")){
+            nameBlockoutTime.setError("Please give this a name");
+            nameBlockoutTime.requestFocus();
+            return;
+        }
+
         Course newBlockoutCourse = new Course();
 
-        Section newBlockoutTime = new Section(-1, nameBlockoutTime.getText().toString(), "", newStartTime, newEndTime, newDayList, ClassStatus.OPEN, newBlockoutCourse);
+        Section newBlockoutTime = new Section(-1, blockoutTimeName , "", newStartTime, newEndTime, newDayList, ClassStatus.OPEN, newBlockoutCourse);
         nameBlockoutTime.setText("");
         currentBlockoutTimes.add(newBlockoutTime);
         blockoutTimesListAdapter.notifyDataSetChanged();

@@ -74,7 +74,7 @@
             <Button
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="@string/action_generate_schedule"
+                android:text="GENERATE SCHEDULE"
                 android:id="@+id/generate_schedules_button"
                 android:layout_gravity="center_horizontal"
                 android:layout_weight="1"
