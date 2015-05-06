@@ -9,6 +9,8 @@
 
     <style name="Orange_Buttons" parent="@android:style/Widget.Button">
         <item name="android:background">@color/utaOrange</item>
+        <item name="android:paddingTop">5dp</item>
+        <item name="android:paddingBottom">5dp</item>
     </style>
 
     <style name="FullscreenTheme" parent="android:Theme.NoTitleBar">
