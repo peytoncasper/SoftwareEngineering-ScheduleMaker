@@ -132,6 +132,7 @@ public class Schedule {
 
     public static ArrayList<Section> scheduleGenerator(int index, ArrayList<Course> courseArrayList, ArrayList<Section> sectionArrayList, ArrayList<Section> blockOutTimesList) throws NoSchedulesPossibleException{
 
+        NoSchedulesPossibleException scheduleConflict = null; //new NoSchedulesPossibleException();
         Log.i("schedule Factory", "Loop Counter:" + ((Integer) index).toString());
         if (index == courseArrayList.size()){
             return sectionArrayList;
@@ -142,23 +143,28 @@ public class Schedule {
         Collections.shuffle(possibleSections);
         // Shuffle sectionArrayList
         checkPossibleSections:
+
         for (Section section : possibleSections){
             if(section.getStatus() != ClassStatus.OPEN)
                 continue;
             for (Section sectionToCompare : sectionArrayList){
                 if (section.conflictsWith(sectionToCompare)){
-                    Log.e("Schedule Conflict Error", "Conflict between " + section.getSourceCourse().getCourseName() + " "
-                            + section.getSourceCourse().getCourseNumber() + "-"
-                            + section.getSectionNumber() + " and "
-                            + sectionToCompare.getSourceCourse().getCourseName() + " "
-                            + sectionToCompare.getSourceCourse().getCourseNumber() + "-"
-                            + sectionToCompare.getSectionNumber());
+                    if(scheduleConflict != null)
+                        scheduleConflict.addConflict(section, sectionToCompare);
+                    else scheduleConflict = new NoSchedulesPossibleException(section, sectionToCompare);
+                    Log.e("Schedule Conflict Error", "Conflict between " + section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseNumber() + "-" + section.getSectionNumber() + " and "
+                            + sectionToCompare.getSourceCourse().getCourseName() + " " + sectionToCompare.getSourceCourse().getCourseNumber() + "-" + sectionToCompare.getSectionNumber());
                     continue checkPossibleSections;
                 }
             }
             for (Section sectionToCompare : blockOutTimesList){
                 if (section.conflictsWith(sectionToCompare)){
-                    Log.e("Schedule Conflict Error", "Conflict between " + section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseNumber() + "-" + section.getSectionNumber() + " and " + sectionToCompare.getSourceCourse().getCourseNumber() + " " + sectionToCompare.getInstructors());
+                    if (section.conflictsWith(sectionToCompare))
+                        if(scheduleConflict != null)
+                            scheduleConflict.addConflict(section, sectionToCompare);
+                        else scheduleConflict = new NoSchedulesPossibleException(section, sectionToCompare);
+                    Log.e("Schedule Conflict Error", "Conflict between " + section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseNumber() + "-" + section.getSectionNumber() + " and "
+                            + sectionToCompare.getSourceCourse().getCourseNumber() + " " + sectionToCompare.getInstructors());
                     continue checkPossibleSections;
                 }
             }
@@ -169,9 +175,10 @@ public class Schedule {
             } catch (NoSchedulesPossibleException exception){
                 exception.printStackTrace();
                 sectionArrayList.remove(index);
+                scheduleConflict = new NoSchedulesPossibleException(exception);
             }
 
-        }throw new NoSchedulesPossibleException(course, sectionArrayList);
+        }throw scheduleConflict;
 
     }
 
@@ -184,7 +191,16 @@ class NoSchedulesPossibleException extends Exception {
 
     String message;
 
-    public NoSchedulesPossibleException() {}
+    public NoSchedulesPossibleException() {
+        this.message = "";
+    }
+
+    public NoSchedulesPossibleException(NoSchedulesPossibleException innerError) {
+        if(innerError != null)
+            this.message = this.message + "\n" + innerError.message;
+        else
+            this.message = "";
+    }
 
     public NoSchedulesPossibleException(String message) {
         super(message);
@@ -211,7 +227,20 @@ class NoSchedulesPossibleException extends Exception {
                 + " and " + conflictingSection.getSourceCourse().getCourseDepartment() +  " " + conflictingSection.getSourceCourse().getCourseNumber() + "-" + conflictingSection.getSectionNumber();
     }
 
-    public String getConflict(){
+    public void addConflict(Section sourceSection, Section conflictingSection){
+
+        if(conflictingSection.getSourceCourse().getCourseDepartment().equalsIgnoreCase("BLOCKOUT")){
+            this.message = this.message + "\n" +
+                    "Conflict between " + sourceSection.getSourceCourse().getCourseDepartment() +  " " + sourceSection.getSourceCourse().getCourseNumber() + "-" + sourceSection.getSectionNumber()
+                    + " and " + conflictingSection.getSourceCourse().getCourseDepartment() +  " time:" + conflictingSection.getInstructors();
+        }
+        else
+            this.message = this.message + "\n" +
+                    "Conflict between " + sourceSection.getSourceCourse().getCourseDepartment() +  " " + sourceSection.getSourceCourse().getCourseNumber() + "-" + sourceSection.getSectionNumber()
+                    + " and " + conflictingSection.getSourceCourse().getCourseDepartment() +  " " + conflictingSection.getSourceCourse().getCourseNumber() + "-" + conflictingSection.getSectionNumber();
+    }
+
+    public String printConflict(){
         Log.e("Cannot Generate", message);
         return message;
     }
