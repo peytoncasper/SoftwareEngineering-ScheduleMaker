@@ -201,7 +201,14 @@ class NoSchedulesPossibleException extends Exception {
         this.message = "Could not build a schedule from this combination of courses:\n" + course.getCourseName() + "\n" + "\t" + section.getSourceCourse().getCourseName() + " - " + section.getSourceCourse().getCourseNumber() + "\nError - Unrecognized Course";
     }
 
-        this.message = message.toString();
+    public NoSchedulesPossibleException(Section sourceSection, Section conflictingSection){
+        if(conflictingSection.getSourceCourse().getCourseDepartment().equalsIgnoreCase("BLOCKOUT")){
+            this.message = "Conflict between " + sourceSection.getSourceCourse().getCourseDepartment() +  " " + sourceSection.getSourceCourse().getCourseNumber() + "-" + sourceSection.getSectionNumber()
+                    + " and " + conflictingSection.getSourceCourse().getCourseDepartment() +  " time:" + conflictingSection.getInstructors();
+        }
+        else
+            this.message = "Conflict between " + sourceSection.getSourceCourse().getCourseDepartment() +  " " + sourceSection.getSourceCourse().getCourseNumber() + "-" + sourceSection.getSectionNumber()
+                + " and " + conflictingSection.getSourceCourse().getCourseDepartment() +  " " + conflictingSection.getSourceCourse().getCourseNumber() + "-" + conflictingSection.getSectionNumber();
     }
 
     public String getConflict(){
