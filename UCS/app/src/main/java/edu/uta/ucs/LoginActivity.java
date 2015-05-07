@@ -13,6 +13,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 
@@ -428,6 +429,17 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                     response = new JSONObject(intent.getStringExtra(HTTPService.SERVER_RESPONSE));
                     success = response.getBoolean("Success");
                     if(success){
+
+
+                        SharedPreferences.Editor scheduleEditor;
+                        scheduleEditor = context.getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, Context.MODE_PRIVATE).edit();
+                        scheduleEditor.clear();
+                        scheduleEditor.apply();
+
+                        SharedPreferences.Editor blockoutTimesEditor;
+                        blockoutTimesEditor = context.getSharedPreferences(SelectBlockoutTimes.BLOCKOUT_TIMES, MODE_PRIVATE).edit();
+                        blockoutTimesEditor.clear();
+                        blockoutTimesEditor.apply();
 
                         UserData.setEmail(null);
                         UserData.setMilitaryTime(false);

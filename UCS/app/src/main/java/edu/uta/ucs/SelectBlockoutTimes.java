@@ -346,7 +346,7 @@ class BlockoutCoursesAdapter extends BaseExpandableListAdapter {
 
 public class SelectBlockoutTimes extends ActionBarActivity {
 
-    private static final String BLOCKOUT_TIMES = "BLOCKOUT_TIMES";
+    public static final String BLOCKOUT_TIMES = "BLOCKOUT_TIMES";
 
     EditText nameBlockoutTime;
     ToggleButton mondayToggleButton, tuesdayToggleButton, wednesdayToggleButton, thursdayToggleButton, fridayToggleButton, saturdayToggleButton;
@@ -803,6 +803,7 @@ public class SelectBlockoutTimes extends ActionBarActivity {
 
         SharedPreferences.Editor blockoutTimesEditor;
         blockoutTimesEditor = context.getSharedPreferences(BLOCKOUT_TIMES, MODE_PRIVATE).edit();
+        blockoutTimesEditor.clear();
 
         ArrayList<JSONObject> savedBlockoutCourseString = new ArrayList<>(coursesToSave.size());
         for (Course course : coursesToSave){
