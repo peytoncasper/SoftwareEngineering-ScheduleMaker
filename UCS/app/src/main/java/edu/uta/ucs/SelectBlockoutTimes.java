@@ -668,7 +668,7 @@ public class SelectBlockoutTimes extends ActionBarActivity {
 
         ExpandableListView blockoutListView = new ExpandableListView(this);
 
-        final BlockoutCoursesAdapter blockoutCoursesAdapter = new BlockoutCoursesAdapter(loadBlockoutTimesFromFile(SelectBlockoutTimes.this), getApplicationContext());
+        final BlockoutCoursesAdapter blockoutCoursesAdapter = new BlockoutCoursesAdapter(loadBlockoutTimesFromFile(SelectBlockoutTimes.this), SelectBlockoutTimes.this);
 
         blockoutListView.setAdapter(blockoutCoursesAdapter);
 
