@@ -109,20 +109,4 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
-    void signOut() {
-        Intent intent = new Intent(this, LoginActivity.class);
-        intent.putExtra("finish", true); // if you are checking for this in your other Activities
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
-                Intent.FLAG_ACTIVITY_CLEAR_TASK |
-                Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-        finish();
-        /*
-        Intent intent = new Intent(this, LoginActivity.class);
-        intent.putExtra("finish", true);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // To clean up all activities
-        startActivity(intent);
-        finish();*/
-    }
-
 }

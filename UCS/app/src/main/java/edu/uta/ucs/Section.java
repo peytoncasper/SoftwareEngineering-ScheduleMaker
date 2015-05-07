@@ -1,9 +1,5 @@
 package edu.uta.ucs;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.res.Resources;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -47,16 +43,6 @@ class TimeShort {
     private byte hour;
     private byte minute;
 
-    public TimeShort() {
-        this.hour = 0;
-        this.minute = 0;
-    }
-
-    public TimeShort(byte hour, byte minute) {
-        this.hour = hour;
-        this.minute = minute;
-    }
-
     public TimeShort(int hour, int minute) {
         Log.d("New TimeShort Hour",""+(byte)hour);
         Log.d("New TimeShort Minute",""+(byte)minute);
@@ -92,8 +78,7 @@ class TimeShort {
     }
 
     public String toString24h() {
-        String result = String.format("%d", this.hour) + ":" + String.format("%02d", this.minute);
-        return result;
+        return String.format("%d", this.hour) + ":" + String.format("%02d", this.minute);
     }
 
     public String toString12h() {
@@ -113,7 +98,7 @@ class TimeShort {
 }
 
 /**
- * Created by arunk_000 on 4/5/2015.
+ * This class contains all information used to identify a particular class at UT Arlington
  */
 public class Section {
 
@@ -127,14 +112,10 @@ public class Section {
     private ClassStatus status;
     private Course sourceCourse;
 
-    public static final int h12 = 0;
-    public static final int h24 = 1;
-
     /**
      * Constructor
      *
      * Generates a new Section will all fields set to null
-     * @returns Section
      */
     Section() {
         this.setSectionID(0);
@@ -181,7 +162,7 @@ public class Section {
      *                   <li>"MeetingDays" - String, JSON Array of days class will be meeting
      *                   <li>"Status" - String, current class status (OPEN, CLOSED, WAIT_LIST)
      *                   <ul/>
-     * @param sourceCourse
+     * @param sourceCourse Course this section belongs to. Used primarily to recreate JSON.
      * @throws JSONException
      */
     Section(JSONObject jsonObject, Course sourceCourse) throws JSONException {
@@ -212,12 +193,12 @@ public class Section {
         JSONArray jsonDaysArray = jsonObject.getJSONArray("MeetingDays");
         Log.i("New Section Days List:", jsonDaysArray.toString());
 
-        days = new ArrayList<Day>(jsonDaysArray.length());
+        days = new ArrayList<>(jsonDaysArray.length());
 
         for(int index = jsonDaysArray.length(); index != 0;index--){
             Day temp = Day.valueOf(jsonDaysArray.getString(index -1));
             days.add(temp);
-            Log.i("New Section Day: ", ((Day)days.get(days.size()-1)).toString());
+            Log.i("New Section Day: ", days.get(days.size()-1).toString());
         }
         Collections.reverse(days);
         Log.i("New Section #of Days: ", ((Integer) days.size()).toString());
@@ -271,17 +252,9 @@ public class Section {
         //Log.i("New Section End Time", getEndTime().toString24h());
     }
 
-    public boolean hasTimes(){
-        return (startTime.getMinAfterMidnight() - endTime.getMinAfterMidnight()) != 0;
-    }
-
     public String getTimeString(){
 
-        Context context = UserData.getContext();
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-        boolean useMilTime = settings.getBoolean(context.getResources().getString(R.string.pref_key_military_time), false);
-
-        if(useMilTime){
+        if(UserData.useMilitaryTime()){
             return startTime.toString24h() + "-" + endTime.toString24h();
         }
         return startTime.toString12h() + "-" + endTime.toString12h();
@@ -295,7 +268,7 @@ public class Section {
         StringBuilder daysStringBuilder = new StringBuilder("[");
 
         for(Day day : days){
-            daysStringBuilder.append(day.toString() + ",");
+            daysStringBuilder.append(day.toString()).append(",");
         }
 
         String result = daysStringBuilder.length() > 0 ? daysStringBuilder.substring( 0, daysStringBuilder.length() - 1 ): "";

@@ -12,14 +12,14 @@ import java.util.Collections;
 /**
  * Created by arunk_000 on 4/5/2015.
  *
- * Contains 4 objects
+ * <p>Contains 4 objects</p>
  *
- * String Course Department, a 3 or more character string which represents the department
- * String Course ID, 4 digit number which represents the course identifier
- * String Course Name, University designation for a given course
+ * <li>String Course Department, a 3 or more character string which represents the department. <br>EX: ENGL in "ENGL 1301"</li>
+ * <li>String Course Number, 4 digit number which represents the course identifier <br>EX: 1301 in "ENGL 1301"</li>
+ * <li>String Course Name, University designation for a given course <br>EX: "RHETORIC AND COMPOSITION I" for "ENGL 1301"</li>
+ * <li>Arraylist of {@link Section} which are of this type of course</li>
  */
 public class Course {
-    //private String courseDepartment;
     private String courseNumber;
     private String courseName;
     private String courseDepartment;
@@ -27,10 +27,10 @@ public class Course {
 
     /**
      *
-     * @param courseNumber
-     * @param name
-     * @param department
-     * @param sectionList
+     * @param courseNumber String course number EX: 1301 in "ENGL 1301"
+     * @param department String course department EX: ENGL in "ENGL 1301"
+     * @param name  String course name. EX: "RHETORIC AND COMPOSITION I" for "ENGL 1301"
+     * @param sectionList Arraylist of {@link Section} which are of this type of course
      */
     Course(String courseNumber, String department, String name, ArrayList<Section> sectionList) {
         this.setCourseNumber(courseNumber);
@@ -113,9 +113,16 @@ public class Course {
         } else return true;
     }
 
+    /**
+     * Builds an ArrayList of Courses based on a JSONArray
+     *
+     * @param jsonCourses JSONArray of courses
+     * @return ArrayList<Course>
+     * @throws JSONException
+     */
     public static ArrayList<Course> buildCourseList(JSONArray jsonCourses) throws JSONException {
 
-        ArrayList<Course> courseList = new ArrayList<Course>(jsonCourses.length());
+        ArrayList<Course> courseList = new ArrayList<>(jsonCourses.length());
 
         for(int index = jsonCourses.length(); index != 0;index--){
             JSONObject courseJSON;

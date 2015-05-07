@@ -7,11 +7,16 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+
 /**
- * Created by Owner on 5/5/2015.
+ * Stores some userdata at login and thoughout application lifecycle. Kind of a hack around, but what else can you do?
+ *
+ * !!Replace with superior implementation if one is thought up!!
  */
 public class UserData extends Application {
 
@@ -30,39 +35,86 @@ public class UserData extends Application {
         super.onCreate();
         UserData.context = getApplicationContext();
         UserData.setEmail(null);
-        UserData.setMilitaryTime(false);
+
+        Context context = UserData.getContext();
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        UserData.setMilitaryTime(settings.getBoolean(context.getResources().getString(R.string.pref_key_military_time), false));
+
     }
 
+    /**
+     * Used by android system to initialize UserData.
+     *
+     * !!Do not remove!!
+     */
     public UserData() {
         super();
     }
 
-    UserData(String email, Boolean militaryTime) {
-    }
-
     UserData(JSONObject userDataJSON) throws JSONException {
-        UserData.setEmail(userDataJSON.getString("Email"));
+        if(userDataJSON.has("Email"))
+            UserData.setEmail(userDataJSON.getString("Email"));
+        if(userDataJSON.has("MilitaryTime"))
+            UserData.setMilitaryTime(userDataJSON.getBoolean("MilitaryTime"));
+
+        if(userDataJSON.has("SCHEDULES")){
+            Log.i("UserData Login","Found Schedules in login data");
+            JSONArray schedulesJSONArray = userDataJSON.getJSONArray("SCHEDULES");
+            ArrayList<Schedule> schedulesFromServer = Schedule.buildScheduleList(schedulesJSONArray);
+            Schedule.saveSchedulesToFile(UserData.getContext(), schedulesFromServer);
+        }
+
+        if(userDataJSON.has("BLOCKOUTTIMES")){
+            Log.i("UserData Login","Found blockout times in login data");
+            JSONArray blockoutTimesJSONArray = userDataJSON.getJSONArray("BLOCKOUTTIMES");
+            ArrayList<Course> blockoutTimesFromServer = Course.buildCourseList(blockoutTimesJSONArray);
+            SelectBlockoutTimes.saveBlockoutCoursesToFile(UserData.getContext(), blockoutTimesFromServer);
+        }
+
     }
 
     public static JSONObject toJSON() throws JSONException {
         JSONObject userDataJSON = new JSONObject();
 
+        ArrayList<Schedule> schedules = Schedule.loadSchedulesFromFile(UserData.getContext());
+        JSONArray schedulesJSON = new JSONArray();
+        for(Schedule schedule : schedules){
+            schedulesJSON.put(schedule.toJSON());
+        }
+
+        ArrayList<Course> blockoutTimes = SelectBlockoutTimes.loadBlockoutTimesFromFile(UserData.getContext());
+        JSONArray blockoutJSON = new JSONArray();
+        for(Course course : blockoutTimes){
+            blockoutJSON.put(course.toJSON());
+        }
+
         userDataJSON.put("Email", UserData.getEmail());
+        userDataJSON.put("MilitaryTime", militaryTime);
+        userDataJSON.put("SCHEDULES", schedulesJSON);
+        userDataJSON.put("BLOCKOUTTIMES", blockoutJSON);
 
         return userDataJSON;
     }
 
     public static void logout(Context context) {
 
-        Intent intent = new Intent(context, LoginActivity.class);
-        intent.putExtra("finish", true); // if you are checking for this in your other Activities
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
-                Intent.FLAG_ACTIVITY_CLEAR_TASK |
-                Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
+        JSONObject logoutJSON = null;
 
-        UserData.setEmail(null);
-        UserData.setMilitaryTime(false);
+        try {
+            logoutJSON = UserData.toJSON();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+        SharedPreferences.Editor logoutLog = context.getSharedPreferences("LOGOUT_LOG", Context.MODE_PRIVATE).edit();
+        logoutLog.putString(((Long) System.currentTimeMillis()).toString(), logoutJSON.toString());
+        logoutLog.apply();
+
+        HTTPService.PostJSON(LoginActivity.getLOGOUT_URL(), logoutJSON,LoginActivity.ACTION_LOGOUT,UserData.getContext());
+
+        Log.i("UserData Logout", "LOGOUT JSON: " + logoutJSON.toString());
+
     }
 
 
@@ -74,12 +126,19 @@ public class UserData extends Application {
         UserData.email = email;
     }
 
-    public static Boolean isMilitaryTime() {
-        return militaryTime;
+    public static Boolean useMilitaryTime() {
+        Context context = UserData.getContext();
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        return settings.getBoolean(context.getResources().getString(R.string.pref_key_military_time), false);
     }
 
     public static void setMilitaryTime(Boolean militaryTime) {
+
         UserData.militaryTime = militaryTime;
+
+        SharedPreferences.Editor settings = PreferenceManager.getDefaultSharedPreferences(UserData.getContext()).edit();
+        settings.putBoolean(context.getResources().getString(R.string.pref_key_spoof_server), militaryTime);
+
     }
 
     public static boolean spoofServer() {

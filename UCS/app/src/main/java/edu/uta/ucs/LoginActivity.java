@@ -49,9 +49,11 @@ import java.util.List;
 public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
     public static final String ACTION_LOGIN ="edu.uta.ucs.intent.action.ACTION_LOGIN";
+    public static final String ACTION_LOGOUT ="edu.uta.ucs.intent.action.ACTION_LOGOUT";
     public static final String ACTION_RESET_PASSWORD ="edu.uta.ucs.intent.action.ACTION_RESET_PASSWORD";
 
     private static final String LOGIN_URL = "http://ucs.azurewebsites.net/UTA/ValidateLogin?";
+    private static final String LOGOUT_URL = "http://ucs.azurewebsites.net/UTA/ValidateLogout?";
     private static final String[] LOGIN_PARAMS ={"username=","&password="};
     private static final String EMAIL_EXISTS_URL = "http://ucs.azurewebsites.net/UTA/EmailExists?email=";
 
@@ -72,6 +74,10 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
     String m_Text;
     private String rawServerResponse;
+
+    public static String getLOGOUT_URL() {
+        return LOGOUT_URL;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,6 +112,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         mProgressView = findViewById(R.id.login_progress);
 
         LocalBroadcastManager.getInstance(this).registerReceiver(new LoginReceiver(), new IntentFilter(ACTION_LOGIN));
+        LocalBroadcastManager.getInstance(this).registerReceiver(new LogoutReceiver(), new IntentFilter(ACTION_LOGOUT));
         LocalBroadcastManager.getInstance(this).registerReceiver(new ResetPasswordReceiver(), new IntentFilter(ACTION_RESET_PASSWORD));
 
     }
@@ -191,7 +198,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             /*
             Intent intent = new Intent(this, HTTPService.class);
 
-            intent.putExtra(HTTPService.REQUEST_GET_URL, url);
+            intent.putExtra(HTTPService.REQUEST_URL, url);
             //intent.putExtra(HTTPGetService.SPOOFED_RESPONSE, SPOOFED_LOGIN);
             intent.putExtra(HTTPService.SOURCE_INTENT, ACTION_LOGIN);
 
@@ -232,7 +239,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                     /* Depreciated with implementation of HTTPService.FetchURL()
                     Intent intent = new Intent(getApplicationContext(), HTTPService.class);
 
-                    intent.putExtra(HTTPService.REQUEST_GET_URL, EMAIL_EXISTS_URL+email);
+                    intent.putExtra(HTTPService.REQUEST_URL, EMAIL_EXISTS_URL+email);
                     //intent.putExtra(HTTPGetService.SPOOFED_RESPONSE, SPOOFED_RESET_PASSWORD);
                     intent.putExtra(HTTPService.SOURCE_INTENT, ACTION_RESET_PASSWORD);
 
@@ -403,6 +410,66 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             }
             Log.d("Login Receiver","Launched Receiver");
             Log.d("Received: ",response.toString());
+
+        }
+    }
+
+
+    private class LogoutReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            JSONObject response = null;
+            boolean success = false;
+
+            if(intent.hasExtra(HTTPService.SERVER_RESPONSE)){
+                try {
+                    response = new JSONObject(intent.getStringExtra(HTTPService.SERVER_RESPONSE));
+                    success = response.getBoolean("Success");
+                    if(success){
+
+                        UserData.setEmail(null);
+                        UserData.setMilitaryTime(false);
+
+                        Intent logoutIntent = new Intent(context, LoginActivity.class);
+                        logoutIntent.putExtra("finish", true); // if you are checking for this in your other Activities
+                        logoutIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                                Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                                Intent.FLAG_ACTIVITY_NEW_TASK);
+                        context.startActivity(logoutIntent);
+
+                        Log.i("LoginActivity", "Successful logout");
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            };
+
+            /*
+            showProgress(false);
+            try {
+                response = new JSONObject(intent.getStringExtra(HTTPService.SERVER_RESPONSE));
+                success = response.getBoolean("Success");
+
+                if (success) {
+                    mEmailView.setText("");
+                    mPasswordView.setText("");
+                    new UserData(response);
+                    Intent launchMainActivity = new Intent(LoginActivity.this, MainActivity.class);
+                    LoginActivity.this.startActivity(launchMainActivity);
+                } else {
+                    mPasswordView.setText("");
+                    mPasswordView.setError(getString(R.string.error_incorrect_password));
+                    mPasswordView.requestFocus();
+                    return;
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            Log.d("Login Receiver","Launched Receiver");
+            Log.d("Received: ",response.toString());
+            */
 
         }
     }

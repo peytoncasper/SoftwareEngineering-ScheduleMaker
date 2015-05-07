@@ -227,7 +227,7 @@ public class DetailedSchedule extends Activity {
 
         Intent intent = new Intent(this, HTTPService.class);
 
-        intent.putExtra(HTTPService.REQUEST_GET_URL, urlFinal);
+        intent.putExtra(HTTPService.REQUEST_URL, urlFinal);
         intent.putExtra(HTTPService.SOURCE_INTENT, ACTION_VERIFY_SCHEDULE);
         startService(intent);
 
@@ -364,7 +364,7 @@ public class DetailedSchedule extends Activity {
         /* Depreciated with implementation of HTTPService.FetchURL()
         Intent intent = new Intent(this, HTTPService.class);
 
-        intent.putExtra(HTTPService.REQUEST_GET_URL, url);
+        intent.putExtra(HTTPService.REQUEST_URL, url);
         intent.putExtra(HTTPService.SOURCE_INTENT, ACTION_GET_COURSE_SECTIONS);
         startService(intent);
         */
@@ -549,21 +549,5 @@ public class DetailedSchedule extends Activity {
             Log.i("Detailed View", "Logging out");
             DetailedSchedule.this.finish();
         }
-    }
-
-    void signOut() {
-        Intent intent = new Intent(this, LoginActivity.class);
-        intent.putExtra("finish", true); // if you are checking for this in your other Activities
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
-                Intent.FLAG_ACTIVITY_CLEAR_TASK |
-                Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-        finish();
-        /*
-        Intent intent = new Intent(this, LoginActivity.class);
-        intent.putExtra("finish", true);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // To clean up all activities
-        startActivity(intent);
-        finish();*/
     }
 }

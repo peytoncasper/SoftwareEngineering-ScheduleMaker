@@ -3,7 +3,6 @@ package edu.uta.ucs;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Messenger;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -40,18 +39,14 @@ import java.net.URL;
 public class HTTPService extends IntentService {
 
     public static final String REQUEST_TYPE= "edu.uta.ucs.REQUEST_TYPE";
-    public static final String REQUEST_GET_URL = "edu.uta.ucs.REQUEST_GET_URL";
+    public static final String REQUEST_URL = "edu.uta.ucs.REQUEST_URL";
     public static final String REQUEST_JSON_POST = "edu.uta.ucs.REQUEST_JSON_POST";
     public static final String SPOOF_SERVER_RESPONSE = "edu.uta.ucs.SPOOF_SERVER_RESPONSE";
     public static final String SERVER_RESPONSE = "edu.uta.ucs.SERVER_RESPONSE";
     public static final String SPOOFED_RESPONSE = "edu.uta.ucs.SPOOFED_RESPONSE";
     public static final String SOURCE_INTENT = "SOURCE_INTENT";
-    public static final String SOURCE_OPCODE = "SOURCE_OPCODE";
     public static final String BAD_RESPONSE = "{\"Success\":false}";
     public static final String GOOD_RESPONSE = "{\"Success\":true}";
-
-    Messenger messenger;
-    String url;
 
 
     /**
@@ -68,12 +63,12 @@ public class HTTPService extends IntentService {
         String requestType = intent.getStringExtra(REQUEST_TYPE);
 
         switch (requestType){
-            case REQUEST_GET_URL:
+            case REQUEST_URL:
                 getURL(intent);
-                return;
+                break;
             case REQUEST_JSON_POST:
                 postJSON(intent);
-                return;
+                break;
 
         }
     }
@@ -81,27 +76,28 @@ public class HTTPService extends IntentService {
     private void postJSON(Intent intent){
 
         String response;
-        URL targetURL = null;
 
-        String urlString = intent.getStringExtra(REQUEST_GET_URL).replace(" ", "");
+
+        String urlString = intent.getStringExtra(REQUEST_URL).replace(" ", "");
         String source = intent.getStringExtra(SOURCE_INTENT);
         String jsonString = intent.getStringExtra(REQUEST_JSON_POST);
 
-        try {
-            targetURL= new URL(urlString);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
+        if (!urlString.equalsIgnoreCase(SPOOF_SERVER_RESPONSE)) {
+            try {
+                URL targetURL = new URL(urlString);
+                response = postJSON(targetURL, jsonString);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+                response = BAD_RESPONSE.substring(0, BAD_RESPONSE.length()-1) + ",\"Message\":\"Malformed URL\"}";
+            }
         }
-
-        Log.d("HTTPService SOURCE", source);
-        Log.d("HTTPService URL", url);
-
-        if (url.equalsIgnoreCase(SPOOF_SERVER_RESPONSE)) {
+        else{
             response = intent.getStringExtra(SPOOFED_RESPONSE);
             Log.d("HTTPGetService", "Spoofing response");
         }
-        else
-            response = postJSON(targetURL, jsonString);
+
+        Log.d("HTTPService SOURCE", source);
+        Log.d("HTTPService URL", urlString);
 
         Intent broadcastIntent = new Intent(intent.getStringExtra(SOURCE_INTENT));
         broadcastIntent.putExtra(SERVER_RESPONSE, response);
@@ -113,7 +109,7 @@ public class HTTPService extends IntentService {
 
         String response;
 
-        String url = intent.getStringExtra(REQUEST_GET_URL);    // Get url
+        String url = intent.getStringExtra(REQUEST_URL);    // Get url
         url = url.replace(" ", "");                         // Remove any whitespace
         String source = intent.getStringExtra(SOURCE_INTENT);
 
@@ -154,13 +150,12 @@ public class HTTPService extends IntentService {
     public String postJSON(URL targetURL, String jsonString){
 
         String response = null;
-        URL url = null;
+
 
         try {
-            url = targetURL;
 
             HttpClient httpClient = new DefaultHttpClient();
-            HttpPost httpPost = new HttpPost(url.toURI());
+            HttpPost httpPost = new HttpPost(targetURL.toURI());
 
             // Prepare JSON to send by setting the entity
             httpPost.setEntity(new StringEntity(jsonString, "UTF-8"));
@@ -175,13 +170,7 @@ public class HTTPService extends IntentService {
             HttpEntity httpEntity = httpResponse.getEntity();
             response = EntityUtils.toString(httpEntity);
 
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException | IOException e) {
             e.printStackTrace();
         }
 
@@ -190,7 +179,7 @@ public class HTTPService extends IntentService {
 
     /**
      * Making service call
-     * @url - url to make request
+     * @param url - url to make request
      * */
     public String fetchJSON(String url) {
 
@@ -202,8 +191,8 @@ public class HTTPService extends IntentService {
             HttpConnectionParams.setConnectionTimeout(httpParams, 5000);
             HttpConnectionParams.setSoTimeout(httpParams, 45000);
             DefaultHttpClient httpClient = new DefaultHttpClient(httpParams);
-            HttpEntity httpEntity = null;
-            HttpResponse httpResponse = null;
+            HttpEntity httpEntity;
+            HttpResponse httpResponse;
             Log.d("test:", "fetchJSON HTTP parameters set");
 
             HttpGet httpGet = new HttpGet(url);
@@ -240,9 +229,9 @@ public class HTTPService extends IntentService {
 
         if(UserData.spoofServer()){ // Spoof server response
 
-            Log.i("HTTPService", "Spoofing JSON Post to URL: " + targetURL);
+            Log.i("HTTPService PostJSON", "Spoofing JSON Post to URL: " + targetURL);
 
-            intent.putExtra(HTTPService.REQUEST_JSON_POST, HTTPService.SPOOF_SERVER_RESPONSE);
+            intent.putExtra(HTTPService.REQUEST_URL, HTTPService.SPOOF_SERVER_RESPONSE);
 
             String spoofData = loadSpoofData(targetURL); // Attempt to load spoof data from file
 
@@ -250,7 +239,7 @@ public class HTTPService extends IntentService {
             // if not, strip parameters and get generic response
             if(spoofData == null) {
                 String spoofURL = null;
-                int baseURLEnd = targetURL.indexOf("?") - 1;
+                int baseURLEnd = targetURL.indexOf("?");
                 if (baseURLEnd != -1)
                     spoofURL = targetURL.substring(0, baseURLEnd);
 
@@ -260,13 +249,14 @@ public class HTTPService extends IntentService {
                     spoofData = BAD_RESPONSE;
             }
 
+            Log.i("HTTPService PostJSON", "Spoof response expected: " + spoofData);
             intent.putExtra(HTTPService.SPOOFED_RESPONSE, spoofData);
         }
         else{   // Attempt a real server response
 
-            Log.i("HTTPService", "Creating a url request for: " + targetURL);
+            Log.i("HTTPService PostJSON", "Creating a url request for: " + targetURL);
 
-            intent.putExtra(HTTPService.REQUEST_JSON_POST, targetURL);
+            intent.putExtra(HTTPService.REQUEST_URL, targetURL);
 
         }
 
@@ -286,13 +276,13 @@ public class HTTPService extends IntentService {
     public static void FetchURL(String urlToFetch, String recieverTag, Context context){
 
         Intent intent = new Intent(context, HTTPService.class);
-        intent.putExtra(HTTPService.REQUEST_TYPE, HTTPService.REQUEST_GET_URL);
+        intent.putExtra(HTTPService.REQUEST_TYPE, HTTPService.REQUEST_URL);
 
         if(UserData.spoofServer()){ // Spoof server response
 
             Log.i("HTTPService", "Spoofing response for url request: " + urlToFetch);
 
-            intent.putExtra(HTTPService.REQUEST_GET_URL, HTTPService.SPOOF_SERVER_RESPONSE);
+            intent.putExtra(HTTPService.REQUEST_URL, HTTPService.SPOOF_SERVER_RESPONSE);
 
             String spoofData = loadSpoofData(urlToFetch);
 
@@ -319,7 +309,7 @@ public class HTTPService extends IntentService {
 
             Log.i("HTTPService", "Creating a url request for: " + urlToFetch);
 
-            intent.putExtra(HTTPService.REQUEST_GET_URL, urlToFetch);
+            intent.putExtra(HTTPService.REQUEST_URL, urlToFetch);
 
         }
 
@@ -328,7 +318,7 @@ public class HTTPService extends IntentService {
     }
 
     private static String loadSpoofData(String url){
-        String spoofData = null;
+        String spoofData;
 
         spoofData = loadStringFromAsset("spoof_data.json");
 
@@ -348,7 +338,7 @@ public class HTTPService extends IntentService {
 
 
     private static String loadStringFromAsset(String fileName){
-        String fileContent = null;
+        String fileContent;
 
         try {
 

@@ -1,5 +1,6 @@
 package edu.uta.ucs;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -163,6 +164,7 @@ class BlockoutCoursesAdapter extends BaseExpandableListAdapter {
      * @param parent        the parent that this view will eventually be attached to
      * @return the View corresponding to the group at the specified position
      */
+    @SuppressLint("InflateParams")
     @Override
     public View getGroupView(final int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
 
@@ -215,6 +217,7 @@ class BlockoutCoursesAdapter extends BaseExpandableListAdapter {
      * @param parent        the parent that this view will eventually be attached to
      * @return the View corresponding to the child at the specified position
      */
+    @SuppressLint("InflateParams")
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
 
@@ -652,16 +655,16 @@ public class SelectBlockoutTimes extends ActionBarActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 Boolean[] blockoutTimesToLoad = blockoutCoursesAdapter.getChecked();
-                for (int index = 0; index < savedBlockoutCourses.size(); index++){
-                    if (blockoutTimesToLoad[index] == null){
+                for (int index = 0; index < savedBlockoutCourses.size(); index++) {
+                    if (blockoutTimesToLoad[index] == null) {
                         Log.i("Loading Blockout", "Found null" + index);
                         continue;
                     }
-                    if (blockoutTimesToLoad[index]){
+                    if (blockoutTimesToLoad[index]) {
                         Log.i("Loading BlockOut", savedBlockoutCourses.get(index).toJSON().toString());
-                        for(Section section : savedBlockoutCourses.get(index).getSectionList()){
-                            Log.i("Adding to Blockout List",section.toJSON().toString());
-                            if (!currentBlockoutTimes.contains(section)){
+                        for (Section section : savedBlockoutCourses.get(index).getSectionList()) {
+                            Log.i("Adding to Blockout List", section.toJSON().toString());
+                            if (!currentBlockoutTimes.contains(section)) {
                                 currentBlockoutTimes.add(section);
                             }
                         }
@@ -832,9 +835,9 @@ public class SelectBlockoutTimes extends ActionBarActivity {
                 JSONArray savedBlockoutCourseJSONArray = new JSONArray();
                 for(int index = savedBlockoutCourseJSONArrayString.length(); index != 0;index--){
                     JSONObject courseJSONObject = new JSONObject(savedBlockoutCourseJSONArrayString.getString(index-1));
-    savedBlockoutCourseJSONArray.put(courseJSONObject);
-}
-blockoutTimes = Course.buildCourseList(savedBlockoutCourseJSONArray);
+                savedBlockoutCourseJSONArray.put(courseJSONObject);
+            }
+            blockoutTimes = Course.buildCourseList(savedBlockoutCourseJSONArray);
         } catch (JSONException e) {
         e.printStackTrace();
         }
@@ -850,22 +853,6 @@ blockoutTimes = Course.buildCourseList(savedBlockoutCourseJSONArray);
             Log.i("Select Blockout", "Logging out");
             SelectBlockoutTimes.this.finish();
         }
-    }
-
-    void signOut() {
-        Intent intent = new Intent(this, LoginActivity.class);
-        intent.putExtra("finish", true); // if you are checking for this in your other Activities
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
-                Intent.FLAG_ACTIVITY_CLEAR_TASK |
-                Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-        finish();
-        /*
-        Intent intent = new Intent(this, LoginActivity.class);
-        intent.putExtra("finish", true);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // To clean up all activities
-        startActivity(intent);
-        finish();*/
     }
 
 }

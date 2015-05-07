@@ -11,10 +11,11 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Created by arunk_000 on 4/5/2015.
+ * This class is used to store schedules.
  */
 public class Schedule {
 
@@ -24,15 +25,6 @@ public class Schedule {
     private String name;
     private int semesterNumber;
     private ArrayList<Section> selectedSections;
-
-    Schedule() {
-        this.setName(null);
-        this.setSelectedSections(null);
-    }
-
-    Schedule(String name) {
-        this.setName(name);
-    }
 
     Schedule(String name, int semesterNumber, ArrayList<Section> sectionArrayList){
         this.name = name;
@@ -90,9 +82,71 @@ public class Schedule {
         return result;
     }
 
+    /**
+     * Builds an ArrayList of Schedules based on a JSONArray
+     *
+     * @param jsonSchedules JSONArray of schedules
+     * @return ArrayList<Schedules>
+     * @throws JSONException
+     */
+    public static ArrayList<Schedule> buildScheduleList(JSONArray jsonSchedules) throws JSONException {
+
+        ArrayList<Schedule> scheduleList = new ArrayList<>(jsonSchedules.length());
+
+        for(int index = jsonSchedules.length(); index != 0;index--){
+            JSONObject scheduleJSON;
+            try {
+                scheduleJSON = jsonSchedules.getJSONObject(index - 1);
+            }
+            catch (JSONException e){
+                Log.i("New Schedule JSON", "JSON Construction failed. Attempting to construct JSON from String");
+                String courseString = jsonSchedules.getString(index - 1);
+                scheduleJSON = new JSONObject(courseString);
+            }
+
+            Log.i("New Schedule JSON", "Adding to ArrayList: " + scheduleJSON.toString());
+            scheduleList.add(new Schedule(scheduleJSON));
+        }
+        Collections.reverse(scheduleList);
+
+        return scheduleList;
+    }
+
+    /**
+     * Saves all schedules in the list of schedules provided to a sharedPreferance file. This will overwrite all schedules currently in that file.
+     *
+     * @param context Context to save with. Usually will be the calling class followed by ".this"
+     *                EX: MainActivity.this
+     * @param schedulesToSave ArrayList of schedules
+     */
+    public static void saveSchedulesToFile(Context context, ArrayList<Schedule> schedulesToSave){
+
+        SharedPreferences.Editor scheduleEditor;
+        scheduleEditor = context.getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, Context.MODE_PRIVATE).edit();
+        scheduleEditor.clear();
+
+        ArrayList<JSONObject> savedSchedules = new ArrayList<>(schedulesToSave.size());
+        ArrayList<String> scheduleNames = new ArrayList<>(schedulesToSave.size());
+
+        for (Schedule schedule : schedulesToSave){
+            scheduleNames.add(schedule.getName());
+            try {
+                savedSchedules.add(schedule.toJSON());
+                scheduleEditor.putString(Schedule.SCHEDULE_NAMES + "_" + schedule.getName(), schedule.toJSON().toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        HashSet<String> scheduleNameSet = new HashSet<>(scheduleNames);
+        scheduleEditor.putStringSet(Schedule.SCHEDULE_NAMES, scheduleNameSet);
+        scheduleEditor.apply();
+
+    }
+
     public static ArrayList<Schedule> loadSchedulesFromFile(Context context){
 
-        SharedPreferences scheduleFile = context.getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, context.MODE_PRIVATE);
+        SharedPreferences scheduleFile = context.getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, Context.MODE_PRIVATE);
 
         Set<String> scheduleNames = scheduleFile.getStringSet(Schedule.SCHEDULE_NAMES, null);
         if (scheduleNames == null)
@@ -195,30 +249,11 @@ class NoSchedulesPossibleException extends Exception {
 
     String message;
 
-    public NoSchedulesPossibleException() {
-        this.message = "";
-    }
-
     public NoSchedulesPossibleException(NoSchedulesPossibleException innerError) {
         if(innerError != null)
             this.message = this.message + "\n" + innerError.message;
         else
             this.message = "";
-    }
-
-    public NoSchedulesPossibleException(String message) {
-        super(message);
-    }
-
-    public NoSchedulesPossibleException(Course course, ArrayList<Section> sectionArrayList){
-        super();
-        this.message = "Could not build a schedule from this combination of courses\n";
-    }
-
-    public NoSchedulesPossibleException(Course course, Section section){
-        super();
-
-        this.message = "Could not build a schedule from this combination of courses:\n" + course.getCourseName() + "\n" + "\t" + section.getSourceCourse().getCourseName() + " - " + section.getSourceCourse().getCourseNumber() + "\nError - Unrecognized Course";
     }
 
     public NoSchedulesPossibleException(Section sourceSection, Section conflictingSection){

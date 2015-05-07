@@ -136,11 +136,11 @@ public class CreateAccount extends Activity {
             // Spoof data switch
             if (spoofData) {
                 // Put spoof request instead of url in intent extras
-                intent.putExtra(HTTPService.REQUEST_GET_URL, HTTPService.SPOOF_SERVER);
+                intent.putExtra(HTTPService.REQUEST_URL, HTTPService.SPOOF_SERVER);
                 intent.putExtra(HTTPService.SPOOFED_RESPONSE, SPOOF_ACCOUNT_CREATION);
             } else
                 // Put creation request in intent extras
-                intent.putExtra(HTTPService.REQUEST_GET_URL, url);
+                intent.putExtra(HTTPService.REQUEST_URL, url);
 
             // Launch service
             startService(intent);
