@@ -24,7 +24,11 @@ import org.json.JSONObject;
 public class CreateAccount extends Activity {
     public static final String ACTION_CREATE_ACCOUNT ="edu.uta.ucs.intent.action.CREATE_ACCOUNT";
 
-    public static final String CREATE_ACCOUNT_URL[] = {"http://ucs.azurewebsites.net/UTA/CreateAccount?","username=","&password=","&email="};
+    public static final String CREATE_ACCOUNT_URL[] = {
+            UserData.getContext().getString(R.string.create_account_base),
+            UserData.getContext().getString(R.string.create_account_param_username),
+            UserData.getContext().getString(R.string.create_account_param_password),
+            UserData.getContext().getString(R.string.create_account_param_email)};
 
     ProgressDialog progressDialog;
 

@@ -36,12 +36,12 @@ import java.util.Set;
  */
 public class DetailedSchedule extends Activity {
 
-    public static final String URL_GET_COURSE_SECTIONS ="http://ucs.azurewebsites.net/UTA/GetCourseInfo?";
-    public static final String URL_VALIDATE_COURSES ="http://ucs.azurewebsites.net/UTA/ValidateCourses?";
-    public static final String URL_GET_COURSE_SECTIONS_PARAM_SEMESTER ="semester=";
-    public static final String URL_GET_COURSE_SECTIONS_PARAM_DEPARTMENT ="&department=";
-    public static final String URL_GET_COURSE_SECTIONS_PARAM_COURSENUMBER ="&courseNumber=";
-    public static final String URL_GET_COURSE_SECTIONS_PARAM_CLASSNUMBER ="&classNumbers=";
+    public static final String URL_GET_COURSE_SECTIONS =UserData.getContext().getString(R.string.get_course_info_base);
+    public static final String URL_VALIDATE_COURSES =UserData.getContext().getString(R.string.validate_courses_base);
+    public static final String URL_GET_COURSE_SECTIONS_PARAM_SEMESTER =UserData.getContext().getString(R.string.validate_courses_param_semester);
+    public static final String URL_GET_COURSE_SECTIONS_PARAM_DEPARTMENT =UserData.getContext().getString(R.string.validate_courses_param_department);
+    public static final String URL_GET_COURSE_SECTIONS_PARAM_COURSENUMBER =UserData.getContext().getString(R.string.validate_courses_param_course_number);
+    public static final String URL_GET_COURSE_SECTIONS_PARAM_CLASSNUMBER =UserData.getContext().getString(R.string.validate_courses_param_class_number);
 
     private static final String ACTION_GET_COURSE_SECTIONS = "ACTION_GET_COURSE_SECTIONS";
     private static final String ACTION_VERIFY_SCHEDULE = "ACTION_VERIFY_SCHEDULE";

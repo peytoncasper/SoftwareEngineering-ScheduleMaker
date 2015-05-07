@@ -53,10 +53,12 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     public static final String ACTION_LOGOUT ="edu.uta.ucs.intent.action.ACTION_LOGOUT";
     public static final String ACTION_RESET_PASSWORD ="edu.uta.ucs.intent.action.ACTION_RESET_PASSWORD";
 
-    private static final String LOGIN_URL = "http://ucs.azurewebsites.net/UTA/ValidateLogin?";
-    private static final String LOGOUT_URL = "http://ucs.azurewebsites.net/UTA/ValidateLogout?";
-    private static final String[] LOGIN_PARAMS ={"username=","&password="};
-    private static final String EMAIL_EXISTS_URL = "http://ucs.azurewebsites.net/UTA/EmailExists?email=";
+    private static final String LOGIN_URL = UserData.getContext().getString(R.string.login_base);
+    private static final String[] LOGIN_PARAMS ={
+            UserData.getContext().getString(R.string.login_param_username),
+            UserData.getContext().getString(R.string.login_param_password)};
+    private static final String LOGOUT_URL = UserData.getContext().getString(R.string.logout_base);
+    private static final String EMAIL_EXISTS_URL = UserData.getContext().getString(R.string.email_exists_base);
 
     /**
      * Keep track of the login task to ensure we can cancel it if requested.

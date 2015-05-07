@@ -300,7 +300,7 @@ public class SettingsActivity extends PreferenceActivity {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
         View changeElement = inflater.inflate(R.layout.dialog_change_element, null);
 
-        final String baseURl = "http://ucs.azurewebsites.net/UTA/Change" + updateElement;
+        final String baseURL = UserData.getContext().getString(R.string.change_settings_base) + updateElement;
 
         TextView newElement = (TextView) changeElement.findViewById(R.id.textview_new_type);
         TextView confirmElement = (TextView) changeElement.findViewById(R.id.textview_confirm_type);
@@ -361,7 +361,7 @@ public class SettingsActivity extends PreferenceActivity {
                 }
 
                 if (dismiss) {
-                    String changeElementURL = baseURl + "?email=" + UserData.getEmail() + "?password=" + oldElement + "?confirm=" + newElement;
+                    String changeElementURL = baseURL + "?email=" + UserData.getEmail() + "?password=" + oldElement + "?confirm=" + newElement;
                     HTTPService.FetchURL(changeElementURL, "null", context);
                     changeElementDialog.dismiss();
                 }

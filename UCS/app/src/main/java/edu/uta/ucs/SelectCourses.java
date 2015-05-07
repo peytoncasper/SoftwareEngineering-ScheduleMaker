@@ -579,14 +579,14 @@ class DesiredCoursesArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInf
 
 public class SelectCourses extends ActionBarActivity {
 
-    public static final String URL_GET_COURSE_SECTIONS ="http://ucs.azurewebsites.net/UTA/GetCourseInfo?";
-    public static final String URL_GET_COURSE_SECTIONS_PARAM_SEMESTER ="semester=";
-    public static final String URL_GET_COURSE_SECTIONS_PARAM_DEPARTMENT ="&department=";
-    public static final String URL_GET_COURSE_SECTIONS_PARAM_COURSENUMBER ="&courseNumber=";
+    public static final String URL_GET_COURSE_SECTIONS = UserData.getContext().getString(R.string.get_course_section_base);
+    public static final String URL_GET_COURSE_SECTIONS_PARAM_SEMESTER = UserData.getContext().getString(R.string.get_course_sections_param_semester);
+    public static final String URL_GET_COURSE_SECTIONS_PARAM_DEPARTMENT = UserData.getContext().getString(R.string.get_course_sections_param_department);
+    public static final String URL_GET_COURSE_SECTIONS_PARAM_COURSENUMBER = UserData.getContext().getString(R.string.get_course_sections_param_course_number);
 
     public static final String ACTION_GET_DESIRED_COURSE_SECTIONS ="edu.uta.ucs.intent.action.ACTION_GET_DESIRED_COURSE_SECTIONS";
 
-    public static final String URL_GET_SEMESTER = "http://ucs.azurewebsites.net/UTA/GetDepartmentClassData";
+    public static final String URL_GET_SEMESTER = UserData.getContext().getString(R.string.get_semester_data);
     public static final String ACTION_GET_SEMESTER ="edu.uta.ucs.intent.action.ACTION_GET_SEMESTER";
 
 

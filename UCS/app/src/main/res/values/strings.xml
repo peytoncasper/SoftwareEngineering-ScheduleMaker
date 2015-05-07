@@ -12,4 +12,5 @@
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="action_about">About</string>
     <string name="action_logout">Logout</string>
+    <string name="get_course_sections_param_course_number"><![CDATA[&courseNumber=]]></string>
 </resources>
