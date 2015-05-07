@@ -19,80 +19,74 @@
             android:id="@+id/blockout_time_name_edittext"
             android:hint="@string/prompt_blockout_time_name"/>
 
-        <HorizontalScrollView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/horizontalScrollView2" >
+            android:id="@+id/toggle_days_layout">
 
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/toggle_days_layout">
+            <ToggleButton
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/text_monday"
+                android:id="@+id/monday_toggleButton"
+                android:checked="false"
+                android:textOn="MON"
 
-                <ToggleButton
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:text="@string/text_monday"
-                    android:id="@+id/monday_toggleButton"
-                    android:checked="false"
-                    android:textOn="MON"
+                android:textOff="MON" />
 
-                    android:textOff="MON" />
+            <ToggleButton
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/text_tuesday"
+                android:id="@+id/tuesday_toggleButton"
+                android:textOn="TUE"
+                android:textOff="TUE"
+                android:checked="false" />
 
-                <ToggleButton
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:text="@string/text_tuesday"
-                    android:id="@+id/tuesday_toggleButton"
-                    android:textOn="TUE"
-                    android:textOff="TUE"
-                    android:checked="false" />
+            <ToggleButton
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/text_wednesday"
+                android:id="@+id/wednesday_toggleButton"
+                android:textOn="WED"
+                android:textOff="WED"
+                android:checked="false" />
 
-                <ToggleButton
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:text="@string/text_wednesday"
-                    android:id="@+id/wednesday_toggleButton"
-                    android:textOn="WED"
-                    android:textOff="WED"
-                    android:checked="false" />
+            <ToggleButton
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/text_thursday"
+                android:id="@+id/thursday_toggleButton"
+                android:textOn="THU"
+                android:textOff="THU"
+                android:checked="false" />
 
-                <ToggleButton
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:text="@string/text_thursday"
-                    android:id="@+id/thursday_toggleButton"
-                    android:textOn="THU"
-                    android:textOff="THU"
-                    android:checked="false" />
+            <ToggleButton
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/text_friday"
+                android:id="@+id/friday_toggleButton"
+                android:textOn="FRI"
+                android:textOff="FRI"
+                android:checked="false" />
 
-                <ToggleButton
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:text="@string/text_friday"
-                    android:id="@+id/friday_toggleButton"
-                    android:textOn="FRI"
-                    android:textOff="FRI"
-                    android:checked="false" />
+            <ToggleButton
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/text_saturday"
+                android:id="@+id/saturday_toggleButton"
+                android:textOn="SAT"
+                android:textOff="SAT"
+                android:checked="false" />
 
-                <ToggleButton
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:text="@string/text_saturday"
-                    android:id="@+id/saturday_toggleButton"
-                    android:textOn="SAT"
-                    android:textOff="SAT"
-                    android:checked="false" />
-
-            </LinearLayout>
-        </HorizontalScrollView>
+        </LinearLayout>
 
         <HorizontalScrollView
             android:layout_width="fill_parent"
@@ -103,7 +97,8 @@
             <LinearLayout
                 android:orientation="horizontal"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal">
 
                 <LinearLayout
                     android:orientation="vertical"
@@ -173,7 +168,7 @@
                 android:layout_height="wrap_content"
                 android:text="SHOW/HIDE TIME"
                 android:id="@+id/toggle_timepickers_button"
-                android:onClick="toggleTimepickers" />
+                android:onClick="toggleTimepickers"/>
 
             <Button
                 android:layout_width="wrap_content"
@@ -231,7 +226,6 @@
             android:text="@string/action_use_blockout_times"
             android:id="@+id/use_blockout_times_button"
             android:onClick="useBlockoutTimes" />
-
     </LinearLayout>
 
 </FrameLayout>

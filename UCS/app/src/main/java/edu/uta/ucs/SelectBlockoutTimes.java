@@ -349,6 +349,7 @@ public class SelectBlockoutTimes extends ActionBarActivity {
     TimePicker startTimePicker, endTimePicker;
     ListView sectionListView;
     Button toggleTimePickersButton;
+    Button addBlockoutTimesButton;
     HorizontalScrollView timePickerView;
     LinearLayout toggleDaysLayout;
 
@@ -375,6 +376,8 @@ public class SelectBlockoutTimes extends ActionBarActivity {
         fridayToggleButton = ((ToggleButton) findViewById(R.id.friday_toggleButton));
         saturdayToggleButton = ((ToggleButton) findViewById(R.id.saturday_toggleButton));
         toggleDaysLayout = (LinearLayout) findViewById(R.id.toggle_days_layout);
+
+        addBlockoutTimesButton= (Button) findViewById(R.id.add_blockout_time_button);
 
         startTimePicker = ((TimePicker) findViewById(R.id.start_timePicker));
         endTimePicker = ((TimePicker) findViewById(R.id.end_timePicker));
@@ -671,15 +674,21 @@ public class SelectBlockoutTimes extends ActionBarActivity {
 
     public void toggleTimepickers(View view){
 
-        if(toggleDaysLayout.getVisibility() == View.GONE)
-            toggleDaysLayout.setVisibility(View.VISIBLE);
-        else
+        if(toggleDaysLayout.getVisibility() == View.VISIBLE)
             toggleDaysLayout.setVisibility(View.GONE);
-
-        if(timePickerView.getVisibility() == View.GONE)
-            timePickerView.setVisibility(View.VISIBLE);
         else
+            toggleDaysLayout.setVisibility(View.VISIBLE);
+
+        if(timePickerView.getVisibility() == View.VISIBLE)
             timePickerView.setVisibility(View.GONE);
+        else
+            timePickerView.setVisibility(View.VISIBLE);
+
+        if(addBlockoutTimesButton.getVisibility() == View.VISIBLE)
+            addBlockoutTimesButton.setVisibility(View.GONE);
+        else
+            addBlockoutTimesButton.setVisibility(View.VISIBLE);
+
     }
 
     private TimeShort getTime(TimePicker timePicker){
