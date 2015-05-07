@@ -409,7 +409,7 @@ public class SelectBlockoutTimes extends ActionBarActivity {
                 break;
             case R.id.action_logout:
                 UserData.logout(SelectBlockoutTimes.this);
-                signOut();
+                //signOut();
                 break;
         }
 

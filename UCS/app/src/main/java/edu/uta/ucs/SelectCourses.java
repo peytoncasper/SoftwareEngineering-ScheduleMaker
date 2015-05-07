@@ -689,7 +689,7 @@ public class SelectCourses extends ActionBarActivity {
                 break;
             case R.id.action_logout:
                 UserData.logout(SelectCourses.this);
-                signOut();
+                //signOut();
                 break;
         }
 

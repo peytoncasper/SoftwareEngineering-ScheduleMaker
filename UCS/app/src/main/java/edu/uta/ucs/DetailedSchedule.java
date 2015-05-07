@@ -88,7 +88,7 @@ public class DetailedSchedule extends Activity {
                 break;
             case R.id.action_logout:
                 UserData.logout(DetailedSchedule.this);
-                signOut();
+                //signOut();
                 break;
         }
 

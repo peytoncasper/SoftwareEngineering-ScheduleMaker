@@ -54,10 +54,12 @@ public class UserData extends Application {
 
     public static void logout(Context context) {
 
-        Intent broadcastIntent = new Intent();
-        broadcastIntent.setAction(ACTION_LOGOUT);
-        Log.i("USER DATA", "Logging Out");
-        context.sendBroadcast(broadcastIntent);
+        Intent intent = new Intent(context, LoginActivity.class);
+        intent.putExtra("finish", true); // if you are checking for this in your other Activities
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
 
         UserData.setEmail(null);
         UserData.setMilitaryTime(false);

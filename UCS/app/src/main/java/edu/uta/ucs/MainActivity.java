@@ -81,7 +81,7 @@ public class MainActivity extends ActionBarActivity {
                 break;
             case R.id.action_logout:
                 UserData.logout(MainActivity.this);
-                signOut();
+                //signOut();
                 break;
         }
 
