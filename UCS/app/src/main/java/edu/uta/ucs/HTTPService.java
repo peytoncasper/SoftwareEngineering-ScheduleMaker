@@ -122,7 +122,10 @@ public class HTTPService extends IntentService {
 
         if (url.equalsIgnoreCase(SPOOF_SERVER_RESPONSE)) {
             response = intent.getStringExtra(SPOOFED_RESPONSE);
-            Log.d("HTTPGetService", "Spoofing response");
+            if(response == null)
+                response = BAD_RESPONSE;
+            Log.i("HTTPService SPOOF", "Spoofing response");
+            Log.i("HTTPService SPOOF", response);
         }
         else
             response = fetchJSON(url);
@@ -297,7 +300,7 @@ public class HTTPService extends IntentService {
             // if not, strip parameters and get generic response
             if(spoofData == null) {
                 String spoofURL = null;
-                int baseURLEnd = urlToFetch.indexOf("?") - 1;
+                int baseURLEnd = urlToFetch.indexOf("?");
                 if (baseURLEnd != -1)
                     spoofURL = urlToFetch.substring(0, baseURLEnd);
 
@@ -305,8 +308,11 @@ public class HTTPService extends IntentService {
                     spoofData = loadSpoofData(spoofURL);
                 else
                     spoofData = BAD_RESPONSE;
+                Log.i("HTTPService FetchURL", "Spoof URL:" + spoofURL);
             }
 
+
+            Log.i("HTTPService FetchURL", "Spoof Data:" + spoofData);
             intent.putExtra(HTTPService.SPOOFED_RESPONSE, spoofData);
         }
         else{   // Attempt a real server response
