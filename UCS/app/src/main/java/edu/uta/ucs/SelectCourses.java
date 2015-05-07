@@ -400,6 +400,7 @@ class DepartmentInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInf
             }
 
             @Override
+            @SuppressWarnings("unchecked cast")
             protected void publishResults(CharSequence constraint, FilterResults results) {
                 if (results != null && results.count > 0){
                     departmentInfoArrayList = (ArrayList<SemesterInfo.DepartmentInfo>) results.values;
@@ -501,6 +502,7 @@ class CourseInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInfo.Co
             }
 
             @Override
+            @SuppressWarnings("unchecked cast")
             protected void publishResults(CharSequence constraint, FilterResults results) {
                 if (results != null && results.count > 0){
                     courseInfoArrayList = (ArrayList<SemesterInfo.DepartmentInfo.CourseInfo>) results.values;
