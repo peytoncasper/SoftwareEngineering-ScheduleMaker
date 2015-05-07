@@ -63,7 +63,8 @@
             android:name=".DetailedSchedule"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_detailed_schedule"
-            android:theme="@android:style/Theme.Dialog" >
+            android:theme="@android:style/Theme.Dialog"
+            android:launchMode="singleTop">
         </activity>
         <activity
             android:launchMode= "singleTask"

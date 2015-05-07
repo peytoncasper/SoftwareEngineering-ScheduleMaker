@@ -43,6 +43,9 @@ public class HTTPService extends IntentService {
     public static final String SPOOFED_RESPONSE = "edu.uta.ucs.SPOOFED_RESPONSE";
     public static final String SOURCE_INTENT = "SOURCE_INTENT";
     public static final String BAD_RESPONSE = "{\"Success\":false}";
+
+    private static final int socketTimeoutMilliseconds = 45000; // 45 second timeout
+    private static final int connectionTimeoutMilliseconds = 10000; // 10 second timeout
     // Unused public static final String GOOD_RESPONSE = "{\"Success\":true}";
 
 
@@ -159,7 +162,10 @@ public class HTTPService extends IntentService {
 
         try {
 
-            HttpClient httpClient = new DefaultHttpClient();
+            HttpParams httpParams = new BasicHttpParams();
+            HttpConnectionParams.setConnectionTimeout(httpParams, connectionTimeoutMilliseconds);
+            HttpConnectionParams.setSoTimeout(httpParams, socketTimeoutMilliseconds);
+            HttpClient httpClient = new DefaultHttpClient(httpParams);
             HttpPost httpPost = new HttpPost(targetURL.toURI());
 
             // Prepare JSON to send by setting the entity
@@ -195,8 +201,8 @@ public class HTTPService extends IntentService {
         try {
             // http client
             HttpParams httpParams = new BasicHttpParams();
-            HttpConnectionParams.setConnectionTimeout(httpParams, 5000);
-            HttpConnectionParams.setSoTimeout(httpParams, 45000);
+            HttpConnectionParams.setConnectionTimeout(httpParams, connectionTimeoutMilliseconds);
+            HttpConnectionParams.setSoTimeout(httpParams, socketTimeoutMilliseconds);
             DefaultHttpClient httpClient = new DefaultHttpClient(httpParams);
             HttpEntity httpEntity;
             HttpResponse httpResponse;

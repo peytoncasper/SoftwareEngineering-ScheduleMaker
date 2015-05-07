@@ -1013,29 +1013,37 @@ public class SelectCourses extends ActionBarActivity {
         public void onReceive(Context context, Intent intent) {
             JSONObject response;
             boolean success;
+            String message;
+
+            if(progressDialog != null)
+                progressDialog.dismiss();
+
             try {
+
                 response = new JSONObject(intent.getStringExtra(HTTPService.SERVER_RESPONSE));
-
                 success = response.getBoolean("Success");
-                ArrayList<SemesterInfo> fetchedSemesters = SemesterInfo.SemesterInfoFactory(response);
-                Log.i("Get Semesters", "Semesters found in fetch: " + fetchedSemesters.size());
-                SemesterInfo.saveSemestersToFile(fetchedSemesters, SelectCourses.this);
-
-                Toast.makeText(getBaseContext(), "Semester Data Updated", Toast.LENGTH_LONG).show();
-
-                selectSemester(fetchedSemesters);
-                //should be made functional when there is time
-                //noinspection StatementWithEmptyBody
-                if(success){
-                    // enable text field
+                if(response.has("Message")) {
+                    if(success)
+                        message = response.getString("Message");
+                    else message = "Error: " + response.getString("Message");
+                    Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
                 }
-                else {
-                    // Try again?
+                if(response.has("TimeTaken")){
+                    float timeTaken = Float.parseFloat(response.getString("TimeTaken"));
+                    Log.d("New Request Time Taken:", Float.toString(timeTaken));
+                }
+                if(success) {
+                    ArrayList<SemesterInfo> fetchedSemesters = SemesterInfo.SemesterInfoFactory(response);
+                    Log.i("Get Semesters", "Semesters found in fetch: " + fetchedSemesters.size());
+                    SemesterInfo.saveSemestersToFile(fetchedSemesters, SelectCourses.this);
+
+                    Toast.makeText(getBaseContext(), "Semester Data Updated", Toast.LENGTH_LONG).show();
+
+                    selectSemester(fetchedSemesters);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            progressDialog.dismiss();
         }
     }
 
@@ -1043,65 +1051,74 @@ public class SelectCourses extends ActionBarActivity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
+            JSONObject response;
+            boolean success;
+            String message;
+
+            if(progressDialog!= null)
+                progressDialog.dismiss();
+
+            ArrayList<Course> fetchedCourses = null;
             ArrayList<Section> sectionArrayList = null;
-            String response = intent.getStringExtra(HTTPService.SERVER_RESPONSE);
-            Log.d("Received: ", response);
 
-            ArrayList<Course> fetchedCourses;
             try {
-                JSONObject rawResult = new JSONObject(response);
-                if (!rawResult.getBoolean("Success")){
-                    progressDialog.dismiss();
-                    Toast.makeText(getApplicationContext(), "Couldn't contact server. Please try again in a few minutes", Toast.LENGTH_LONG).show();
-                    return;
+                response = new JSONObject(intent.getStringExtra(HTTPService.SERVER_RESPONSE));
+                success = response.getBoolean("Success");
+                if(response.has("Message")) {
+                    if(success)
+                        message = response.getString("Message");
+                    else message = "Error: " + response.getString("Message");
+                    Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
                 }
-                JSONArray jsonCourses = rawResult.getJSONArray("Results");
-                float timeTaken = Float.parseFloat(rawResult.getString("TimeTaken"));
-                Log.d("New Request Time Taken:", Float.toString(timeTaken));
-                fetchedCourses = Course.buildCourseList(jsonCourses);
+                if(response.has("TimeTaken")){
+                    float timeTaken = Float.parseFloat(response.getString("TimeTaken"));
+                    Log.d("New Request Time Taken:", Float.toString(timeTaken));
+                }
+                if(success) {
+                    JSONArray jsonCourses = response.getJSONArray("Results");
+                    float timeTaken = Float.parseFloat(response.getString("TimeTaken"));
+                    Log.d("New Request Time Taken:", Float.toString(timeTaken));
+                    fetchedCourses = Course.buildCourseList(jsonCourses);
 
-            } catch (JSONException e) {
-                e.printStackTrace();
-                Toast.makeText(getApplicationContext(), "Error: Received Invalid Data", Toast.LENGTH_LONG).show();
-                if(progressDialog != null)
-                    progressDialog.dismiss();
-                return;
-            }
-            progressDialog.dismiss();
+                    try {
+                        ArrayList<Section> blockoutSections;
+                        if (blockoutTimes != null)
+                            blockoutSections = blockoutTimes.getSectionList();
+                        else
+                            blockoutSections = new ArrayList<>();
 
-            try {
-                ArrayList<Section> blockoutSections;
-                if (blockoutTimes != null)
-                    blockoutSections = blockoutTimes.getSectionList();
-                else
-                    blockoutSections = new ArrayList<>();
+                        if (fetchedCourses != null)
+                            sectionArrayList = Schedule.scheduleGenerator(fetchedCourses, new ArrayList<Section>(), blockoutSections);
+                        if (sectionArrayList != null) {
+                            for (Section section : sectionArrayList){
+                                Log.i("Built Schedule Sections",section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseNumber() + "-" + section.getSectionNumber() + "\t" + section.toJSON().toString());
+                            }
+                        }
 
-                if (fetchedCourses != null)
-                    sectionArrayList = Schedule.scheduleGenerator(fetchedCourses, new ArrayList<Section>(), blockoutSections);
-                if (sectionArrayList != null) {
-                    for (Section section : sectionArrayList){
-                        Log.i("Built Schedule Sections",section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseNumber() + "-" + section.getSectionNumber() + "\t" + section.toJSON().toString());
+                        Schedule schedule = new Schedule("Schedule Name", selectedSemester.getSemesterNumber(), sectionArrayList);
+                        DetailedSchedule.ShowSchedule(schedule, SelectCourses.this);
+                        Log.i("Built Schedule", schedule.toJSON().toString());
+                    } catch (NoSchedulesPossibleException e) {
+                        e.printStackTrace();
+                        AlertDialog.Builder noSchedulesPossible = new AlertDialog.Builder(SelectCourses.this);
+                        noSchedulesPossible.setTitle("Schedule Could be generated. Issues:");
+                        noSchedulesPossible.setMessage(e.printConflict());
+                        noSchedulesPossible.setNeutralButton("OKAY", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                        noSchedulesPossible.create().show();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
                 }
 
-                Schedule schedule = new Schedule("Schedule Name", selectedSemester.getSemesterNumber(), sectionArrayList);
-                DetailedSchedule.ShowSchedule(schedule, SelectCourses.this);
-                Log.i("Built Schedule", schedule.toJSON().toString());
-            } catch (NoSchedulesPossibleException e) {
-                e.printStackTrace();
-                AlertDialog.Builder noSchedulesPossible = new AlertDialog.Builder(SelectCourses.this);
-                noSchedulesPossible.setTitle("Schedule Could be generated. Issues:");
-                noSchedulesPossible.setMessage(e.printConflict());
-                noSchedulesPossible.setNeutralButton("OKAY", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-                noSchedulesPossible.create().show();
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+
 
         }
 

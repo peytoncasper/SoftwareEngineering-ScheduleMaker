@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -193,18 +194,28 @@ public class CreateAccount extends Activity {
         public void onReceive(Context context, Intent intent) {
             JSONObject response;
             boolean success;
+            String message;
             try {
+
                 response = new JSONObject(intent.getStringExtra(HTTPService.SERVER_RESPONSE));
                 success = response.getBoolean("Success");
-                String message = response.getString("Message");
-                if(success){
+                if(response.has("Message")) {
+                    if(success)
+                        message = response.getString("Message");
+                    else message = "Error: " + response.getString("Message");
                     Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+                }
+                if(response.has("TimeTaken")){
+                    float timeTaken = Float.parseFloat(response.getString("TimeTaken"));
+                    Log.d("New Request Time Taken:", Float.toString(timeTaken));
+                }
+
+                if(success){
                     Intent launchMainActivity = new Intent(getApplicationContext(), MainActivity.class);
                     startActivity(launchMainActivity);
                     finish();
                 }
                 else {
-                    Toast.makeText(CreateAccount.this, "Error: " + message, Toast.LENGTH_LONG).show();
                     ((EditText) findViewById(R.id.create_account_password)).setText("");
                     ((EditText) findViewById(R.id.create_account_confirm_password)).setText("");
 

@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
@@ -17,8 +18,12 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Adapter;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -40,16 +45,16 @@ public class DetailedSchedule extends Activity {
     public static final String URL_VALIDATE_COURSES =UserData.getContext().getString(R.string.validate_courses_base);
     public static final String URL_GET_COURSE_SECTIONS_PARAM_SEMESTER =UserData.getContext().getString(R.string.validate_courses_param_semester);
     public static final String URL_GET_COURSE_SECTIONS_PARAM_DEPARTMENT =UserData.getContext().getString(R.string.validate_courses_param_department);
-    public static final String URL_GET_COURSE_SECTIONS_PARAM_COURSENUMBER =UserData.getContext().getString(R.string.validate_courses_param_course_number);
     public static final String URL_GET_COURSE_SECTIONS_PARAM_CLASSNUMBER =UserData.getContext().getString(R.string.validate_courses_param_class_number);
 
     private static final String ACTION_GET_COURSE_SECTIONS = "ACTION_GET_COURSE_SECTIONS";
     private static final String ACTION_VERIFY_SCHEDULE = "ACTION_VERIFY_SCHEDULE";
 
-    ListView scheduleSections;
-    Schedule scheduleToShow;
-    SectionArrayAdapter adapter;
-    ProgressDialog progressDialog;
+    private ListView scheduleSections;
+    private Schedule scheduleToShow;
+    private Section sectionToSwap;
+    private SectionArrayAdapter adapter;
+    private ProgressDialog progressDialog;
 
     int selection;
     boolean saveCheck = false;
@@ -121,6 +126,7 @@ public class DetailedSchedule extends Activity {
         scheduleSections.setAdapter(adapter);
     }
 
+
     public void saveSchedule(View view){
 
 
@@ -167,6 +173,14 @@ public class DetailedSchedule extends Activity {
         saveNameDialog.show();
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        if(progressDialog != null)
+            progressDialog.dismiss();
+    }
+
     public void verifySchedule(View view){
         getVerifySchedule();
     }
@@ -184,14 +198,10 @@ public class DetailedSchedule extends Activity {
         builder.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Section section = scheduleToShow.getSelectedSections().get(which);
-                scheduleToShow.getSelectedSections().remove(which);
+                sectionToSwap = scheduleToShow.getSelectedSections().get(which);
+                //removeSection(sectionToSwap);
                 setSelection(which);
-                getAlternativeSections(section.getSourceCourse().getCourseDepartment(), section.getSourceCourse().getCourseNumber());
-                progressDialog = new ProgressDialog(DetailedSchedule.this);
-                progressDialog.setTitle("");
-                progressDialog.setMessage("");
-                progressDialog.show();
+                getAlternativeSections(sectionToSwap.getSourceCourse().getCourseDepartment(), sectionToSwap.getSourceCourse().getCourseNumber());
             }
         });
         builder.show();
@@ -219,16 +229,9 @@ public class DetailedSchedule extends Activity {
 
         String urlFinal = URL_VALIDATE_COURSES + semesterParamFinal + departmentParamFinal + courseNumberParamFinal;
 
-        Intent intent = new Intent(this, HTTPService.class);
+        HTTPService.FetchURL(urlFinal, ACTION_VERIFY_SCHEDULE,DetailedSchedule.this);
 
-        intent.putExtra(HTTPService.REQUEST_URL, urlFinal);
-        intent.putExtra(HTTPService.SOURCE_INTENT, ACTION_VERIFY_SCHEDULE);
-        startService(intent);
-
-        progressDialog = new ProgressDialog(DetailedSchedule.this);
-        progressDialog.setTitle("");
-        progressDialog.setMessage("");
-        progressDialog.show();
+        showProgressDialog("Verifying Class Statuses");
     }
 
     private void setName(String name){
@@ -346,29 +349,23 @@ public class DetailedSchedule extends Activity {
         scheduleToShow.getSelectedSections().add(section);
     }
 
+    private void removeSection(Section section){
+        scheduleToShow.getSelectedSections().remove(section);
+    }
+
     private void updateAdapter(){
         adapter.notifyDataSetChanged();
     }
 
-    public void getAlternativeSections(String department, String courseNumber){
+    public void getAlternativeSections(String department, String classNumber){
         String url = URL_GET_COURSE_SECTIONS
                 + URL_GET_COURSE_SECTIONS_PARAM_SEMESTER + scheduleToShow.getSemesterNumber()
                 + URL_GET_COURSE_SECTIONS_PARAM_DEPARTMENT + department
-                + URL_GET_COURSE_SECTIONS_PARAM_COURSENUMBER + courseNumber;
+                + URL_GET_COURSE_SECTIONS_PARAM_CLASSNUMBER + classNumber;
 
         HTTPService.FetchURL(url, ACTION_GET_COURSE_SECTIONS, this);
-        /* Depreciated with implementation of HTTPService.FetchURL()
-        Intent intent = new Intent(this, HTTPService.class);
 
-        intent.putExtra(HTTPService.REQUEST_URL, url);
-        intent.putExtra(HTTPService.SOURCE_INTENT, ACTION_GET_COURSE_SECTIONS);
-        startService(intent);
-        */
-
-        progressDialog = new ProgressDialog(DetailedSchedule.this);
-        progressDialog.setTitle("");
-        progressDialog.setMessage("");
-        progressDialog.show();
+        showProgressDialog("Getting alternate sections");
     }
 
     class CouresAlternatesReciever extends BroadcastReceiver{
@@ -411,51 +408,45 @@ public class DetailedSchedule extends Activity {
         @SuppressWarnings("JavaDoc")
         @Override
         public void onReceive(Context context, Intent intent) {
+            JSONObject response;
+            boolean success;
+            String message;
 
             ArrayList<Course> fetchedCourses;
 
-            String response = intent.getStringExtra(HTTPService.SERVER_RESPONSE);
-            Log.d("Received: ", response);
-
             try {
-                JSONObject rawResult = new JSONObject(response);
-                if (!rawResult.getBoolean("Success")){
-                    if(progressDialog != null)
-                        progressDialog.dismiss();
-                    Toast.makeText(getApplicationContext(), "Couldn't contact server. Please try again in a few minutes", Toast.LENGTH_LONG).show();
-                    return;
+
+                response = new JSONObject(intent.getStringExtra(HTTPService.SERVER_RESPONSE));
+                success = response.getBoolean("Success");
+                if(response.has("Message")) {
+                    if(success)
+                        message = response.getString("Message");
+                    else message = "Error: " + response.getString("Message");
+                    Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
                 }
-                JSONArray jsonCourses = rawResult.getJSONArray("Results");
-                float timeTaken = Float.parseFloat(rawResult.getString("TimeTaken"));
-                Log.d("New Request Time Taken:", Float.toString(timeTaken));
-                fetchedCourses = Course.buildCourseList(jsonCourses);
-                for(Section section : fetchedCourses.get(0).getSectionList()){
-                    if(section.getStatus() == ClassStatus.OPEN && section.conflictsWith(scheduleToShow.getSelectedSections())){
-                        section.setStatus(ClassStatus.CONFLICT);
+                if(response.has("TimeTaken")){
+                    float timeTaken = Float.parseFloat(response.getString("TimeTaken"));
+                    Log.d("New Request Time Taken:", Float.toString(timeTaken));
+                }
+                if(success) {
+                    JSONArray jsonCourses = response.getJSONArray("Results");
+                    fetchedCourses = Course.buildCourseList(jsonCourses);
+                    for (Section section : fetchedCourses.get(0).getSectionList()) {
+                        if (section.getStatus() == ClassStatus.OPEN && section.conflictsWith(scheduleToShow.getSelectedSections()) && !section.equals(sectionToSwap)) {
+                            section.setStatus(ClassStatus.CONFLICT);
+                        }
                     }
+                    showAlternateChoices(fetchedCourses.get(0).getSectionList());
+
                 }
 
             } catch (JSONException e) {
                 e.printStackTrace();
-                Toast.makeText(getApplicationContext(), "Couldn't contact server. Please try again in a few minutes", Toast.LENGTH_LONG).show();
-                if(progressDialog != null)
-                    progressDialog.dismiss();
-                return;
             }
+
             if(progressDialog != null)
                 progressDialog.dismiss();
 
-            final SectionArrayAdapter arrayAdapter = new SectionArrayAdapter(DetailedSchedule.this,R.layout.section_list_display,fetchedCourses.get(0).getSectionList());
-            AlertDialog.Builder builder = new AlertDialog.Builder(DetailedSchedule.this);
-            builder.setTitle("Select a replacement course");
-            builder.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    addSection(arrayAdapter.getItem(which));
-                    updateAdapter();
-                }
-            });
-            builder.show();
         }
     }
 
@@ -499,41 +490,60 @@ public class DetailedSchedule extends Activity {
         @SuppressWarnings("JavaDoc")
         @Override
         public void onReceive(Context context, Intent intent) {
+            JSONObject response;
+            boolean success;
+            String message;
 
             ArrayList<Course> fetchedCourses;
 
-            String response = intent.getStringExtra(HTTPService.SERVER_RESPONSE);
-            Log.d("HTTPGet Received: ", response);
 
             try {
-                JSONObject rawResult = new JSONObject(response);
-                Log.i("Verify Schedule", rawResult.toString());
-                if (!rawResult.getBoolean("Success")){
-                    if(progressDialog != null)
-                        progressDialog.dismiss();
-                    Toast.makeText(getApplicationContext(), "Couldn't contact server. Please try again in a few minutes", Toast.LENGTH_LONG).show();
-                    return;
+
+                response = new JSONObject(intent.getStringExtra(HTTPService.SERVER_RESPONSE));
+                success = response.getBoolean("Success");
+                if(response.has("Message")) {
+                    if(success)
+                        message = response.getString("Message");
+                    else message = "Error: " + response.getString("Message");
+                    Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
                 }
-                JSONArray jsonCourses = rawResult.getJSONArray("Results");
-                float timeTaken = Float.parseFloat(rawResult.getString("TimeTaken"));
-                Log.d("New Request Time Taken:", Float.toString(timeTaken));
+                if(response.has("TimeTaken")){
+                    float timeTaken = Float.parseFloat(response.getString("TimeTaken"));
+                    Log.d("New Request Time Taken:", Float.toString(timeTaken));
+                }
+                if(success){
+                    JSONArray jsonCourses = response.getJSONArray("Results");
+                    fetchedCourses = Course.buildCourseList(jsonCourses);
 
-                fetchedCourses = Course.buildCourseList(jsonCourses);
+                    ArrayList<Section> fetchedSections = new ArrayList<>(fetchedCourses.size());
+                    for (Course course : fetchedCourses){
+                        fetchedSections.addAll(course.getSectionList());
+                    }
 
-                ArrayList<Section> fetchedSections = new ArrayList<>(fetchedCourses.size());
-                for (Course course : fetchedCourses){
-                    fetchedSections.addAll(course.getSectionList());
+                    ArrayList<String> notifications = new ArrayList<>();
+                    for(Section section : scheduleToShow.getSelectedSections()){
+                        for(Section fetchedSection : fetchedSections){
+                            if (section.getSectionID() == fetchedSection.getSectionID()){
+                                if(section.getStatus() != fetchedSection.getStatus()){
+                                    String notification = section.getSourceCourse().getCourseDepartment() + " "
+                                            + section.getSourceCourse().getCourseNumber() + "-" + section.getSectionNumber() + " status has changed to: " + fetchedSection.getStatus().toString().replace("_", " ");
+                                    Log.i("DetailedSchedule", "Verify Schedule detected status change: " + notification);
+                                    notifications.add(notification);
+                                    section.setStatus(fetchedSection.getStatus());
+                                }
+                            }
+
+                        }
+                    }
+
+                    //scheduleToShow.setSelectedSections(fetchedSections);
+                    showStatusChanges(notifications);
+                    adapter.notifyDataSetChanged();
                 }
 
-                scheduleToShow.setSelectedSections(fetchedSections);
-                adapter.notifyDataSetChanged();
 
             } catch (JSONException e) {
                 e.printStackTrace();
-                Toast.makeText(getApplicationContext(), "Couldn't contact server. Please try again in a few minutes", Toast.LENGTH_LONG).show();
-                if(progressDialog != null)
-                    progressDialog.dismiss();
-                return;
             }
             if(progressDialog != null)
                 progressDialog.dismiss();
@@ -556,5 +566,61 @@ public class DetailedSchedule extends Activity {
             Log.e("DetailedSchedule", "Could not parse schedule to JSON");
         }
         context.startActivity(scheduleIntent);
+    }
+
+    private void showAlternateChoices(ArrayList<Section> alternates){
+
+        final SectionArrayAdapter arrayAdapter = new SectionArrayAdapter(DetailedSchedule.this,R.layout.section_list_display,alternates);
+        final AlertDialog.Builder showAlternatesBuilder = new AlertDialog.Builder(this);
+        showAlternatesBuilder.setTitle("Select a replacement course");
+        showAlternatesBuilder.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                removeSection(sectionToSwap);
+                addSection(arrayAdapter.getItem(which));
+                dialog.dismiss();
+                updateAdapter();
+            }
+        });
+        if(!DetailedSchedule.this.isFinishing()) {
+            showAlternatesBuilder.show();
+        }
+    }
+
+    private void showStatusChanges(ArrayList<String> listToShow){
+
+        AlertDialog.Builder showStatusBuilder = new AlertDialog.Builder(this);
+        if(listToShow.size() > 0){
+            showStatusBuilder.setTitle("Section statuses have changed");
+            ArrayAdapter<String> listArrayAdapter = new ArrayAdapter<String>(DetailedSchedule.this, android.R.layout.simple_list_item_1, listToShow) {
+                @Override
+                public View getView(int position, View convertView, ViewGroup parent) {
+                    View view = super.getView(position, convertView, parent);
+                    TextView text1 = (TextView) view.findViewById(android.R.id.text1);
+                    text1.setTextColor(Color.BLACK);
+                    return view;
+                }
+            };
+            showStatusBuilder.setAdapter( listArrayAdapter, null);
+        }
+        else {
+            showStatusBuilder.setTitle("Section statuses have not changed");
+        }
+        showStatusBuilder.setNeutralButton("OKAY", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        if(!DetailedSchedule.this.isFinishing()) {
+            showStatusBuilder.show();
+        }
+    }
+
+    private void showProgressDialog(String title){
+        progressDialog = new ProgressDialog(DetailedSchedule.this);
+        progressDialog.setTitle(title);
+        progressDialog.setMessage("Please wait while data is fetched...");
+        progressDialog.show();
     }
 }

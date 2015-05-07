@@ -233,15 +233,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
 
                     HTTPService.FetchURL(EMAIL_EXISTS_URL + email, ACTION_RESET_PASSWORD, LoginActivity.this);
-                    /* Depreciated with implementation of HTTPService.FetchURL()
-                    Intent intent = new Intent(getApplicationContext(), HTTPService.class);
-
-                    intent.putExtra(HTTPService.REQUEST_URL, EMAIL_EXISTS_URL+email);
-                    //intent.putExtra(HTTPGetService.SPOOFED_RESPONSE, SPOOFED_RESET_PASSWORD);
-                    intent.putExtra(HTTPService.SOURCE_INTENT, ACTION_RESET_PASSWORD);
-
-                    startService(intent);
-                    */
                 }
             }
         });
@@ -364,20 +355,34 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         @Override
         public void onReceive(Context context, Intent intent) {
             JSONObject response;
-            boolean success = false;
+            boolean success;
+            String message;
+
             try {
+
                 response = new JSONObject(intent.getStringExtra(HTTPService.SERVER_RESPONSE));
                 success = response.getBoolean("Success");
+                if(response.has("Message")) {
+                    if(success)
+                        message = response.getString("Message");
+                    else message = "Error: " + response.getString("Message");
+                    Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+                }
+                if(response.has("TimeTaken")){
+                    float timeTaken = Float.parseFloat(response.getString("TimeTaken"));
+                    Log.d("New Request Time Taken:", Float.toString(timeTaken));
+                }
+
+                if (success) {
+                    Toast.makeText(LoginActivity.this, "Successfully reset password",Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(LoginActivity.this, "Failed to reset password",Toast.LENGTH_LONG).show();
+                }
+
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            Log.d("Reset Password Receiver","Launched Receiver");
 
-            if (success) {
-                Toast.makeText(LoginActivity.this, "Successfully reset password",Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(LoginActivity.this, "Failed to reset password",Toast.LENGTH_LONG).show();
-            }
 
         }
     }
@@ -386,13 +391,22 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            showProgress(false);
-            JSONObject response = null;
+            JSONObject response;
             boolean success;
+            String message;
             try {
                 response = new JSONObject(intent.getStringExtra(HTTPService.SERVER_RESPONSE));
                 success = response.getBoolean("Success");
-
+                if(response.has("Message")) {
+                    if(success)
+                        message = response.getString("Message");
+                    else message = "Error: " + response.getString("Message");
+                    Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+                }
+                if(response.has("TimeTaken")){
+                    float timeTaken = Float.parseFloat(response.getString("TimeTaken"));
+                    Log.d("New Request Time Taken:", Float.toString(timeTaken));
+                }
                 if (success) {
                     mEmailView.setText("");
                     mPasswordView.setText("");
@@ -400,19 +414,14 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                     Intent launchMainActivity = new Intent(LoginActivity.this, MainActivity.class);
                     LoginActivity.this.startActivity(launchMainActivity);
                 } else {
+                    showProgress(false);
                     mPasswordView.setText("");
                     mPasswordView.setError(getString(R.string.error_incorrect_password));
                     mPasswordView.requestFocus();
-                    return;
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            Log.d("Login Receiver","Launched Receiver");
-            if (response != null) {
-                Log.d("Received: ",response.toString());
-            }
-
         }
     }
 
@@ -421,68 +430,51 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-
             JSONObject response;
             boolean success;
+            String message;
 
-            if(intent.hasExtra(HTTPService.SERVER_RESPONSE)){
-                try {
-                    response = new JSONObject(intent.getStringExtra(HTTPService.SERVER_RESPONSE));
-                    success = response.getBoolean("Success");
-                    if(success){
-
-
-                        SharedPreferences.Editor scheduleEditor;
-                        scheduleEditor = context.getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, Context.MODE_PRIVATE).edit();
-                        scheduleEditor.clear();
-                        scheduleEditor.apply();
-
-                        SharedPreferences.Editor blockoutTimesEditor;
-                        blockoutTimesEditor = context.getSharedPreferences(SelectBlockoutTimes.BLOCKOUT_TIMES, MODE_PRIVATE).edit();
-                        blockoutTimesEditor.clear();
-                        blockoutTimesEditor.apply();
-
-                        UserData.setEmail(null);
-                        UserData.setMilitaryTime(false);
-
-                        Intent logoutIntent = new Intent(context, LoginActivity.class);
-                        logoutIntent.putExtra("finish", true); // if you are checking for this in your other Activities
-                        logoutIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
-                                Intent.FLAG_ACTIVITY_CLEAR_TASK |
-                                Intent.FLAG_ACTIVITY_NEW_TASK);
-                        context.startActivity(logoutIntent);
-
-                        Log.i("LoginActivity", "Successful logout");
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            /*
-            showProgress(false);
             try {
                 response = new JSONObject(intent.getStringExtra(HTTPService.SERVER_RESPONSE));
                 success = response.getBoolean("Success");
+                if(response.has("Message")) {
+                    if(success)
+                        message = response.getString("Message");
+                    else message = "Error: " + response.getString("Message");
+                    Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+                }
+                if(response.has("TimeTaken")){
+                    float timeTaken = Float.parseFloat(response.getString("TimeTaken"));
+                    Log.d("New Request Time Taken:", Float.toString(timeTaken));
+                }
+                if(success){
 
-                if (success) {
-                    mEmailView.setText("");
-                    mPasswordView.setText("");
-                    new UserData(response);
-                    Intent launchMainActivity = new Intent(LoginActivity.this, MainActivity.class);
-                    LoginActivity.this.startActivity(launchMainActivity);
-                } else {
-                    mPasswordView.setText("");
-                    mPasswordView.setError(getString(R.string.error_incorrect_password));
-                    mPasswordView.requestFocus();
-                    return;
+                    SharedPreferences.Editor scheduleEditor;
+                    scheduleEditor = context.getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, Context.MODE_PRIVATE).edit();
+                    scheduleEditor.clear();
+                    scheduleEditor.apply();
+
+                    SharedPreferences.Editor blockoutTimesEditor;
+                    blockoutTimesEditor = context.getSharedPreferences(SelectBlockoutTimes.BLOCKOUT_TIMES, MODE_PRIVATE).edit();
+                    blockoutTimesEditor.clear();
+                    blockoutTimesEditor.apply();
+
+                    UserData.setEmail(null);
+                    UserData.setMilitaryTime(false);
+
+
+                    Log.i("LoginActivity", "Successful logout");
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            Log.d("Login Receiver","Launched Receiver");
-            Log.d("Received: ",response.toString());
-            */
+
+            Intent logoutIntent = new Intent(context, LoginActivity.class);
+            logoutIntent.putExtra("finish", true); // if you are checking for this in your other Activities
+            logoutIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                    Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                    Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(logoutIntent);
 
         }
     }
