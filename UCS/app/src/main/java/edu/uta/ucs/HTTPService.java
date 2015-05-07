@@ -96,15 +96,17 @@ public class HTTPService extends IntentService {
             Log.i("HTTPGetService", "Spoofing response");
         }
 
+
+        Intent broadcastIntent = new Intent(intent.getStringExtra(SOURCE_INTENT));
+        if(!isJSON(response))
+            response = BAD_RESPONSE.substring(0, BAD_RESPONSE.length()-1) + ",\"Message\":\"Bad server response\"}";
+        broadcastIntent.putExtra(SERVER_RESPONSE, response);
         Log.i("HTTPService SOURCE", source);
         Log.i("HTTPService URL", urlString);
 
         Log.i("HTTPService Response", response);
-
-        Intent broadcastIntent = new Intent(intent.getStringExtra(SOURCE_INTENT));
-        broadcastIntent.putExtra(SERVER_RESPONSE, response);
         LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
-        sendBroadcast(broadcastIntent);
+        //sendBroadcast(broadcastIntent);
     }
 
     private void getURL(Intent intent){
@@ -129,15 +131,18 @@ public class HTTPService extends IntentService {
             response = intent.getStringExtra(SPOOFED_RESPONSE);
             Log.i("HTTPGetService", "Spoofing response");
         }
+
+        Intent broadcastIntent = new Intent(intent.getStringExtra(SOURCE_INTENT));
+
+        if(!isJSON(response))
+            response = BAD_RESPONSE.substring(0, BAD_RESPONSE.length()-1) + ",\"Message\":\"Bad server response\"}";
+        broadcastIntent.putExtra(SERVER_RESPONSE, response);
         Log.i("HTTPService SOURCE", source);
         Log.i("HTTPService URL", urlString);
 
         Log.i("HTTPService Response", response);
-
-        Intent broadcastIntent = new Intent(intent.getStringExtra(SOURCE_INTENT));
-        broadcastIntent.putExtra(SERVER_RESPONSE, response);
         LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
-        sendBroadcast(broadcastIntent);
+        //sendBroadcast(broadcastIntent);
     }
 
     @Override
@@ -199,7 +204,6 @@ public class HTTPService extends IntentService {
         Log.d("HTTPGetService URL:", url.toString());
         String response;
         try {
-            // http client
             HttpParams httpParams = new BasicHttpParams();
             HttpConnectionParams.setConnectionTimeout(httpParams, connectionTimeoutMilliseconds);
             HttpConnectionParams.setSoTimeout(httpParams, socketTimeoutMilliseconds);
@@ -375,6 +379,17 @@ public class HTTPService extends IntentService {
         }
 
         return fileContent;
+    }
+
+    private static boolean isJSON(String stringToTest){
+        Log.i("HTTPService isJSON", stringToTest);
+        try {
+            JSONObject testOBJ = new JSONObject(stringToTest);
+            return true;
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
 
