@@ -1,0 +1,5 @@
+{
+  "http://ucs.azurewebsites.net/UTA/ValidateLogin?username=a&password=a": "{\"Success\":true,\"Email\":\"a@a.a\"}",
+  "http://ucs.azurewebsites.net/UTA/ValidateLogin?username=spoof&password=spoof": "{\"Success\":true,\"Email\":\"spoof@spoof.com\"}",
+  "http://ucs.azurewebsites.net/UTA/ValidateLogin": "{\"Success\":true,\"Email\":\"a@a.a\"}"
+}

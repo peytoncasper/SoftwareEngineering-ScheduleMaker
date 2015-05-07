@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:paddingBottom="1dip"
             android:paddingTop="2dip"
-            android:textSize="@dimen/mediumlTextSize"
+            android:textSize="20sp"
             android:textStyle="bold"
             android:text="@string/listitem_text_course"
             android:id="@+id/courseName"
@@ -39,7 +39,6 @@
                 android:paddingTop="1dip"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="@string/listitem_text_days"
-                android:textSize="@dimen/smallTextSize"
                 android:id="@+id/sectionMeetingDays"
                 android:gravity="left" />
 
@@ -49,7 +48,6 @@
                 android:paddingTop="1dip"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="@string/listitem_text_times"
-                android:textSize="@dimen/smallTextSize"
                 android:id="@+id/sectionMeetingTimes"
                 android:gravity="right" />
         </LinearLayout>
@@ -78,7 +76,6 @@
                 android:text="@string/listitem_text_room"
                 android:id="@+id/sectionRoom"
                 android:gravity="right"
-                android:textSize="@dimen/smallTextSize"
                 android:singleLine="true" />
 
             <!--Instructors Label-->
@@ -88,7 +85,6 @@
                 android:paddingTop="1dip"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="@string/listitem_text_instructors"
-                android:textSize="@dimen/smallTextSize"
                 android:id="@+id/sectionInstructors"
                 android:gravity="left" />
 
@@ -98,7 +94,6 @@
             android:orientation="vertical"
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
-            android:textSize="10sp"
             android:layout_weight="1">
 
             <!--Times Label-->
@@ -112,7 +107,6 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="@string/listitem_text_id"
                 android:id="@+id/sectionID"
-                android:textSize="@dimen/smallTextSize"
                 android:gravity="right" />
 
             <!--Status Label-->
@@ -122,7 +116,6 @@
                 android:paddingTop="1dip"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="@string/listitem_text_full_designation"
-                android:textSize="@dimen/smallTextSize"
                 android:id="@+id/sectionDesignation"
                 android:gravity="right" />
 

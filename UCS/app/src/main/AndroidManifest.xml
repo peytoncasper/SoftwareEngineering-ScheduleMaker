@@ -25,7 +25,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:launchMode= "singleInstance"
+            android:launchMode= "singleTask"
             android:name=".MainActivity"
             android:label="@string/title_activity_main" >
         </activity>
@@ -36,7 +36,7 @@
         </service>
 
         <activity
-            android:launchMode= "singleInstance"
+            android:launchMode= "singleTask"
             android:name=".SelectCourses"
             android:label="@string/title_activity_select_courses"
             android:parentActivityName=".MainActivity" >
@@ -65,7 +65,7 @@
             android:theme="@android:style/Theme.Dialog" >
         </activity>
         <activity
-            android:launchMode= "singleInstance"
+            android:launchMode= "singleTask"
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings" >
         </activity>

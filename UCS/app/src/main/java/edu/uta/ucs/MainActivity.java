@@ -93,12 +93,6 @@ public class MainActivity extends ActionBarActivity {
         super.onStop();
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        UserData.logout(MainActivity.this);
-    }
-
     public void generateSchedule(View view){
         Log.d("MainActivity", "Opening Generate Schedule");
         Intent startSelectCoursesActivity = new Intent(MainActivity.this, SelectCourses.class);

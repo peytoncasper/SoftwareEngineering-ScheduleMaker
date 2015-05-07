@@ -2,10 +2,9 @@
     <string name="app_name">UCS</string>
     <string name="title_activity_main">MainActivity</string>
 
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_select_courses">Select Courses</string>
-    <string name="title_activity_select_blockout_times">Select Blockout Times</string>
+    <string name="title_activity_select_blockout_times">Select Block-Out Times</string>
     <string name="title_activity_create_account">" Create Account"</string>
 
     <string name="title_activity_detailed_schedule">DetailedSchedule</string>

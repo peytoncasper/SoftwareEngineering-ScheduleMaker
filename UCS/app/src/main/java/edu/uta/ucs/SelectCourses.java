@@ -389,6 +389,10 @@ class DepartmentInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInf
                 List<SemesterInfo.DepartmentInfo> results = new ArrayList<>();
                 if (constraint != null){
                     for(SemesterInfo.DepartmentInfo departmentInfo : departmentInfoArrayList){
+                        if(departmentInfo.getDepartmentAcronym().toUpperCase().contains(" NULL"))
+                            continue;
+                        if(departmentInfo.getDepartmentTitle().toUpperCase().contains(" NULL"))
+                            continue;
                         if(departmentInfo.getDepartmentAcronym().toUpperCase().startsWith(constraint.toString().toUpperCase())){
                             if (!results.contains(departmentInfo))
                                 results.add(departmentInfo);
@@ -489,11 +493,15 @@ class CourseInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInfo.Co
                 List<SemesterInfo.DepartmentInfo.CourseInfo> results = new ArrayList<>();
                 if (constraint != null){
                     for(SemesterInfo.DepartmentInfo.CourseInfo courseInfo : courseInfoArrayList){
+                        if(courseInfo.getCourseTitle().toUpperCase().contains(" NULL"))
+                            continue;
                         if(((Integer) courseInfo.getCourseNumber()).toString().contains(constraint.toString())){
-                            results.add(courseInfo);
+                            if (!results.contains(courseInfo))
+                                results.add(courseInfo);
                         }
                         if(courseInfo.getCourseTitle().toUpperCase().contains(constraint.toString().toUpperCase())){
-                            results.add(courseInfo);
+                            if (!results.contains(courseInfo))
+                                results.add(courseInfo);
                         }
                     }
                 }
@@ -626,6 +634,8 @@ public class SelectCourses extends ActionBarActivity {
     private ArrayList<SemesterInfo.DepartmentInfo> departmentInfoArrayList;
     private ArrayList<SemesterInfo.DepartmentInfo.CourseInfo> courseInfoArrayList;
 
+    private Button addCourse;
+
     private ArrayList<Course> fetchedCourses;
     private long lastFetchTime;
 
@@ -643,6 +653,8 @@ public class SelectCourses extends ActionBarActivity {
         departmentInfoArrayList = new ArrayList<>();
         courseInfoArrayList = new ArrayList<>();
 
+        setTitle("Schedule Setup");
+
         LocalBroadcastManager.getInstance(this).registerReceiver(new DepartmentCoursesReceiver(), new IntentFilter(ACTION_GET_SEMESTER));
         LocalBroadcastManager.getInstance(this).registerReceiver(new DesiredSectionsReceiver(), new IntentFilter(ACTION_GET_DESIRED_COURSE_SECTIONS));
         LocalBroadcastManager.getInstance(this).registerReceiver(new LogoutReciever(), new IntentFilter(UserData.ACTION_LOGOUT));
@@ -654,6 +666,8 @@ public class SelectCourses extends ActionBarActivity {
 
         courseDepartment = ((AutoCompleteTextView) findViewById(R.id.course_department_edittext));
         courseNumber = ((AutoCompleteTextView) findViewById(R.id.course_number_edittext));
+
+        addCourse = (Button) findViewById(R.id.add_course_button);
     }
 
 
@@ -808,9 +822,13 @@ public class SelectCourses extends ActionBarActivity {
     public void addCourse(View view){
 
         if(selectedSemester == null){
+            addCourse.setError("Please select a semester first");
             Toast.makeText(getApplicationContext(), "Please select a semester first", Toast.LENGTH_LONG).show();
             return;
         }
+
+        addCourse.setError(null);
+
         String department = courseDepartment.getText().toString().toUpperCase();
         String number = courseNumber.getText().toString();
 
@@ -830,25 +848,32 @@ public class SelectCourses extends ActionBarActivity {
 
         if (selectedCourse != null) {
 
-            Log.d("Selected Course",selectedCourse.getDepartmentInfo().getDepartmentAcronym() + " - " + ((Integer) selectedCourse.getCourseNumber()).toString() + "\t" + selectedCourse.getCourseTitle());
+            Log.d("Selected Course", selectedCourse.getDepartmentInfo().getDepartmentAcronym() + " - " + ((Integer) selectedCourse.getCourseNumber()).toString() + "\t" + selectedCourse.getCourseTitle());
 
-            if(!desiredCoursesArrayList.contains(selectedCourse))
+            if(!desiredCoursesArrayList.contains(selectedCourse)) {
                 desiredCoursesArrayList.add(selectedCourse);
+                desiredCoursesArrayAdapter.notifyDataSetChanged();
+
+
+                courseNumber.setError(null);
+
+                courseDepartment.setText("");
+                courseNumber.setText("");
+
+                courseDepartment.requestFocus();
+            }
             else
-                Toast.makeText(SelectCourses.this, "Class already selected", Toast.LENGTH_LONG).show();
+                //Toast.makeText(SelectCourses.this, "Class already selected", Toast.LENGTH_LONG).show();
+                courseNumber.setError("Class already selected!");
+                courseNumber.requestFocus();
 
-            desiredCoursesArrayAdapter.notifyDataSetChanged();
 
-            courseDepartment.setText("");
-            courseNumber.setText("");
-
-            courseDepartment.requestFocus();
         }
         else {
-            Toast.makeText(SelectCourses.this, "Class not found", Toast.LENGTH_LONG).show();
+            //Toast.makeText(SelectCourses.this, "Class not found", Toast.LENGTH_LONG).show();
 
-            courseDepartment.setText("");
-            courseNumber.setText("");
+            courseNumber.setError("Class not found!");
+            courseNumber.requestFocus();
 
             courseDepartment.requestFocus();
         }
@@ -967,7 +992,7 @@ public class SelectCourses extends ActionBarActivity {
             }
         });
 
-        getDesiredSemester.show();
+        getDesiredSemester.create().show();
     }
 
     public void setSelectedSemester(SemesterInfo semesterInfo){
@@ -1005,13 +1030,11 @@ public class SelectCourses extends ActionBarActivity {
     private void updateDepartmentInfoAdapter(ArrayList<SemesterInfo.DepartmentInfo> departmentInfo){
         departmentInfoArrayAdapter = new DepartmentInfoArrayAdapter(this,R.layout.desired_courses_listview, departmentInfo);
         courseDepartment.setAdapter(departmentInfoArrayAdapter);
-        Toast.makeText(getBaseContext(), "Semester Data Updated", Toast.LENGTH_LONG).show();
     }
 
     private void updateCourseInfoAdapter(ArrayList<SemesterInfo.DepartmentInfo.CourseInfo> courseInfo){
         courseInfoArrayAdapter = new CourseInfoArrayAdapter(this,R.layout.desired_courses_listview, courseInfo);
         courseNumber.setAdapter(courseInfoArrayAdapter);
-        Toast.makeText(getBaseContext(), "Department Data Updated", Toast.LENGTH_LONG).show();
     }
 
     private class LogoutReciever extends BroadcastReceiver{
@@ -1036,6 +1059,8 @@ public class SelectCourses extends ActionBarActivity {
                 fetchedSemesters = SemesterInfo.SemesterInfoFactory(response);
                 Log.i("Get Semesters", "Semesters found in fetch: " + fetchedSemesters.size());
                 saveSemestersToFile(fetchedSemesters);
+
+                Toast.makeText(getBaseContext(), "Semester Data Updated", Toast.LENGTH_LONG).show();
 
                 selectSemester(fetchedSemesters);
                 if(success){
@@ -1153,11 +1178,11 @@ public class SelectCourses extends ActionBarActivity {
         savedSemesters.apply();
     }
 
-    public ArrayList<SemesterInfo> loadSemesterInfoFromFile(){
+    public static ArrayList<SemesterInfo> loadSemesterInfoFromFile(Context context){
 
         Log.i("Load Semester", "Preparing to load");
 
-        SharedPreferences savedSemesters = getSharedPreferences(SemesterInfo.getSEMESTER_INFO(), MODE_PRIVATE);
+        SharedPreferences savedSemesters = context.getSharedPreferences(SemesterInfo.getSEMESTER_INFO(), MODE_PRIVATE);
 
         Map<String, ?> allEntries = savedSemesters.getAll();
 

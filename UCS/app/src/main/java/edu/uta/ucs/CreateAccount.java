@@ -118,28 +118,34 @@ public class CreateAccount extends ActionBarActivity {
         // Build url from user given fields
         url = CREATE_ACCOUNT_URL[0]+CREATE_ACCOUNT_URL[1]+username+CREATE_ACCOUNT_URL[2]+password+CREATE_ACCOUNT_URL[3]+email;
 
+        /* Depreciated with implementation of HTTPService.FetchURL()
         // Create activity intent
-        Intent intent = new Intent(this, HTTPGetService.class);
+        Intent intent = new Intent(this, HTTPService.class);
         // Listener filter for result broadcast
-        intent.putExtra(HTTPGetService.SOURCE_INTENT, ACTION_CREATE_ACCOUNT);
+        intent.putExtra(HTTPService.SOURCE_INTENT, ACTION_CREATE_ACCOUNT);
 
         // Last chance to interrupt before account creation is attempted
+        */
         if (cancel){
 
             focusView.requestFocus();
         }
         else {
+            HTTPService.FetchURL(url, ACTION_CREATE_ACCOUNT, this);
+            /* Depreciated with implementation of HTTPService.FetchURL()
             // Spoof data switch
             if (spoofData) {
                 // Put spoof request instead of url in intent extras
-                intent.putExtra(HTTPGetService.URL_REQUEST, HTTPGetService.SPOOF_SERVER);
-                intent.putExtra(HTTPGetService.SPOOFED_RESPONSE, SPOOF_ACCOUNT_CREATION);
+                intent.putExtra(HTTPService.REQUEST_GET_URL, HTTPService.SPOOF_SERVER);
+                intent.putExtra(HTTPService.SPOOFED_RESPONSE, SPOOF_ACCOUNT_CREATION);
             } else
                 // Put creation request in intent extras
-                intent.putExtra(HTTPGetService.URL_REQUEST, url);
+                intent.putExtra(HTTPService.REQUEST_GET_URL, url);
 
             // Launch service
             startService(intent);
+            */
+
 
             progressDialog = new ProgressDialog(CreateAccount.this);
             progressDialog.setTitle("Attempting to create account");
@@ -187,7 +193,7 @@ public class CreateAccount extends ActionBarActivity {
             JSONObject response = null;
             boolean success = false;
             try {
-                response = new JSONObject(intent.getStringExtra(HTTPGetService.SERVER_RESPONSE));
+                response = new JSONObject(intent.getStringExtra(HTTPService.SERVER_RESPONSE));
                 success = response.getBoolean("Success");
                 if(success){
                     Toast.makeText(getApplicationContext(), "Account Created", Toast.LENGTH_LONG).show();

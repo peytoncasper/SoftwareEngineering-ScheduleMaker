@@ -181,6 +181,7 @@ class BlockoutCoursesAdapter extends BaseExpandableListAdapter {
             @Override
             public void onClick(View v) {
                 courseArrayList.remove(getGroup(groupPosition));
+                SelectBlockoutTimes.saveBlockoutCoursesToFile(context,courseArrayList);
                 notifyDataSetChanged();
             }
         });
@@ -425,6 +426,71 @@ public class SelectBlockoutTimes extends ActionBarActivity {
         blockoutTimesListAdapter.setDeleteButtonVisibility(true);
         blockoutTimesListAdapter.setNotifyOnChange(true);
         sectionListView.setAdapter(blockoutTimesListAdapter);
+
+        mondayToggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    buttonView.setBackgroundColor(getResources().getColor(R.color.utaOrange));
+                } else
+                    buttonView.setBackgroundColor(getResources().getColor(R.color.button_material_light));
+            }
+        });
+
+        tuesdayToggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    buttonView.setBackgroundColor(getResources().getColor(R.color.utaOrange));
+                }
+                else
+                    buttonView.setBackgroundColor(getResources().getColor(R.color.button_material_light));
+            }
+        });
+
+        wednesdayToggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    buttonView.setBackgroundColor(getResources().getColor(R.color.utaOrange));
+                }
+                else
+                    buttonView.setBackgroundColor(getResources().getColor(R.color.button_material_light));
+            }
+        });
+
+        thursdayToggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    buttonView.setBackgroundColor(getResources().getColor(R.color.utaOrange));
+                }
+                else
+                    buttonView.setBackgroundColor(getResources().getColor(R.color.button_material_light));
+            }
+        });
+
+        fridayToggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    buttonView.setBackgroundColor(getResources().getColor(R.color.utaOrange));
+                }
+                else
+                    buttonView.setBackgroundColor(getResources().getColor(R.color.button_material_light));
+            }
+        });
+
+        saturdayToggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    buttonView.setBackgroundColor(getResources().getColor(R.color.utaOrange));
+                }
+                else
+                    buttonView.setBackgroundColor(getResources().getColor(R.color.button_material_light));
+            }
+        });
 
 
         Intent intent = getIntent();
@@ -735,9 +801,9 @@ public class SelectBlockoutTimes extends ActionBarActivity {
         SharedPreferences.Editor blockoutTimesEditor;
         blockoutTimesEditor = context.getSharedPreferences(BLOCKOUT_TIMES, MODE_PRIVATE).edit();
 
-        ArrayList<String> savedBlockoutCourseString = new ArrayList<>(coursesToSave.size());
+        ArrayList<JSONObject> savedBlockoutCourseString = new ArrayList<>(coursesToSave.size());
         for (Course course : coursesToSave){
-            savedBlockoutCourseString.add(course.toJSON().toString());
+            savedBlockoutCourseString.add(course.toJSON());
         }
         JSONArray savedBlockoutCourseJSONArray = new JSONArray(savedBlockoutCourseString);
         blockoutTimesEditor.putString(BLOCKOUT_TIMES, savedBlockoutCourseJSONArray.toString());

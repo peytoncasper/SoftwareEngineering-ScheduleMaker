@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="defaultImeActionID" format="integer" type="integer">100</item>
+    <item name="smallTextSize" format="integer" type="integer">12</item>
+    <item name="mediumlTextSize" format="integer" type="integer">15</item>
+    <item name="largelTextSize" format="integer" type="integer">20</item>
 </resources>

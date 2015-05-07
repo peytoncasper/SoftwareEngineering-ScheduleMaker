@@ -78,10 +78,10 @@ public class Schedule {
         result.put("ScheduleName", name);
         result.put("ScheduleSemester", getSemesterNumber());
 
-        ArrayList<String> selectedSectionsString = new ArrayList<>(selectedSections.size());
+        ArrayList<JSONObject> selectedSectionsString = new ArrayList<>(selectedSections.size());
 
         for (Section section : selectedSections){
-            selectedSectionsString.add(section.getSourceCourse().toJSON(section).toString());
+            selectedSectionsString.add(section.getSourceCourse().toJSON(section));
         }
         JSONArray selectedSectionsJSONArray = new JSONArray(selectedSectionsString);
 

@@ -225,10 +225,10 @@ public class DetailedSchedule extends Activity {
 
         String urlFinal = URL_VALIDATE_COURSES + semesterParamFinal + departmentParamFinal + courseNumberParamFinal;
 
-        Intent intent = new Intent(this, HTTPGetService.class);
+        Intent intent = new Intent(this, HTTPService.class);
 
-        intent.putExtra(HTTPGetService.URL_REQUEST, urlFinal);
-        intent.putExtra(HTTPGetService.SOURCE_INTENT, ACTION_VERIFY_SCHEDULE);
+        intent.putExtra(HTTPService.REQUEST_GET_URL, urlFinal);
+        intent.putExtra(HTTPService.SOURCE_INTENT, ACTION_VERIFY_SCHEDULE);
         startService(intent);
 
         progressDialog = new ProgressDialog(DetailedSchedule.this);
@@ -360,11 +360,14 @@ public class DetailedSchedule extends Activity {
                 + URL_GET_COURSE_SECTIONS_PARAM_DEPARTMENT + department
                 + URL_GET_COURSE_SECTIONS_PARAM_COURSENUMBER + courseNumber;
 
-        Intent intent = new Intent(this, HTTPGetService.class);
+        HTTPService.FetchURL(url, ACTION_GET_COURSE_SECTIONS, this);
+        /* Depreciated with implementation of HTTPService.FetchURL()
+        Intent intent = new Intent(this, HTTPService.class);
 
-        intent.putExtra(HTTPGetService.URL_REQUEST, url);
-        intent.putExtra(HTTPGetService.SOURCE_INTENT, ACTION_GET_COURSE_SECTIONS);
+        intent.putExtra(HTTPService.REQUEST_GET_URL, url);
+        intent.putExtra(HTTPService.SOURCE_INTENT, ACTION_GET_COURSE_SECTIONS);
         startService(intent);
+        */
 
         progressDialog = new ProgressDialog(DetailedSchedule.this);
         progressDialog.setTitle("");
@@ -414,7 +417,7 @@ public class DetailedSchedule extends Activity {
 
             ArrayList<Course> fetchedCourses = null;
 
-            String response = intent.getStringExtra(HTTPGetService.SERVER_RESPONSE);
+            String response = intent.getStringExtra(HTTPService.SERVER_RESPONSE);
             Log.d("Received: ", response);
 
             try {
@@ -501,7 +504,7 @@ public class DetailedSchedule extends Activity {
 
             ArrayList<Course> fetchedCourses = null;
 
-            String response = intent.getStringExtra(HTTPGetService.SERVER_RESPONSE);
+            String response = intent.getStringExtra(HTTPService.SERVER_RESPONSE);
             Log.d("HTTPGet Received: ", response);
 
             try {
