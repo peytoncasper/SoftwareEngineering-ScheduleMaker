@@ -195,14 +195,14 @@ public class CreateAccount extends ActionBarActivity {
             try {
                 response = new JSONObject(intent.getStringExtra(HTTPService.SERVER_RESPONSE));
                 success = response.getBoolean("Success");
+                String message = response.getString("Message");
                 if(success){
-                    Toast.makeText(getApplicationContext(), "Account Created", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
                     Intent launchMainActivity = new Intent(getApplicationContext(), MainActivity.class);
                     startActivity(launchMainActivity);
                     finish();
                 }
                 else {
-                    String message = response.getString("Message");
                     Toast.makeText(CreateAccount.this, "Error: " + message, Toast.LENGTH_LONG).show();
                     ((EditText) findViewById(R.id.create_account_password)).setText("");
                     ((EditText) findViewById(R.id.create_account_confirm_password)).setText("");
