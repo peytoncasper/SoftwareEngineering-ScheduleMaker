@@ -880,16 +880,21 @@ public class SelectCourses extends ActionBarActivity {
 
         String urlFinal = URL_GET_COURSE_SECTIONS + semesterParamFinal + departmentParamFinal + courseNumberParamFinal;
 
-        Intent intent = new Intent(this, HTTPGetService.class);
+        HTTPService.FetchURL(urlFinal, ACTION_GET_DESIRED_COURSE_SECTIONS, this);
+
+        /* Deprecisted with use of HTTPService.FetchURL();
+        Intent intent = new Intent(this, HTTPService.class);
         if(spoofServerSwitch) {
-            intent.putExtra(HTTPGetService.URL_REQUEST, HTTPGetService.SPOOF_SERVER);
-            intent.putExtra(HTTPGetService.SPOOFED_RESPONSE, SPOOF_DESIRED_COURSE_SECTIONS);
+            intent.putExtra(HTTPService.REQUEST_GET_URL, HTTPService.SPOOF_SERVER);
+            intent.putExtra(HTTPService.SPOOFED_RESPONSE, SPOOF_DESIRED_COURSE_SECTIONS);
         }
         else
-            intent.putExtra(HTTPGetService.URL_REQUEST, urlFinal);
+            intent.putExtra(HTTPService.REQUEST_GET_URL, urlFinal);
 
-        intent.putExtra(HTTPGetService.SOURCE_INTENT, ACTION_GET_DESIRED_COURSE_SECTIONS);
+        intent.putExtra(HTTPService.SOURCE_INTENT, ACTION_GET_DESIRED_COURSE_SECTIONS);
         startService(intent);
+        */
+
         showProgressDialog("Getting All Selected Course Data");
     }
 
@@ -897,7 +902,7 @@ public class SelectCourses extends ActionBarActivity {
 
         Log.i("Get Semesters", "Getting Semesters");
 
-        ArrayList <SemesterInfo> fileSemesters = loadSemesterInfoFromFile();
+        ArrayList <SemesterInfo> fileSemesters = loadSemesterInfoFromFile(SelectCourses.this);
         Log.i("Get Semesters", "Semesters found on file: " + fileSemesters.size());
 
         if (fileSemesters.size() == 0)
@@ -971,16 +976,20 @@ public class SelectCourses extends ActionBarActivity {
     }
 
     private void fetchSemesters(){
-        Intent intent = new Intent(this, HTTPGetService.class);
+
+        HTTPService.FetchURL(URL_GET_SEMESTER, ACTION_GET_SEMESTER, this);
+        /* Deprecisted with use of HTTPService.FetchURL();
+        Intent intent = new Intent(this, HTTPService.class);
         if(spoofServerSwitch) {
-            intent.putExtra(HTTPGetService.URL_REQUEST, HTTPGetService.SPOOF_SERVER);
-            intent.putExtra(HTTPGetService.SPOOFED_RESPONSE, SPOOF_SEMESTER);
+            intent.putExtra(HTTPService.REQUEST_GET_URL, HTTPService.SPOOF_SERVER);
+            intent.putExtra(HTTPService.SPOOFED_RESPONSE, SPOOF_SEMESTER);
         }
         else
-            intent.putExtra(HTTPGetService.URL_REQUEST, URL_GET_SEMESTER);
+            intent.putExtra(HTTPService.REQUEST_GET_URL, URL_GET_SEMESTER);
 
-        intent.putExtra(HTTPGetService.SOURCE_INTENT, ACTION_GET_SEMESTER);
+        intent.putExtra(HTTPService.SOURCE_INTENT, ACTION_GET_SEMESTER);
         startService(intent);
+        */
         showProgressDialog("Getting Semester Data");
     }
 
@@ -1021,7 +1030,7 @@ public class SelectCourses extends ActionBarActivity {
             JSONObject response = null;
             boolean success = false;
             try {
-                response = new JSONObject(intent.getStringExtra(HTTPGetService.SERVER_RESPONSE));
+                response = new JSONObject(intent.getStringExtra(HTTPService.SERVER_RESPONSE));
 
                 success = response.getBoolean("Success");
                 fetchedSemesters = SemesterInfo.SemesterInfoFactory(response);
@@ -1047,7 +1056,7 @@ public class SelectCourses extends ActionBarActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             ArrayList<Section> sectionArrayList = null;
-            String response = intent.getStringExtra(HTTPGetService.SERVER_RESPONSE);
+            String response = intent.getStringExtra(HTTPService.SERVER_RESPONSE);
             Log.d("Received: ", response);
 
             try {

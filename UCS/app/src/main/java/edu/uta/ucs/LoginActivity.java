@@ -74,7 +74,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
-    HTTPGetService HTTPGetService;
 
     String m_Text;
     private String rawServerResponse;
@@ -110,8 +109,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
-
-        HTTPGetService = new HTTPGetService();
 
         LocalBroadcastManager.getInstance(this).registerReceiver(new LoginReceiver(), new IntentFilter(ACTION_LOGIN));
         LocalBroadcastManager.getInstance(this).registerReceiver(new ResetPasswordReceiver(), new IntentFilter(ACTION_RESET_PASSWORD));
@@ -192,13 +189,17 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             // perform the user login attempt.
             showProgress(true);
 
-            Intent intent = new Intent(this, HTTPGetService.class);
+            HTTPService.FetchURL(url, ACTION_LOGIN, this);
 
-            intent.putExtra(HTTPGetService.URL_REQUEST, url);
+            /*
+            Intent intent = new Intent(this, HTTPService.class);
+
+            intent.putExtra(HTTPService.REQUEST_GET_URL, url);
             //intent.putExtra(HTTPGetService.SPOOFED_RESPONSE, SPOOFED_LOGIN);
-            intent.putExtra(HTTPGetService.SOURCE_INTENT, ACTION_LOGIN);
+            intent.putExtra(HTTPService.SOURCE_INTENT, ACTION_LOGIN);
 
             startService(intent);
+            */
         }
     }
 
@@ -228,13 +229,18 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 String email = input.getText().toString();
 
                 if (isEmailValid(email)){
-                    Intent intent = new Intent(getApplicationContext(), HTTPGetService.class);
 
-                    intent.putExtra(HTTPGetService.URL_REQUEST, EMAIL_EXISTS_URL+email);
+
+                    HTTPService.FetchURL(EMAIL_EXISTS_URL + email, ACTION_RESET_PASSWORD, LoginActivity.this);
+                    /* Depreciated with implementation of HTTPService.FetchURL()
+                    Intent intent = new Intent(getApplicationContext(), HTTPService.class);
+
+                    intent.putExtra(HTTPService.REQUEST_GET_URL, EMAIL_EXISTS_URL+email);
                     //intent.putExtra(HTTPGetService.SPOOFED_RESPONSE, SPOOFED_RESET_PASSWORD);
-                    intent.putExtra(HTTPGetService.SOURCE_INTENT, ACTION_RESET_PASSWORD);
+                    intent.putExtra(HTTPService.SOURCE_INTENT, ACTION_RESET_PASSWORD);
 
                     startService(intent);
+                    */
                 }
             }
         });
@@ -356,7 +362,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             JSONObject response = null;
             boolean success = false;
             try {
-                response = new JSONObject(intent.getStringExtra(HTTPGetService.SERVER_RESPONSE));
+                response = new JSONObject(intent.getStringExtra(HTTPService.SERVER_RESPONSE));
                 success = response.getBoolean("Success");
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -380,7 +386,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             JSONObject response = null;
             boolean success = false;
             try {
-                response = new JSONObject(intent.getStringExtra(HTTPGetService.SERVER_RESPONSE));
+                response = new JSONObject(intent.getStringExtra(HTTPService.SERVER_RESPONSE));
                 success = response.getBoolean("Success");
 
                 if (success) {

@@ -77,4 +77,14 @@ public class UserData extends Application{
     public static void setMilitaryTime(Boolean militaryTime) {
         UserData.militaryTime = militaryTime;
     }
+
+    public static boolean spoofServer() {
+
+        Context context = UserData.getContext();
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        boolean spoofServer = settings.getBoolean(context.getResources().getString(R.string.pref_key_spoof_server), false);
+
+        return spoofServer;
+    }
+
 }
