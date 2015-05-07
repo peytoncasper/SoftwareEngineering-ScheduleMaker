@@ -15,7 +15,7 @@
 
     <string name="email_exists_base">http://ucs.azurewebsites.net/UTA/EmailExists?email=</string>
 
-    <string name="logout_base">http://ucs.azurewebsites.net/UTA/CreateSchedule</string>
+    <string name="logout_base">http://osassignment.azurewebsites.net/UTA/CreateSchedule</string>
 
     <string name="login_base">http://ucs.azurewebsites.net/UTA/ValidateLogin?</string>
     <string name="login_param_username">username=</string>

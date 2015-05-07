@@ -19,6 +19,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.Adapter;
@@ -179,13 +180,18 @@ class BlockoutCoursesAdapter extends BaseExpandableListAdapter {
         CheckBox courseCheckbox = (CheckBox) convertView.findViewById(R.id.courseExpandableListViewCheckbox);
         Button courseDelete = (Button) convertView.findViewById(R.id.courseExpandableListViewDeleteButton);
 
+        final Context tempContext = context;
 
         courseDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                courseArrayList.remove(getGroup(groupPosition));
-                SelectBlockoutTimes.saveBlockoutCoursesToFile(context,courseArrayList);
-                notifyDataSetChanged();
+                try{
+                    confirmDelete(groupPosition, tempContext);
+                }catch (WindowManager.BadTokenException e) {
+                    courseArrayList.remove(getGroup(groupPosition));
+                    SelectBlockoutTimes.saveBlockoutCoursesToFile(context, courseArrayList);
+                    notifyDataSetChanged();
+                }
             }
         });
 
@@ -303,6 +309,26 @@ class BlockoutCoursesAdapter extends BaseExpandableListAdapter {
             }
         }
         return convertView;
+    }
+
+    public void confirmDelete(final int position, Context context) throws WindowManager.BadTokenException{
+
+        AlertDialog.Builder confirmDelete = new AlertDialog.Builder(context);
+        confirmDelete.setTitle("Are you sure you want to delete this?");
+        confirmDelete.setPositiveButton("DELETE", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                courseArrayList.remove(getGroup(position));
+                dialog.dismiss();
+            }
+        });
+        confirmDelete.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        confirmDelete.create().show();
     }
 
     /**

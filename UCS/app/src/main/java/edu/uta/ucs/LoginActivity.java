@@ -440,7 +440,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 if(response.has("Message")) {
                     if(success)
                         message = response.getString("Message");
-                    else message = "Error: " + response.getString("Message");
+                    else message = "Error: " + response.getString("Message") + " Upload failed. Saving userdata locally";
                     Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
                 }
                 if(response.has("TimeTaken")){
