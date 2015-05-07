@@ -1,5 +1,7 @@
 {
   "http://ucs.azurewebsites.net/UTA/ValidateLogin?username=a&password=a": "{\"Success\":true,\"Email\":\"a@a.a\"}",
   "http://ucs.azurewebsites.net/UTA/ValidateLogin?username=spoof&password=spoof": "{\"Success\":true,\"Email\":\"spoof@spoof.com\"}",
-  "http://ucs.azurewebsites.net/UTA/ValidateLogin": "{\"Success\":true,\"Email\":\"a@a.a\"}"
+  "http://ucs.azurewebsites.net/UTA/ValidateLogin": "{\"Success\":true,\"Email\":\"a@a.a\"}",
+  "http://ucs.azurewebsites.net/UTA/CreateAccount": "{\"Success\":true,\"Email\":\"none@notreal.com\",\"Username\":\"none\",\"Message\":\"Account Added.\"}",
+  "http://ucs.azurewebsites.net/UTA/CreateAccount?username=spoof&password=spoof&email=spoof@spoof.com": "{\"Success\":true,\"Email\":\"spoof@spoof.com\",\"Username\":\"spoof\",\"Message\":\"Account Added.\"}"
 }
