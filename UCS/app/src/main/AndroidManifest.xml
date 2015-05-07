@@ -56,7 +56,8 @@
         <activity
             android:launchMode= "singleTask"
             android:name=".CreateAccount"
-            android:label="@string/title_activity_create_account" >
+            android:label="@string/title_activity_create_account"
+            android:theme="@android:style/Theme.Dialog" >
         </activity>
         <activity
             android:name=".DetailedSchedule"

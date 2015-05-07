@@ -1,12 +1,12 @@
 package edu.uta.ucs;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,7 +21,7 @@ import org.json.JSONObject;
 /**
  * This Activity is the input form for a user to create a new account
  */
-public class CreateAccount extends ActionBarActivity {
+public class CreateAccount extends Activity {
     public static final String ACTION_CREATE_ACCOUNT ="edu.uta.ucs.intent.action.CREATE_ACCOUNT";
     private static final String SPOOF_ACCOUNT_CREATION = "{\"Success\":true,\"Email\":\"b@b.b\",\"Username\":\"b\",\"Message\":\"Account Added.\"}";
 

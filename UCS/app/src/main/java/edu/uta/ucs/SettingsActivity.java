@@ -50,6 +50,11 @@ public class SettingsActivity extends PreferenceActivity {
     private static final boolean ALWAYS_SIMPLE_PREFS = false;
 
     @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
 
@@ -80,13 +85,13 @@ public class SettingsActivity extends PreferenceActivity {
             PreferenceCategory fakeHeader = new PreferenceCategory(this);
             fakeHeader.setTitle(R.string.pref_header_account_settings);
             getPreferenceScreen().addPreference(fakeHeader);
-            addPreferencesFromResource(R.xml.pref_data_sync);
+            addPreferencesFromResource(R.xml.pref_account);
 
             Preference updatePasswordButton = findPreference(getString(R.string.pref_key_update_password));
             updatePasswordButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    updateElementDialog("Password");
+                    updateElementDialog("Password", SettingsActivity.this);
                     return false;
                 }
             });
@@ -95,7 +100,7 @@ public class SettingsActivity extends PreferenceActivity {
             updateEmailButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    updateElementDialog("Email");
+                    updateElementDialog("Email", SettingsActivity.this);
                     return false;
                 }
             });
@@ -112,7 +117,7 @@ public class SettingsActivity extends PreferenceActivity {
         fakeHeader = new PreferenceCategory(this);
         fakeHeader.setTitle(R.string.pref_header_data_sync);
         getPreferenceScreen().addPreference(fakeHeader);
-        addPreferencesFromResource(R.xml.pref_data_sync);
+        addPreferencesFromResource(R.xml.pref_account);
 
         // Bind the summaries of EditText/List/Dialog/Ringtone preferences to
         // their values. When their values change, their summaries are updated
@@ -149,8 +154,7 @@ public class SettingsActivity extends PreferenceActivity {
      * "simplified" settings UI should be shown.
      */
     private static boolean isSimplePreferences(Context context) {
-        return ALWAYS_SIMPLE_PREFS
-                || Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB
                 || !isXLargeTablet(context);
     }
 
@@ -257,49 +261,48 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     /**
-     * This fragment shows notification preferences only. It is used when the
+     * This fragment shows user account preferences only. It is used when the
      * activity is showing a two-pane settings UI.
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public static class NotificationPreferenceFragment extends PreferenceFragment {
+    public static class AccountPreferenceFragment extends PreferenceFragment {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_notification);
+            addPreferencesFromResource(R.xml.pref_account);
 
             // Bind the summaries of EditText/List/Dialog/Ringtone preferences
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
+            //bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
+            Preference updatePasswordButton = findPreference(getString(R.string.pref_key_update_password));
+            updatePasswordButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    updateElementDialog("Password", getActivity());
+                    return false;
+                }
+            });
+
+            Preference updateEmailButton = findPreference(getString(R.string.pref_key_update_email));
+            updateEmailButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    updateElementDialog("Email", getActivity());
+                    return false;
+                }
+            });
         }
     }
 
-    /**
-     * This fragment shows data and sync preferences only. It is used when the
-     * activity is showing a two-pane settings UI.
-     */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public static class DataSyncPreferenceFragment extends PreferenceFragment {
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_data_sync);
-
-            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-            // to their values. When their values change, their summaries are
-            // updated to reflect the new value, per the Android Design
-            // guidelines.
-            bindPreferenceSummaryToValue(findPreference("sync_frequency"));
-        }
-    }
 
     /**
      * Creates a dialog which prompts user for password and element to change
      */
-    private void updateElementDialog(String updateElement){
+    private static void updateElementDialog(String updateElement, final Context context){
 
-        LayoutInflater inflater = getLayoutInflater();
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
         View changeElement = inflater.inflate(R.layout.dialog_change_element, null);
 
         final String baseURl = "http://ucs.azurewebsites.net/UTA/Change" + updateElement;
@@ -315,47 +318,65 @@ public class SettingsActivity extends PreferenceActivity {
         final EditText confirmEditText = (EditText) changeElement.findViewById(R.id.edittext_confirm_type);
 
 
-        final AlertDialog.Builder changeElementDialog = new AlertDialog.Builder(SettingsActivity.this);
-        changeElementDialog.setTitle("Change " + updateElement);
-        changeElementDialog.setView(changeElement);
-
-        changeElementDialog.setPositiveButton("UPDATE " + updateElement.toUpperCase(), new DialogInterface.OnClickListener() {
+        final AlertDialog.Builder changeElementBuilder = new AlertDialog.Builder(context);
+        changeElementBuilder.setTitle("Change " + updateElement);
+        changeElementBuilder.setView(changeElement);
+        changeElementBuilder.setPositiveButton("UPDATE " + updateElement.toUpperCase(), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+        changeElementBuilder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+
+        final AlertDialog changeElementDialog = changeElementBuilder.create();
+        changeElementDialog.show();
+
+        changeElementDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
                 String oldElement = oldEditText.getText().toString();
                 String newElement = newEditText.getText().toString();
                 String confirmElement = confirmEditText.getText().toString();
+                boolean dismiss = true;
 
                 if (oldElement.equals("")) {
                     oldEditText.setError("Cannot be blank");
-                    return;
-                } else oldEditText.setError(null);
+                    dismiss = false;
+                } else if(dismiss) oldEditText.setError(null);
 
                 if (newElement.equals("")) {
                     newEditText.setError("Cannot be blank");
-                    return;
-                } else newEditText.setError(null);
+                    dismiss = false;
+                } else if(dismiss) newEditText.setError(null);
 
                 if (!newElement.equals(confirmElement)) {
                     newEditText.setError("Must Match");
                     confirmEditText.setError("Must Match");
-                    return;
-                } else {
+                    dismiss = false;
+                } else if(dismiss) {
                     newEditText.setError(null);
                     confirmEditText.setError(null);
 
                 }
 
-                String changeElementURL = baseURl + "?email=" + UserData.getEmail() + "?password=" + oldElement + "?confirm=" + newElement;
-                HTTPService.FetchURL(changeElementURL, "null", SettingsActivity.this);
-                dialog.dismiss();
+                if (dismiss) {
+                    String changeElementURL = baseURl + "?email=" + UserData.getEmail() + "?password=" + oldElement + "?confirm=" + newElement;
+                    HTTPService.FetchURL(changeElementURL, "null", context);
+                    changeElementDialog.dismiss();
+                }
             }
         });
 
-        changeElementDialog.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+        changeElementDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
+            public void onClick(View view) {
+                changeElementDialog.dismiss();
             }
         });
 
@@ -374,10 +395,6 @@ public class SettingsActivity extends PreferenceActivity {
             confirmEditText.setTransformationMethod(null);
 
         }
-
-
-
-        changeElementDialog.create().show();
 
     }
 

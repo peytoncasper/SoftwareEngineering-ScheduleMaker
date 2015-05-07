@@ -10,6 +10,7 @@
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
+        android:minWidth="500dp"
         android:layout_height="wrap_content"
         android:padding="15dp"
         android:background="@color/frameContainerColor"
