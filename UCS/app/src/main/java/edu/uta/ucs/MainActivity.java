@@ -98,6 +98,11 @@ public class MainActivity extends ActionBarActivity {
         MainActivity.this.startActivity(startSelectCoursesActivity);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        UserData.logout(MainActivity.this);
+    }
 
     private class LogoutReciever extends BroadcastReceiver {
 
