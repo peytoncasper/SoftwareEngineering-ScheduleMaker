@@ -96,6 +96,8 @@ public class HTTPService extends IntentService {
         Log.i("HTTPService SOURCE", source);
         Log.i("HTTPService URL", urlString);
 
+        Log.i("HTTPService Response", response);
+
         Intent broadcastIntent = new Intent(intent.getStringExtra(SOURCE_INTENT));
         broadcastIntent.putExtra(SERVER_RESPONSE, response);
         LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
@@ -109,8 +111,6 @@ public class HTTPService extends IntentService {
         String urlString = intent.getStringExtra(REQUEST_URL).replace(" ", "");                         // Remove any whitespace
         String source = intent.getStringExtra(SOURCE_INTENT);
 
-        Log.i("HTTPService SOURCE", source);
-        Log.i("HTTPService URL", urlString);
 
         if (!urlString.equalsIgnoreCase(SPOOF_SERVER_RESPONSE)) {
 
@@ -126,6 +126,10 @@ public class HTTPService extends IntentService {
             response = intent.getStringExtra(SPOOFED_RESPONSE);
             Log.i("HTTPGetService", "Spoofing response");
         }
+        Log.i("HTTPService SOURCE", source);
+        Log.i("HTTPService URL", urlString);
+
+        Log.i("HTTPService Response", response);
 
         Intent broadcastIntent = new Intent(intent.getStringExtra(SOURCE_INTENT));
         broadcastIntent.putExtra(SERVER_RESPONSE, response);

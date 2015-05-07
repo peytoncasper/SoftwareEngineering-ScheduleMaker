@@ -4,20 +4,28 @@
     <string name="create_account_param_username">username=</string>
     <string name="create_account_param_password"><![CDATA[&password=]]></string>
     <string name="create_account_param_email"><![CDATA[&email=]]></string>
+
     <string name="get_course_info_base">http://ucs.azurewebsites.net/UTA/GetCourseInfo?</string>
+
     <string name="validate_courses_base">http://ucs.azurewebsites.net/UTA/ValidateCourses?</string>
     <string name="validate_courses_param_semester">semester=</string>
     <string name="validate_courses_param_department"><![CDATA[&department=]]></string>
     <string name="validate_courses_param_course_number"><![CDATA[&courseNumber=]]></string>
     <string name="validate_courses_param_class_number"><![CDATA[&classNumbers=]]></string>
-    <string name="login_base">http://ucs.azurewebsites.net/UTA/ValidateLogin?</string>
+
     <string name="email_exists_base">http://ucs.azurewebsites.net/UTA/EmailExists?email=</string>
+
     <string name="logout_base">http://ucs.azurewebsites.net/UTA/ValidateLogout?</string>
+
+    <string name="login_base">http://ucs.azurewebsites.net/UTA/ValidateLogin?</string>
     <string name="login_param_username">username=</string>
     <string name="login_param_password"><![CDATA[&password=]]></string>
+
     <string name="get_course_section_base">http://ucs.azurewebsites.net/UTA/GetCourseInfo?</string>
     <string name="get_course_sections_param_semester">semester=</string>
     <string name="get_course_sections_param_department"><![CDATA[&department=]]></string>
+
     <string name="get_semester_data">http://ucs.azurewebsites.net/UTA/GetDepartmentClassData</string>
+
     <string name="change_settings_base">http://ucs.azurewebsites.net/UTA/Change</string>
 </resources>
