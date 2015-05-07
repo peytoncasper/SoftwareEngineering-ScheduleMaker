@@ -1,7 +1,5 @@
 package edu.uta.ucs;
 
-import edu.uta.ucs.util.SystemUiHider;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -34,10 +32,7 @@ import java.util.Set;
 
 
 /**
- * An example full-screen activity that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
- *
- * @see SystemUiHider
+ * This Activity is designed to show a schedule. It expects the intent with which it is started to have the propper string extras.
  */
 public class DetailedSchedule extends Activity {
 
@@ -53,7 +48,7 @@ public class DetailedSchedule extends Activity {
 
     ListView scheduleSections;
     Schedule scheduleToShow;
-    MySectionArrayAdapter adapter;
+    SectionArrayAdapter adapter;
     ProgressDialog progressDialog;
 
     int selection;
@@ -66,7 +61,6 @@ public class DetailedSchedule extends Activity {
 
         scheduleSections = (ListView) findViewById(R.id.schedule_section_listview);
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(new LogoutReciever(), new IntentFilter(UserData.ACTION_LOGOUT));
     }
 
 
@@ -123,7 +117,7 @@ public class DetailedSchedule extends Activity {
         super.onResume();
 
         setTitle(scheduleToShow.getName());
-        adapter = new MySectionArrayAdapter(this, R.layout.section_list_display, scheduleToShow.getSelectedSections());
+        adapter = new SectionArrayAdapter(this, R.layout.section_list_display, scheduleToShow.getSelectedSections());
         scheduleSections.setAdapter(adapter);
     }
 
@@ -183,7 +177,7 @@ public class DetailedSchedule extends Activity {
     }
 
     public void editSchedule(View view){
-        MySectionArrayAdapter arrayAdapter = new MySectionArrayAdapter(DetailedSchedule.this, R.layout.section_list_display, scheduleToShow.getSelectedSections());
+        SectionArrayAdapter arrayAdapter = new SectionArrayAdapter(DetailedSchedule.this, R.layout.section_list_display, scheduleToShow.getSelectedSections());
 
         AlertDialog.Builder builder = new AlertDialog.Builder(DetailedSchedule.this);
         builder.setTitle("Select the course for which you want to swap sections");
@@ -214,9 +208,9 @@ public class DetailedSchedule extends Activity {
 
         for (Section section : sectionsToUpdate){
 
-            semesterParam.append(this.scheduleToShow.getSemesterNumber() + ",");
-            departmentParam.append(section.getSourceCourse().getCourseDepartment() + ",");
-            classNumberParam.append(section.getSectionID() + ",");
+            semesterParam.append(this.scheduleToShow.getSemesterNumber()).append(",");
+            departmentParam.append(section.getSourceCourse().getCourseDepartment()).append(",");
+            classNumberParam.append(section.getSectionID()).append(",");
         }
 
         String semesterParamFinal = semesterParam.length() > 0 ? semesterParam.substring( 0, semesterParam.length() - 1 ): "";
@@ -276,7 +270,7 @@ public class DetailedSchedule extends Activity {
         if (saveCheck){
             savedScheduleNames.add(schedule.getName());
             SharedPreferences.Editor editor = getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, MODE_PRIVATE).edit();
-            editor.putStringSet(Schedule.SCHEDULE_NAMES, new HashSet<String>(savedScheduleNames));
+            editor.putStringSet(Schedule.SCHEDULE_NAMES, new HashSet<>(savedScheduleNames));
             try {
                 String scheduleJSON = schedule.toJSON().toString();
                 Log.i("Schedule to Save", scheduleJSON);
@@ -295,7 +289,7 @@ public class DetailedSchedule extends Activity {
                 Log.i("Removing Schedule", scheduleName);
                 scheduleNamesArrayList.remove(scheduleName);
                 SharedPreferences.Editor editor = getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, MODE_PRIVATE).edit();
-                HashSet<String> newScheduleStingSet = new HashSet<String>(scheduleNamesArrayList);
+                HashSet<String> newScheduleStingSet = new HashSet<>(scheduleNamesArrayList);
                 editor.putStringSet(Schedule.SCHEDULE_NAMES, newScheduleStingSet);
                 editor.remove(Schedule.SCHEDULE_NAMES + "_" + scheduleNameToRemove);
                 editor.apply();
@@ -303,14 +297,15 @@ public class DetailedSchedule extends Activity {
             }
             else {
                 Log.i("Keeping Schedule", scheduleName);
-                continue;
             }
         }
     }
 
     private ArrayList<String> getSavedScheduleNames(){
-        File f = new File("/data/data/" + getPackageName() +  "/shared_prefs/" + Schedule.SCHEDULE_SAVEFILE + ".xml");
+        File f = new File(UserData.getContext().getFilesDir().getParentFile().getPath() +  "/shared_prefs/" + Schedule.SCHEDULE_SAVEFILE + ".xml");
+        Log.i("DetailedSchedule", "getSavedScheduleNames attempting load from file: " + f.getAbsolutePath());
         if(f.exists()){
+            Log.i("DetailedSchedule", "getSavedScheduleNames found file");
 
             SharedPreferences scheduleNames = getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, MODE_PRIVATE);
             Set<String> scheduleNameSet = scheduleNames.getStringSet(Schedule.SCHEDULE_NAMES, null);
@@ -334,6 +329,7 @@ public class DetailedSchedule extends Activity {
             return scheduleNamesArrayList;
         }
         else{
+            Log.i("DetailedSchedule", "getSavedScheduleNames file not found");
 
             SharedPreferences.Editor editor = getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, MODE_PRIVATE).edit();
             editor.apply();
@@ -412,10 +408,11 @@ public class DetailedSchedule extends Activity {
          * @param context The Context in which the receiver is running.
          * @param intent  The Intent being received.
          */
+        @SuppressWarnings("JavaDoc")
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            ArrayList<Course> fetchedCourses = null;
+            ArrayList<Course> fetchedCourses;
 
             String response = intent.getStringExtra(HTTPService.SERVER_RESPONSE);
             Log.d("Received: ", response);
@@ -448,7 +445,7 @@ public class DetailedSchedule extends Activity {
             if(progressDialog != null)
                 progressDialog.dismiss();
 
-            final MySectionArrayAdapter arrayAdapter = new MySectionArrayAdapter(DetailedSchedule.this,R.layout.section_list_display,fetchedCourses.get(0).getSectionList());
+            final SectionArrayAdapter arrayAdapter = new SectionArrayAdapter(DetailedSchedule.this,R.layout.section_list_display,fetchedCourses.get(0).getSectionList());
             AlertDialog.Builder builder = new AlertDialog.Builder(DetailedSchedule.this);
             builder.setTitle("Select a replacement course");
             builder.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
@@ -499,10 +496,11 @@ public class DetailedSchedule extends Activity {
          * @param context The Context in which the receiver is running.
          * @param intent  The Intent being received.
          */
+        @SuppressWarnings("JavaDoc")
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            ArrayList<Course> fetchedCourses = null;
+            ArrayList<Course> fetchedCourses;
 
             String response = intent.getStringExtra(HTTPService.SERVER_RESPONSE);
             Log.d("HTTPGet Received: ", response);
@@ -542,12 +540,21 @@ public class DetailedSchedule extends Activity {
         }
     }
 
-    private class LogoutReciever extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.i("Detailed View", "Logging out");
-            DetailedSchedule.this.finish();
+    /**
+     * Will generate a DetailedSchedule activity to display a supplied schedule
+     *
+     * @param scheduleToShow Schedule to show
+     * @param context context to create intent with. Usually will be the calling class followed by ".this"
+     *                <br>EX: MainActivity.this
+     */
+    public static void ShowSchedule(Schedule scheduleToShow, Context context){
+        Intent scheduleIntent = new Intent(context, DetailedSchedule.class);
+        try {
+            scheduleIntent.putExtra("Schedule Data", scheduleToShow.toJSON().toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.e("DetailedSchedule", "Could not parse schedule to JSON");
         }
+        context.startActivity(scheduleIntent);
     }
 }

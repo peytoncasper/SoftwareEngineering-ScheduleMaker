@@ -164,6 +164,7 @@ class BlockoutCoursesAdapter extends BaseExpandableListAdapter {
      * @param parent        the parent that this view will eventually be attached to
      * @return the View corresponding to the group at the specified position
      */
+    @SuppressWarnings("JavaDoc")
     @SuppressLint("InflateParams")
     @Override
     public View getGroupView(final int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
@@ -217,6 +218,7 @@ class BlockoutCoursesAdapter extends BaseExpandableListAdapter {
      * @param parent        the parent that this view will eventually be attached to
      * @return the View corresponding to the child at the specified position
      */
+    @SuppressWarnings("JavaDoc")
     @SuppressLint("InflateParams")
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
@@ -344,6 +346,10 @@ class BlockoutCoursesAdapter extends BaseExpandableListAdapter {
     }
 }
 
+/**
+ * This Activity allows the user to select times which should not be considered for scheduling
+ * <p>Activity should be started for result via startActivityForResult</p>
+ */
 public class SelectBlockoutTimes extends ActionBarActivity {
 
     public static final String BLOCKOUT_TIMES = "BLOCKOUT_TIMES";
@@ -358,7 +364,7 @@ public class SelectBlockoutTimes extends ActionBarActivity {
     LinearLayout toggleDaysLayout;
 
     String blockoutSetName = null;
-    MySectionArrayAdapter blockoutTimesListAdapter;
+    SectionArrayAdapter blockoutTimesListAdapter;
 
     ArrayList<Section> currentBlockoutTimes;
     Course currentBlockoutCourse;
@@ -425,7 +431,7 @@ public class SelectBlockoutTimes extends ActionBarActivity {
 
         currentBlockoutTimes = new ArrayList<>();
 
-        blockoutTimesListAdapter = new MySectionArrayAdapter(SelectBlockoutTimes.this, R.layout.section_list_display, currentBlockoutTimes);
+        blockoutTimesListAdapter = new SectionArrayAdapter(SelectBlockoutTimes.this, R.layout.section_list_display, currentBlockoutTimes);
         blockoutTimesListAdapter.setDeleteButtonVisibility(true);
         blockoutTimesListAdapter.setNotifyOnChange(true);
         sectionListView.setAdapter(blockoutTimesListAdapter);

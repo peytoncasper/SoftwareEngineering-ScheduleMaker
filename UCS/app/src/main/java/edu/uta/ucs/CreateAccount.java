@@ -23,11 +23,8 @@ import org.json.JSONObject;
  */
 public class CreateAccount extends Activity {
     public static final String ACTION_CREATE_ACCOUNT ="edu.uta.ucs.intent.action.CREATE_ACCOUNT";
-    private static final String SPOOF_ACCOUNT_CREATION = "{\"Success\":true,\"Email\":\"b@b.b\",\"Username\":\"b\",\"Message\":\"Account Added.\"}";
 
     public static final String CREATE_ACCOUNT_URL[] = {"http://ucs.azurewebsites.net/UTA/CreateAccount?","username=","&password=","&email="};
-
-    boolean spoofData = false;
 
     ProgressDialog progressDialog;
 
@@ -88,7 +85,7 @@ public class CreateAccount extends Activity {
     public void attemptAccountCreation(View view){
         // Initiate some values
         View focusView = null;
-        String url=null;
+        String url;
         boolean cancel = false;
 
         // Get data from layout fields
@@ -100,7 +97,7 @@ public class CreateAccount extends Activity {
         // Check valid
         if(!emailIsValid(email)){
             //Break and inform user
-            focusView = ((EditText) findViewById(R.id.create_account_email));
+            focusView = findViewById(R.id.create_account_email);
             ((EditText) findViewById(R.id.create_account_email)).setError(getString(R.string.error_invalid_email));
             cancel = true;
 
@@ -111,7 +108,7 @@ public class CreateAccount extends Activity {
             //break and
             ((EditText) findViewById(R.id.create_account_password)).setText("");
             ((EditText) findViewById(R.id.create_account_confirm_password)).setText("");
-            focusView = ((EditText) findViewById(R.id.create_account_password));
+            focusView = findViewById(R.id.create_account_password);
             cancel = true;
         }
 
@@ -158,7 +155,7 @@ public class CreateAccount extends Activity {
      * Checks to make sure email is valid
      *
      * @param email email to be checked for validity
-     * @return
+     * @return boolean
      */
     private boolean emailIsValid(String email){
         return email.contains("@");
@@ -169,7 +166,7 @@ public class CreateAccount extends Activity {
      *
      * @param pass password field - primary
      * @param confirmPass password field - secondary
-     * @return
+     * @return boolean
      */
     private boolean passwordsValid(String pass, String confirmPass){
         // Check to make sure conformation password matches password
@@ -190,8 +187,8 @@ public class CreateAccount extends Activity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            JSONObject response = null;
-            boolean success = false;
+            JSONObject response;
+            boolean success;
             try {
                 response = new JSONObject(intent.getStringExtra(HTTPService.SERVER_RESPONSE));
                 success = response.getBoolean("Success");

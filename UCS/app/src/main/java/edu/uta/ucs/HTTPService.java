@@ -5,11 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -24,7 +22,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -33,7 +30,7 @@ import java.net.URL;
  * An {@link IntentService} subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
  * <p/>
- * TODO: Customize class - update intent actions, extra parameters and static
+ * This IntentService is designed to interact with a web page and either get or send information there
  * helper methods.
  */
 public class HTTPService extends IntentService {
@@ -46,7 +43,7 @@ public class HTTPService extends IntentService {
     public static final String SPOOFED_RESPONSE = "edu.uta.ucs.SPOOFED_RESPONSE";
     public static final String SOURCE_INTENT = "SOURCE_INTENT";
     public static final String BAD_RESPONSE = "{\"Success\":false}";
-    public static final String GOOD_RESPONSE = "{\"Success\":true}";
+    // Unused public static final String GOOD_RESPONSE = "{\"Success\":true}";
 
 
     /**
@@ -93,11 +90,11 @@ public class HTTPService extends IntentService {
         }
         else{
             response = intent.getStringExtra(SPOOFED_RESPONSE);
-            Log.d("HTTPGetService", "Spoofing response");
+            Log.i("HTTPGetService", "Spoofing response");
         }
 
-        Log.d("HTTPService SOURCE", source);
-        Log.d("HTTPService URL", urlString);
+        Log.i("HTTPService SOURCE", source);
+        Log.i("HTTPService URL", urlString);
 
         Intent broadcastIntent = new Intent(intent.getStringExtra(SOURCE_INTENT));
         broadcastIntent.putExtra(SERVER_RESPONSE, response);
@@ -109,22 +106,26 @@ public class HTTPService extends IntentService {
 
         String response;
 
-        String url = intent.getStringExtra(REQUEST_URL);    // Get url
-        url = url.replace(" ", "");                         // Remove any whitespace
+        String urlString = intent.getStringExtra(REQUEST_URL).replace(" ", "");                         // Remove any whitespace
         String source = intent.getStringExtra(SOURCE_INTENT);
 
-        Log.d("HTTPService SOURCE", source);
-        Log.d("HTTPService URL", url);
+        Log.i("HTTPService SOURCE", source);
+        Log.i("HTTPService URL", urlString);
 
-        if (url.equalsIgnoreCase(SPOOF_SERVER_RESPONSE)) {
-            response = intent.getStringExtra(SPOOFED_RESPONSE);
-            if(response == null)
-                response = BAD_RESPONSE;
-            Log.i("HTTPService SPOOF", "Spoofing response");
-            Log.i("HTTPService SPOOF", response);
+        if (!urlString.equalsIgnoreCase(SPOOF_SERVER_RESPONSE)) {
+
+            try {
+                URL url = new URL(urlString);
+                response = fetchJSON(url);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+                response = BAD_RESPONSE.substring(0, BAD_RESPONSE.length()-1) + ",\"Message\":\"Malformed URL\"}";
+            }
         }
-        else
-            response = fetchJSON(url);
+        else{
+            response = intent.getStringExtra(SPOOFED_RESPONSE);
+            Log.i("HTTPGetService", "Spoofing response");
+        }
 
         Intent broadcastIntent = new Intent(intent.getStringExtra(SOURCE_INTENT));
         broadcastIntent.putExtra(SERVER_RESPONSE, response);
@@ -149,7 +150,7 @@ public class HTTPService extends IntentService {
 
     public String postJSON(URL targetURL, String jsonString){
 
-        String response = null;
+        String response;
 
 
         try {
@@ -172,6 +173,8 @@ public class HTTPService extends IntentService {
 
         } catch (URISyntaxException | IOException e) {
             e.printStackTrace();
+            Log.d("HTTPService postJSON", "HTTP Request Failed");
+            response = BAD_RESPONSE.substring(0, BAD_RESPONSE.length()-1) + ",\"Message\":\"bad connection\"}";
         }
 
         return response;
@@ -181,10 +184,10 @@ public class HTTPService extends IntentService {
      * Making service call
      * @param url - url to make request
      * */
-    public String fetchJSON(String url) {
+    public String fetchJSON(URL url) {
 
-        Log.d("HTTPGetService URL:", url);
-        String response = null;
+        Log.d("HTTPGetService URL:", url.toString());
+        String response;
         try {
             // http client
             HttpParams httpParams = new BasicHttpParams();
@@ -195,7 +198,7 @@ public class HTTPService extends IntentService {
             HttpResponse httpResponse;
             Log.d("test:", "fetchJSON HTTP parameters set");
 
-            HttpGet httpGet = new HttpGet(url);
+            HttpGet httpGet = new HttpGet(url.toURI());
             Log.d("test:", "HTTPGet setup");
             httpResponse = httpClient.execute(httpGet);
             Log.d("test:", "HTTPGet executed - response received");
@@ -203,24 +206,26 @@ public class HTTPService extends IntentService {
             httpEntity = httpResponse.getEntity();
             response = EntityUtils.toString(httpEntity);
 
-        } catch (UnsupportedEncodingException e) {
+        } catch (URISyntaxException | IOException e) {
             e.printStackTrace();
-            Log.d("Service Test", "HTTP Request Failed - UnsupportedEncodingException");
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-            Log.d("Service Test", "HTTP Request Failed - ClientProtocolException");
-        } catch (IOException e) {
-            e.printStackTrace();
-            Log.d("Service Test", "HTTP Request Failed - IOException");
-            response = "{\"Success\":false}";
-            Toast.makeText(getBaseContext(), response, Toast.LENGTH_LONG).show();
-
+            Log.d("HTTPService fetchJSON", "HTTP Request Failed");
+            response = BAD_RESPONSE.substring(0, BAD_RESPONSE.length()-1) + ",\"Message\":\"bad connection\"}";
         }
+
 
         Log.d("Server reply:", response);
         return response;
     }
 
+    /**
+     * Creates and starts a HTTPService for JSON post to a url
+     *
+     * @param targetURL String url where JSON will be posted
+     * @param jsonToPost JSONObject to be posted
+     * @param recieverTag String will be the intentFilter when response is posted
+     * @param context context to create intent with. Usually will be the calling class followed by ".this"
+     *                <br>EX: MainActivity.this
+     */
     public static void PostJSON(String targetURL, JSONObject jsonToPost,String recieverTag, Context context){
 
         Intent intent = new Intent(context, HTTPService.class);
@@ -245,8 +250,8 @@ public class HTTPService extends IntentService {
 
                 if(spoofURL != null) // if there was a generic response, use it
                     spoofData = loadSpoofData(spoofURL);
-                else // if there was not a generic response return a json with success false
-                    spoofData = BAD_RESPONSE;
+                if(spoofData == null) // if there was not a generic response return a json with success false and a message
+                    spoofData = BAD_RESPONSE.substring(0, BAD_RESPONSE.length()-1) + ",\"Message\":\"no spoof URL response stored\"}";
             }
 
             Log.i("HTTPService PostJSON", "Spoof response expected: " + spoofData);
@@ -268,10 +273,10 @@ public class HTTPService extends IntentService {
     /**
      * Creates and starts a HTTPService for URL response
      *
-     * @param urlToFetch
-     * @param recieverTag
-     * @param context
-     * @throws MalformedURLException
+     * @param urlToFetch String url to fetch JSON from
+     * @param recieverTag String will be the intentFilter when response is posted
+     * @param context context to create intent with. Usually will be the calling class followed by ".this"
+     *                <br>EX: MainActivity.this
      */
     public static void FetchURL(String urlToFetch, String recieverTag, Context context){
 
@@ -294,13 +299,11 @@ public class HTTPService extends IntentService {
                 if (baseURLEnd != -1)
                     spoofURL = urlToFetch.substring(0, baseURLEnd);
 
-                if(spoofURL != null)
+                if(spoofURL != null) // if there was a generic response, use it
                     spoofData = loadSpoofData(spoofURL);
-                else
-                    spoofData = BAD_RESPONSE;
-                Log.i("HTTPService FetchURL", "Spoof URL:" + spoofURL);
+                if(spoofData == null) // if there was not a generic response return a json with success false and a message
+                    spoofData = BAD_RESPONSE.substring(0, BAD_RESPONSE.length()-1) + ",\"Message\":\"no spoof URL response stored\"}";
             }
-
 
             Log.i("HTTPService FetchURL", "Spoof Data:" + spoofData);
             intent.putExtra(HTTPService.SPOOFED_RESPONSE, spoofData);
@@ -348,6 +351,7 @@ public class HTTPService extends IntentService {
 
             byte[] buffer = new byte[size];
 
+            //noinspection ResultOfMethodCallIgnored
             is.read(buffer);
 
             is.close();

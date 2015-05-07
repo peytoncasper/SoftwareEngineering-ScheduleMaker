@@ -58,9 +58,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     private static final String[] LOGIN_PARAMS ={"username=","&password="};
     private static final String EMAIL_EXISTS_URL = "http://ucs.azurewebsites.net/UTA/EmailExists?email=";
 
-    private static final String SPOOFED_LOGIN = "{\"Success\":true,\"Email\":\"a@a.a\"}";
-    private static final String SPOOFED_RESET_PASSWORD = "{\"Success\":true}";
-
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
@@ -72,9 +69,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
-
-    String m_Text;
-    private String rawServerResponse;
 
     public static String getLOGOUT_URL() {
         return LOGOUT_URL;
@@ -265,7 +259,9 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         return email.contains("@");
     }
 
-    private boolean isPasswordValid(String password) {
+
+    @SuppressWarnings("unused")
+    boolean isPasswordValid(String password) {
         //TODO: Replace this with your own logic
         return true;//password.length() > 4;
     }
@@ -325,7 +321,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        List<String> emails = new ArrayList<String>();
+        List<String> emails = new ArrayList<>();
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             emails.add(cursor.getString(ProfileQuery.ADDRESS));
@@ -340,6 +336,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
     }
 
+    @SuppressWarnings("unused")
     private interface ProfileQuery {
         String[] PROJECTION = {
                 ContactsContract.CommonDataKinds.Email.ADDRESS,
@@ -353,7 +350,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
         //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
         ArrayAdapter<String> adapter =
-                new ArrayAdapter<String>(LoginActivity.this,
+                new ArrayAdapter<>(LoginActivity.this,
                         android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
 
         mEmailView.setAdapter(adapter);
@@ -364,7 +361,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            JSONObject response = null;
+            JSONObject response;
             boolean success = false;
             try {
                 response = new JSONObject(intent.getStringExtra(HTTPService.SERVER_RESPONSE));
@@ -389,7 +386,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         public void onReceive(Context context, Intent intent) {
             showProgress(false);
             JSONObject response = null;
-            boolean success = false;
+            boolean success;
             try {
                 response = new JSONObject(intent.getStringExtra(HTTPService.SERVER_RESPONSE));
                 success = response.getBoolean("Success");
@@ -410,7 +407,9 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 e.printStackTrace();
             }
             Log.d("Login Receiver","Launched Receiver");
-            Log.d("Received: ",response.toString());
+            if (response != null) {
+                Log.d("Received: ",response.toString());
+            }
 
         }
     }
@@ -421,8 +420,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            JSONObject response = null;
-            boolean success = false;
+            JSONObject response;
+            boolean success;
 
             if(intent.hasExtra(HTTPService.SERVER_RESPONSE)){
                 try {
@@ -456,7 +455,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-            };
+            }
 
             /*
             showProgress(false);

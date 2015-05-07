@@ -45,9 +45,6 @@ import java.util.Map;
 class SemesterInfo{
 
 
-
-    private static String SEMESTER_INFO = "SEMESTER_INFO";
-
     private int semesterNumber;
     private String semesterName;
     private ArrayList<DepartmentInfo> departmentArrayList;
@@ -70,13 +67,14 @@ class SemesterInfo{
     }
 
     public static String getSEMESTER_INFO() {
-        return SEMESTER_INFO;
+        return "SEMESTER_INFO";
     }
 
     public String getSemesterName() {
         return semesterName;
     }
 
+    @SuppressWarnings("unused")
     private class SemesterInfoFactoryASYNC extends AsyncTask<JSONObject, Void, ArrayList>{
 
         /**
@@ -157,16 +155,8 @@ class SemesterInfo{
         return semesterNumber;
     }
 
-    public void setSemesterNumber(int semesterNumber) {
-        this.semesterNumber = semesterNumber;
-    }
-
     public ArrayList<DepartmentInfo> getDepartmentArrayList() {
         return departmentArrayList;
-    }
-
-    public void setDepartmentArrayList(ArrayList<DepartmentInfo> departmentArrayList) {
-        this.departmentArrayList = departmentArrayList;
     }
 
     /**
@@ -206,6 +196,7 @@ class SemesterInfo{
             Log.i("Department Details", "New Department Added:"+ getDepartmentID() + " " + getDepartmentAcronym() + " " + getDepartmentTitle() + " " + getCourses().size());
         }
 
+        @SuppressWarnings("unused")
         public DepartmentInfo(){
             this.setDepartmentID(0);
             this.setDepartmentAcronym(null);
@@ -289,13 +280,6 @@ class SemesterInfo{
                 this.departmentInfo = departmentInfo;
             }
 
-            public CourseInfo(JSONObject courseInfoJSONObject) throws JSONException {
-                this.courseNumber = courseInfoJSONObject.getInt("CourseNumber");
-                this.courseTitle = courseInfoJSONObject.getString("CourseName");
-                this.departmentInfo = new DepartmentInfo();
-                this.departmentInfo.setDepartmentAcronym(courseInfoJSONObject.getString("DepartmentAcronym"));
-            }
-
             /*public JSONObject toJSONIsolated() throws JSONException {
                 JSONObject courseInfo = new JSONObject();
                 courseInfo.put("CourseNumber", courseNumber);
@@ -315,25 +299,14 @@ class SemesterInfo{
                 return courseNumber;
             }
 
-            public void setCourseNumber(int courseNumber) {
-                this.courseNumber = courseNumber;
-            }
-
             public String getCourseTitle() {
                 return courseTitle;
-            }
-
-            public void setCourseTitle(String courseTitle) {
-                this.courseTitle = courseTitle;
             }
 
             public DepartmentInfo getDepartmentInfo() {
                 return departmentInfo;
             }
 
-            public void setDepartmentInfo(DepartmentInfo departmentInfo) {
-                this.departmentInfo = departmentInfo;
-            }
         }
     }
 }
@@ -398,7 +371,8 @@ class DepartmentInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInf
 
     @Override
     public Filter getFilter() {
-        Filter filter = new Filter() {
+
+        return new Filter() {
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
                 FilterResults filterResults = new FilterResults();
@@ -436,8 +410,6 @@ class DepartmentInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInf
                 }
             }
         };
-
-        return filter;
     }
 }
 
@@ -502,7 +474,8 @@ class CourseInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInfo.Co
 
     @Override
     public Filter getFilter() {
-        Filter filter = new Filter() {
+
+        return new Filter() {
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
                 FilterResults filterResults = new FilterResults();
@@ -538,24 +511,12 @@ class CourseInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInfo.Co
                 }
             }
         };
-
-        return filter;
     }
 }
 
 class DesiredCoursesArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInfo.CourseInfo>{
 
     ArrayList<SemesterInfo.DepartmentInfo.CourseInfo> courseInfoArrayList;
-
-    /**
-     * Constructor
-     *
-     * @param context  The current context.
-     * @param resource The resource ID for a layout file containing a TextView to use when
-     */
-    DesiredCoursesArrayAdapter(Context context, int resource) {
-        super(context, resource);
-    }
 
     /**
      * Constructor
@@ -596,13 +557,9 @@ class DesiredCoursesArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInf
                 desiredCourseDepartment.setText(Department);
             }
 
-            if (Number != null){
-                desiredCourseNumber.setText(Number);
-            }
+            desiredCourseNumber.setText(Number);
 
-            if (Title != null){
-                desiredCourseTitle.setText(Title);
-            }
+            desiredCourseTitle.setText(Title);
 
             desiredCourseRemoveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -620,17 +577,11 @@ class DesiredCoursesArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInf
 
 public class SelectCourses extends ActionBarActivity {
 
-    private static final boolean spoofServerSwitch = false;
-
-    private static final String SHARED_PREFS = "SHARED_PREFS";
-
-
     public static final String URL_GET_COURSE_SECTIONS ="http://ucs.azurewebsites.net/UTA/GetCourseInfo?";
     public static final String URL_GET_COURSE_SECTIONS_PARAM_SEMESTER ="semester=";
     public static final String URL_GET_COURSE_SECTIONS_PARAM_DEPARTMENT ="&department=";
     public static final String URL_GET_COURSE_SECTIONS_PARAM_COURSENUMBER ="&courseNumber=";
 
-    public static final String URL_GET_DESIRED_COURSE_SECTIONS ="http://ucs.azurewebsites.net/UTA/ClassStatus?classes=";
     public static final String ACTION_GET_DESIRED_COURSE_SECTIONS ="edu.uta.ucs.intent.action.ACTION_GET_DESIRED_COURSE_SECTIONS";
 
     public static final String URL_GET_SEMESTER = "http://ucs.azurewebsites.net/UTA/GetDepartmentClassData";
@@ -647,16 +598,9 @@ public class SelectCourses extends ActionBarActivity {
 
     private Course blockoutTimes = null;
     private ArrayList<SemesterInfo.DepartmentInfo.CourseInfo> desiredCoursesArrayList;
-    private ArrayList<SemesterInfo.DepartmentInfo> departmentInfoArrayList;
-    private ArrayList<SemesterInfo.DepartmentInfo.CourseInfo> courseInfoArrayList;
 
     private Button addCourse;
 
-    private ArrayList<Course> fetchedCourses;
-    private long lastFetchTime;
-
-    private SemesterInfo.DepartmentInfo.CourseInfo tempCourseInfo;
-    private ArrayList<SemesterInfo> fetchedSemesters;
     private SemesterInfo selectedSemester;
 
     private ProgressDialog progressDialog;
@@ -666,8 +610,8 @@ public class SelectCourses extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_courses);
 
-        departmentInfoArrayList = new ArrayList<>();
-        courseInfoArrayList = new ArrayList<>();
+        ArrayList<SemesterInfo.DepartmentInfo> departmentInfoArrayList = new ArrayList<>();
+        ArrayList<SemesterInfo.DepartmentInfo.CourseInfo> courseInfoArrayList = new ArrayList<>();
 
         setTitle("Schedule Setup");
 
@@ -746,7 +690,6 @@ public class SelectCourses extends ActionBarActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 SemesterInfo.DepartmentInfo.CourseInfo courseInfo = (SemesterInfo.DepartmentInfo.CourseInfo) parent.getItemAtPosition(position);
                 courseNumber.setText(((Integer) courseInfo.getCourseNumber()).toString());
-                tempCourseInfo = courseInfo;
             }
         });
 
@@ -754,7 +697,6 @@ public class SelectCourses extends ActionBarActivity {
         desiredCoursesArrayAdapter = new DesiredCoursesArrayAdapter(SelectCourses.this, R.layout.desired_courses_listview, desiredCoursesArrayList);
         desiredCoursesListView.setAdapter(desiredCoursesArrayAdapter);
 
-        lastFetchTime = 0;
     }
 
     @Override
@@ -764,7 +706,6 @@ public class SelectCourses extends ActionBarActivity {
 
         // Load Semester Info from previous session
         String selectedSemesterString = preferences.getString("selectedSemester", null);
-        JSONObject selectedSemesterJSON = null;
         if (selectedSemesterString != null) {
             try {
                 selectedSemester = new SemesterInfo(new JSONObject(selectedSemesterString));
@@ -825,13 +766,15 @@ public class SelectCourses extends ActionBarActivity {
             if (desiredCoursesArrayList.size() > 0){
                 StringBuilder desiredCoursesString = new StringBuilder();
                 for (SemesterInfo.DepartmentInfo.CourseInfo courseInfo : desiredCoursesArrayList){
-                    desiredCoursesString.append(courseInfo.getDepartmentInfo().getDepartmentAcronym() + "-" + courseInfo.getCourseNumber() + ",");
+                    desiredCoursesString.append(courseInfo.getDepartmentInfo().getDepartmentAcronym()).append("-").append(courseInfo.getCourseNumber()).append(",");
                 }
                 Log.i("Desired Courses Builder", desiredCoursesString.length() > 0 ? desiredCoursesString.substring( 0, desiredCoursesString.length() - 1 ): null);
                 editor.putString("desiredCourses", desiredCoursesString.length() > 0 ? desiredCoursesString.substring( 0, desiredCoursesString.length() - 1 ): null);
                 editor.apply();
             }
-        desiredCoursesArrayList.clear();
+        if (desiredCoursesArrayList != null) {
+            desiredCoursesArrayList.clear();
+        }
     }
 
 
@@ -910,9 +853,9 @@ public class SelectCourses extends ActionBarActivity {
         //urlBuilder.append(((Integer) selectedSemester.getSemesterNumber()).toString() + "*");
 
         for (SemesterInfo.DepartmentInfo.CourseInfo courseInfo : desiredCoursesArrayList){
-            semesterParam.append(selectedSemester.getSemesterNumber() + ",");
-            departmentParam.append(courseInfo.getDepartmentInfo().getDepartmentAcronym() + ",");
-            courseNumberParam.append(courseInfo.getCourseNumber() + ",");
+            semesterParam.append(selectedSemester.getSemesterNumber()).append(",");
+            departmentParam.append(courseInfo.getDepartmentInfo().getDepartmentAcronym()).append(",");
+            courseNumberParam.append(courseInfo.getCourseNumber()).append(",");
         }
 
         String semesterParamFinal = semesterParam.length() > 0 ? semesterParam.substring( 0, semesterParam.length() - 1 ): "";
@@ -983,7 +926,7 @@ public class SelectCourses extends ActionBarActivity {
             semesterTitles.add(semesterInfo.getSemesterNumber() + " - " + semesterInfo.getSemesterName());
         }
 
-        ArrayAdapter<String> semesterTitlesAdapter = new ArrayAdapter<String>(SelectCourses.this, android.R.layout.simple_selectable_list_item, semesterTitles);
+        ArrayAdapter<String> semesterTitlesAdapter = new ArrayAdapter<>(SelectCourses.this, android.R.layout.simple_selectable_list_item, semesterTitles);
 
         AlertDialog.Builder getDesiredSemester = new AlertDialog.Builder(SelectCourses.this);
         getDesiredSemester.setTitle("Please Select A Semester");
@@ -1066,19 +1009,21 @@ public class SelectCourses extends ActionBarActivity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            JSONObject response = null;
-            boolean success = false;
+            JSONObject response;
+            boolean success;
             try {
                 response = new JSONObject(intent.getStringExtra(HTTPService.SERVER_RESPONSE));
 
                 success = response.getBoolean("Success");
-                fetchedSemesters = SemesterInfo.SemesterInfoFactory(response);
+                ArrayList<SemesterInfo> fetchedSemesters = SemesterInfo.SemesterInfoFactory(response);
                 Log.i("Get Semesters", "Semesters found in fetch: " + fetchedSemesters.size());
                 SemesterInfo.saveSemestersToFile(fetchedSemesters, SelectCourses.this);
 
                 Toast.makeText(getBaseContext(), "Semester Data Updated", Toast.LENGTH_LONG).show();
 
                 selectSemester(fetchedSemesters);
+                //should be made functional when there is time
+                //noinspection StatementWithEmptyBody
                 if(success){
                     // enable text field
                 }
@@ -1100,6 +1045,7 @@ public class SelectCourses extends ActionBarActivity {
             String response = intent.getStringExtra(HTTPService.SERVER_RESPONSE);
             Log.d("Received: ", response);
 
+            ArrayList<Course> fetchedCourses;
             try {
                 JSONObject rawResult = new JSONObject(response);
                 if (!rawResult.getBoolean("Success")){
@@ -1111,7 +1057,6 @@ public class SelectCourses extends ActionBarActivity {
                 float timeTaken = Float.parseFloat(rawResult.getString("TimeTaken"));
                 Log.d("New Request Time Taken:", Float.toString(timeTaken));
                 fetchedCourses = Course.buildCourseList(jsonCourses);
-                lastFetchTime = System.currentTimeMillis();
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -1127,18 +1072,19 @@ public class SelectCourses extends ActionBarActivity {
                 if (blockoutTimes != null)
                     blockoutSections = blockoutTimes.getSectionList();
                 else
-                    blockoutSections = new ArrayList<Section>();
+                    blockoutSections = new ArrayList<>();
 
                 if (fetchedCourses != null)
                     sectionArrayList = Schedule.scheduleGenerator(fetchedCourses, new ArrayList<Section>(), blockoutSections);
-                for (Section section : sectionArrayList){
-                    Log.i("Built Schedule Sections",section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseNumber() + "-" + section.getSectionNumber() + "\t" + section.toJSON().toString());
+                if (sectionArrayList != null) {
+                    for (Section section : sectionArrayList){
+                        Log.i("Built Schedule Sections",section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseNumber() + "-" + section.getSectionNumber() + "\t" + section.toJSON().toString());
+                    }
                 }
 
                 Schedule schedule = new Schedule("Schedule Name", selectedSemester.getSemesterNumber(), sectionArrayList);
-                schedule.showDetailedView(SelectCourses.this);
+                DetailedSchedule.ShowSchedule(schedule, SelectCourses.this);
                 Log.i("Built Schedule", schedule.toJSON().toString());
-                Schedule scheduleTest = new Schedule(schedule.toJSON());
             } catch (NoSchedulesPossibleException e) {
                 e.printStackTrace();
                 AlertDialog.Builder noSchedulesPossible = new AlertDialog.Builder(SelectCourses.this);

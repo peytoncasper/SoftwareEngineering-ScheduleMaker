@@ -9,7 +9,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -54,7 +53,7 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Log.i("Main Activity", "Showing Schedule Named: " + scheduleArrayList.get(position).getName());
-                scheduleArrayList.get(position).showDetailedView(MainActivity.this);
+                DetailedSchedule.ShowSchedule(scheduleArrayList.get(position), MainActivity.this);
             }
         });
 

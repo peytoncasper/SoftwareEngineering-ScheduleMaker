@@ -2,7 +2,6 @@ package edu.uta.ucs;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -47,6 +46,7 @@ public class UserData extends Application {
      *
      * !!Do not remove!!
      */
+    @SuppressWarnings("unused")
     public UserData() {
         super();
     }
@@ -98,12 +98,13 @@ public class UserData extends Application {
 
     public static void logout(Context context) {
 
-        JSONObject logoutJSON = null;
+        JSONObject logoutJSON;
 
         try {
             logoutJSON = UserData.toJSON();
         } catch (JSONException e) {
             e.printStackTrace();
+            logoutJSON = new JSONObject();
         }
 
 
@@ -111,7 +112,7 @@ public class UserData extends Application {
         logoutLog.putString(((Long) System.currentTimeMillis()).toString(), logoutJSON.toString());
         logoutLog.apply();
 
-        HTTPService.PostJSON(LoginActivity.getLOGOUT_URL(), logoutJSON,LoginActivity.ACTION_LOGOUT,UserData.getContext());
+        HTTPService.PostJSON(LoginActivity.getLOGOUT_URL(), logoutJSON, LoginActivity.ACTION_LOGOUT, UserData.getContext());
 
         Log.i("UserData Logout", "LOGOUT JSON: " + logoutJSON.toString());
 
@@ -138,6 +139,7 @@ public class UserData extends Application {
 
         SharedPreferences.Editor settings = PreferenceManager.getDefaultSharedPreferences(UserData.getContext()).edit();
         settings.putBoolean(context.getResources().getString(R.string.pref_key_spoof_server), militaryTime);
+        settings.apply();
 
     }
 
@@ -145,9 +147,8 @@ public class UserData extends Application {
 
         Context context = UserData.getContext();
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-        boolean spoofServer = settings.getBoolean(context.getResources().getString(R.string.pref_key_spoof_server), false);
 
-        return spoofServer;
+        return settings.getBoolean(context.getResources().getString(R.string.pref_key_spoof_server), false);
     }
 
 }

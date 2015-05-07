@@ -56,7 +56,7 @@ public class Course {
         Log.i("New Course Department", jsonObject.getString("Department"));
         this.setCourseDepartment(jsonObject.getString("Department"));
         JSONArray jsonSectionList = jsonObject.getJSONArray("CourseResults");
-        sectionList = new ArrayList<Section>(jsonSectionList.length());
+        sectionList = new ArrayList<>(jsonSectionList.length());
 
         for(int index = jsonSectionList.length(); index != 0;index--){
             Log.i("New Course Section: ",jsonSectionList.getJSONObject( index-1 ).toString());
