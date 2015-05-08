@@ -35,6 +35,12 @@ public class MainActivity extends ActionBarActivity {
     protected void onStart() {
         super.onStart();
 
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         scheduleArrayList = Schedule.loadSchedulesFromFile(MainActivity.this);
         ArrayList<String> scheduleNameArrayList = new ArrayList<>(scheduleArrayList.size());
         for (Schedule schedule : scheduleArrayList){
@@ -52,9 +58,7 @@ public class MainActivity extends ActionBarActivity {
         });
 
         scheduleNameAdapter.notifyDataSetChanged();
-
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
