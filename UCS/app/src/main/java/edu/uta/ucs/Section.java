@@ -225,7 +225,7 @@ public class Section {
         Collections.reverse(days);
         Log.i("New Section #of Days: ", ((Integer) days.size()).toString());
 
-        this.setStatus(ClassStatus.valueOf(jsonObject.getString("Status").toUpperCase()));
+        this.setStatus(ClassStatus.valueOf(jsonObject.getString("Status").toUpperCase().replace(" ", "_")));
 
         this.setSourceCourse(sourceCourse);
     }
