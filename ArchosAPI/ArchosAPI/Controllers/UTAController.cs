@@ -249,15 +249,17 @@ namespace ArchosAPI.Controllers
         /// <param name="email"></param>
         /// <param name="accountSettings"></param>
         /// <returns></returns>
-        public JsonResult Logout(string email, string accountSettings)
+        public JsonResult Logout(Schedule schedule)
         {
             try
             {
 
-                Account data = connection.Query<Account>("select * from Account where Email='" + email + "'").FirstOrDefault();
+                Account data = connection.Query<Account>("select * from Account where Email='" + schedule.Email + "'").FirstOrDefault();
                 if (data != null)
                 {
-                    data.Settings = accountSettings;
+                    JavaScriptSerializer serializer = new JavaScriptSerializer();
+
+                    data.Settings = serializer.Serialize(schedule);
                     connection.Query<int>("update Account set Settings=@Settings where Id = @Id", data);
 
 
@@ -273,7 +275,7 @@ namespace ArchosAPI.Controllers
                 return Json(new
                 {
                     Success = true,
-
+                    Mimic = "",
                 }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)

@@ -7,9 +7,8 @@ namespace ArchosAPI
 {
     public class Schedule
     {
-        public int Id { get; set; }
         public string Email { get; set; }
-
+        public string MilitartTime { get; set; }
         public List<ScheduleResults> Schedules { get; set; }
         public List<BlockOutTimeResults> BlockOutTimes { get; set; }
     }
