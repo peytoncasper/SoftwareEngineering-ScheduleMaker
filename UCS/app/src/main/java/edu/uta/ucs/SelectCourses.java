@@ -381,9 +381,9 @@ class DepartmentInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInf
                 if (constraint != null){
                     for(SemesterInfo.DepartmentInfo departmentInfo : departmentInfoArrayList){
 
-                        if(departmentInfo.getDepartmentAcronym().toUpperCase().contains(" NULL"))
+                        if(departmentInfo.getDepartmentAcronym().toUpperCase().contains("NULL"))
                             continue;
-                        if(departmentInfo.getDepartmentTitle().toUpperCase().contains(" NULL"))
+                        if(departmentInfo.getDepartmentTitle().toUpperCase().contains("NULL"))
                             continue;
 
                         if(departmentInfo.getDepartmentAcronym()==null)
@@ -492,7 +492,7 @@ class CourseInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInfo.Co
                 List<SemesterInfo.DepartmentInfo.CourseInfo> results = new ArrayList<>();
                 if (constraint != null){
                     for(SemesterInfo.DepartmentInfo.CourseInfo courseInfo : courseInfoArrayList){
-                        if(courseInfo.getCourseTitle().toUpperCase().contains(" NULL"))
+                        if(courseInfo.getCourseTitle().toUpperCase().contains("NULL"))
                             continue;
                         if(((Integer) courseInfo.getCourseNumber()).toString().contains(constraint.toString())){
                             if (!results.contains(courseInfo))
