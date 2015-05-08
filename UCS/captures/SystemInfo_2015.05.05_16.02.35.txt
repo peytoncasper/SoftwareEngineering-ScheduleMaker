@@ -1,0 +1,31 @@
+Activity Resolver Table:
+  Non-Data Actions:
+      android.intent.action.MAIN:
+        53695a80 edu.uta.ucs/.LoginActivity filter 53695b30
+ 
+Packages:
+  Package [edu.uta.ucs] (534f7ecc):
+    userId=10048 gids=[3003]
+    sharedUser=null
+    pkg=Package{5367e490 edu.uta.ucs}
+    codePath=/data/app/edu.uta.ucs-2.apk
+    resourcePath=/data/app/edu.uta.ucs-2.apk
+    nativeLibraryPath=/data/data/edu.uta.ucs/lib
+    versionCode=1
+    applicationInfo=ApplicationInfo{5367e4dc edu.uta.ucs}
+    flags=[ DEBUGGABLE HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP ]
+    versionName=1.0
+    dataDir=/data/data/edu.uta.ucs
+    targetSdk=21
+    supportsScreens=[small, medium, large, xlarge, resizeable, anyDensity]
+    timeStamp=2015-05-05 20:57:18
+    firstInstallTime=2015-04-07 22:52:57
+    lastUpdateTime=2015-05-05 20:57:18
+    signatures=PackageSignatures{534f7f38 [534f8768]}
+    permissionsFixed=true haveGids=true
+    pkgFlags=0x0 installStatus=1 User 0:  stopped=false enabled=0
+    grantedPermissions:
+      android.permission.READ_CONTACTS
+      android.permission.READ_PROFILE
+      android.permission.GET_ACCOUNTS
+      android.permission.INTERNET

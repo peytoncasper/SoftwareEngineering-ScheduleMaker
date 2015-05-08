@@ -7,7 +7,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.DialogInterface;
@@ -17,7 +16,6 @@ import android.content.Loader;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 
 import android.os.Build;
 import android.os.Bundle;
@@ -27,6 +25,8 @@ import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
@@ -34,11 +34,9 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -52,14 +50,14 @@ import java.util.List;
 public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
     public static final String ACTION_LOGIN ="edu.uta.ucs.intent.action.ACTION_LOGIN";
+    public static final String ACTION_LOGOUT ="edu.uta.ucs.intent.action.ACTION_LOGOUT";
     public static final String ACTION_RESET_PASSWORD ="edu.uta.ucs.intent.action.ACTION_RESET_PASSWORD";
 
-    private static final String LOGIN_URL = "http://ucs-scheduler.cloudapp.net/UTA/ValidateLogin?";
-    private static final String[] LOGIN_PARAMS ={"username=","&password="};
-    private static final String EMAIL_EXISTS_URL = "http://ucs-scheduler.cloudapp.net/UTA/EmailExists?email=";
-
-    private static final String SPOOFED_LOGIN = "{\"Success\":true,\"Email\":\"a@a.a\"}";
-    private static final String SPOOFED_RESET_PASSWORD = "{\"Success\":true}";
+    private static final String LOGIN_URL = UserData.getContext().getString(R.string.login_base);
+    private static final String[] LOGIN_PARAMS ={
+            UserData.getContext().getString(R.string.login_param_username),
+            UserData.getContext().getString(R.string.login_param_password)};
+    private static final String EMAIL_EXISTS_URL = UserData.getContext().getString(R.string.email_exists_base);
 
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
@@ -72,10 +70,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
-    HTTPGetService HTTPGetService;
-
-    String m_Text;
-    private String rawServerResponse;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,26 +103,40 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
 
-        HTTPGetService = new HTTPGetService();
-
         LocalBroadcastManager.getInstance(this).registerReceiver(new LoginReceiver(), new IntentFilter(ACTION_LOGIN));
+        LocalBroadcastManager.getInstance(this).registerReceiver(new LogoutReceiver(), new IntentFilter(ACTION_LOGOUT));
         LocalBroadcastManager.getInstance(this).registerReceiver(new ResetPasswordReceiver(), new IntentFilter(ACTION_RESET_PASSWORD));
+
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        switch (id){
+            case R.id.action_settings:
+                SettingsActivity.startActivity(LoginActivity.this);
+                break;
+            case R.id.action_logout:
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     private void populateAutoComplete() {
         getLoaderManager().initLoader(0, null, this);
     }
 
-
-    public void onResume(){
-        super.onResume();
-        TimeShort testTime = new TimeShort("5:25PM");
-        Log.d("TimeTest24", testTime.toString24h());
-        Log.d("TimeTest12", testTime.toString12h());
-
-        Day day = Day.valueOf("M");
-        Log.d("DayTest", day.toString());
-    }
     /**
      * Attempts to sign in or register the account specified by the login form.
      * If there are form errors (invalid email, missing fields, etc.), the
@@ -141,8 +149,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         String password = mPasswordView.getText().toString();
 
         String url = LOGIN_URL + LOGIN_PARAMS[0] + email + LOGIN_PARAMS[1] + password;
-
-
 
         boolean cancel = false;
         View focusView = null;
@@ -177,14 +183,25 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             // perform the user login attempt.
             showProgress(true);
 
-            Intent intent = new Intent(this, HTTPGetService.class);
+            HTTPService.FetchURL(url, ACTION_LOGIN, this);
 
-            intent.putExtra(HTTPGetService.URL_REQUEST, url);
-            intent.putExtra(HTTPGetService.SPOOFED_RESPONSE, SPOOFED_LOGIN);
-            intent.putExtra(HTTPGetService.SOURCE_INTENT, ACTION_LOGIN);
+            /*
+            Intent intent = new Intent(this, HTTPService.class);
+
+            intent.putExtra(HTTPService.REQUEST_URL, url);
+            //intent.putExtra(HTTPGetService.SPOOFED_RESPONSE, SPOOFED_LOGIN);
+            intent.putExtra(HTTPService.SOURCE_INTENT, ACTION_LOGIN);
 
             startService(intent);
+            */
         }
+    }
+
+    public void createAccount(View view){
+        mEmailView.setText("");
+        mPasswordView.setText("");
+        Intent launchCreateAccountActivity = new Intent(LoginActivity.this, CreateAccount.class);
+        LoginActivity.this.startActivity(launchCreateAccountActivity);
     }
 
     public void resetPasswordDialog(View view){
@@ -206,13 +223,9 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 String email = input.getText().toString();
 
                 if (isEmailValid(email)){
-                    Intent intent = new Intent(getApplicationContext(), HTTPGetService.class);
 
-                    intent.putExtra(HTTPGetService.URL_REQUEST, EMAIL_EXISTS_URL+email);
-                    //intent.putExtra(HTTPGetService.SPOOFED_RESPONSE, SPOOFED_RESET_PASSWORD);
-                    intent.putExtra(HTTPGetService.SOURCE_INTENT, ACTION_RESET_PASSWORD);
 
-                    startService(intent);
+                    HTTPService.FetchURL(EMAIL_EXISTS_URL + email, ACTION_RESET_PASSWORD, LoginActivity.this);
                 }
             }
         });
@@ -232,7 +245,9 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         return email.contains("@");
     }
 
-    private boolean isPasswordValid(String password) {
+
+    @SuppressWarnings("unused")
+    boolean isPasswordValid(String password) {
         //TODO: Replace this with your own logic
         return true;//password.length() > 4;
     }
@@ -292,7 +307,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        List<String> emails = new ArrayList<String>();
+        List<String> emails = new ArrayList<>();
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             emails.add(cursor.getString(ProfileQuery.ADDRESS));
@@ -307,6 +322,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
     }
 
+    @SuppressWarnings("unused")
     private interface ProfileQuery {
         String[] PROJECTION = {
                 ContactsContract.CommonDataKinds.Email.ADDRESS,
@@ -320,7 +336,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
         //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
         ArrayAdapter<String> adapter =
-                new ArrayAdapter<String>(LoginActivity.this,
+                new ArrayAdapter<>(LoginActivity.this,
                         android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
 
         mEmailView.setAdapter(adapter);
@@ -331,21 +347,35 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            JSONObject response = null;
-            boolean success = false;
+            JSONObject response;
+            boolean success;
+            String message;
+
             try {
-                response = new JSONObject(intent.getStringExtra(HTTPGetService.SERVER_RESPONSE));
+
+                response = new JSONObject(intent.getStringExtra(HTTPService.SERVER_RESPONSE));
                 success = response.getBoolean("Success");
+                if(response.has("Message")) {
+                    if(success)
+                        message = response.getString("Message");
+                    else message = "Error: " + response.getString("Message");
+                    Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+                }
+                if(response.has("TimeTaken")){
+                    float timeTaken = Float.parseFloat(response.getString("TimeTaken"));
+                    Log.d("New Request Time Taken:", Float.toString(timeTaken));
+                }
+
+                if (success) {
+                    Toast.makeText(LoginActivity.this, "Successfully reset password",Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(LoginActivity.this, "Failed to reset password",Toast.LENGTH_LONG).show();
+                }
+
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            Log.d("Reset Password Receiver","Launched Receiver");
 
-            if (success) {
-                Toast.makeText(LoginActivity.this, "Successfully reset password",Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(LoginActivity.this, "Failed to reset password",Toast.LENGTH_LONG).show();
-            }
 
         }
     }
@@ -354,27 +384,93 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            showProgress(false);
-            JSONObject response = null;
-            boolean success = false;
+            JSONObject response;
+            boolean success;
+            String message;
             try {
-                response = new JSONObject(intent.getStringExtra(HTTPGetService.SERVER_RESPONSE));
+                response = new JSONObject(intent.getStringExtra(HTTPService.SERVER_RESPONSE));
                 success = response.getBoolean("Success");
+                if(response.has("Message")) {
+                    if(success)
+                        message = response.getString("Message");
+                    else message = "Error: " + response.getString("Message");
+                    Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+                }
+                if(response.has("TimeTaken")){
+                    float timeTaken = Float.parseFloat(response.getString("TimeTaken"));
+                    Log.d("New Request Time Taken:", Float.toString(timeTaken));
+                }
+                if (success) {
+                    mEmailView.setText("");
+                    mPasswordView.setText("");
+                    UserData.setUserData(response);
+                    Intent launchMainActivity = new Intent(LoginActivity.this, MainActivity.class);
+                    LoginActivity.this.startActivity(launchMainActivity);
+                } else {
+                    showProgress(false);
+                    mPasswordView.setText("");
+                    mPasswordView.setError(getString(R.string.error_incorrect_password));
+                    mPasswordView.requestFocus();
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            Log.d("Login Receiver","Launched Receiver");
-            Log.d("Received: ",response.toString());
+            Intent launchMainActivity = new Intent(LoginActivity.this, MainActivity.class);
+            LoginActivity.this.startActivity(launchMainActivity);
+        }
+    }
 
-            if (success) {
-                mEmailView.setText("");
-                mPasswordView.setText("");
-                Intent launchMainActivity = new Intent(LoginActivity.this, MainActivity.class);
-                LoginActivity.this.startActivity(launchMainActivity);
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
+
+    private class LogoutReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            JSONObject response;
+            boolean success;
+            String message;
+
+            try {
+                response = new JSONObject(intent.getStringExtra(HTTPService.SERVER_RESPONSE));
+                success = response.getBoolean("Success");
+                if(response.has("Message")) {
+                    if(success)
+                        message = response.getString("Message");
+                    else message = "Error: " + response.getString("Message") + " Upload failed. Saving userdata locally";
+                    Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+                }
+                if(response.has("TimeTaken")){
+                    float timeTaken = Float.parseFloat(response.getString("TimeTaken"));
+                    Log.d("New Request Time Taken:", Float.toString(timeTaken));
+                }
+                if(success){
+
+                    SharedPreferences.Editor scheduleEditor;
+                    scheduleEditor = context.getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, Context.MODE_PRIVATE).edit();
+                    scheduleEditor.clear();
+                    scheduleEditor.apply();
+
+                    SharedPreferences.Editor blockoutTimesEditor;
+                    blockoutTimesEditor = context.getSharedPreferences(SelectBlockoutTimes.BLOCKOUT_TIMES, MODE_PRIVATE).edit();
+                    blockoutTimesEditor.clear();
+                    blockoutTimesEditor.apply();
+
+                    //UserData.setEmail(null);
+                    //UserData.setMilitaryTime(false);
+
+
+                    Log.i("LoginActivity", "Successful logout");
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
+
+            Intent logoutIntent = new Intent(context, LoginActivity.class);
+            logoutIntent.putExtra("finish", true); // if you are checking for this in your other Activities
+            logoutIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                    Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                    Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(logoutIntent);
+
         }
     }
 }

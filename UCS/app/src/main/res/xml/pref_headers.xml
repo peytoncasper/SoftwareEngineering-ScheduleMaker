@@ -1,0 +1,11 @@
+<preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- These settings headers are only used on tablets. -->
+
+    <header android:fragment="edu.uta.ucs.SettingsActivity$GeneralPreferenceFragment"
+        android:title="@string/pref_header_general" />
+
+    <header android:fragment="edu.uta.ucs.SettingsActivity$AccountPreferenceFragment"
+        android:title="@string/pref_header_account_settings" />
+
+</preference-headers>

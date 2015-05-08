@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<map>
+<string name="SCHEDULE_NAMES_a">{&quot;ScheduleSemester&quot;:2152,&quot;ScheduleCourses&quot;:[&quot;{\&quot;CourseResults\&quot;:[{\&quot;MeetingDays\&quot;:[\&quot;M\&quot;,\&quot;W\&quot;,\&quot;F\&quot;],\&quot;MeetingTime\&quot;:\&quot;9:00AM-9:50AM\&quot;,\&quot;Status\&quot;:\&quot;OPEN\&quot;,\&quot;Section\&quot;:4,\&quot;CourseNumber\&quot;:87248,\&quot;Room\&quot;:\&quot;TBA\&quot;,\&quot;Instructor\&quot;:\&quot;Staff\&quot;}],\&quot;CourseName\&quot;:\&quot;MATH\&quot;,\&quot;CourseId\&quot;:\&quot;1301\&quot;}&quot;,&quot;{\&quot;CourseResults\&quot;:[{\&quot;MeetingDays\&quot;:[\&quot;TU\&quot;,\&quot;TH\&quot;],\&quot;MeetingTime\&quot;:\&quot;2:00PM-3:20PM\&quot;,\&quot;Status\&quot;:\&quot;OPEN\&quot;,\&quot;Section\&quot;:1,\&quot;CourseNumber\&quot;:81359,\&quot;Room\&quot;:\&quot;TBA\&quot;,\&quot;Instructor\&quot;:\&quot;Staff\&quot;}],\&quot;CourseName\&quot;:\&quot;CSE\&quot;,\&quot;CourseId\&quot;:\&quot;1320\&quot;}&quot;,&quot;{\&quot;CourseResults\&quot;:[{\&quot;MeetingDays\&quot;:[\&quot;TU\&quot;,\&quot;TH\&quot;],\&quot;MeetingTime\&quot;:\&quot;11:00AM-1:50PM\&quot;,\&quot;Status\&quot;:\&quot;OPEN\&quot;,\&quot;Section\&quot;:8,\&quot;CourseNumber\&quot;:81153,\&quot;Room\&quot;:\&quot;TBA\&quot;,\&quot;Instructor\&quot;:\&quot;Staff\&quot;}],\&quot;CourseName\&quot;:\&quot;PHYS\&quot;,\&quot;CourseId\&quot;:\&quot;1441\&quot;}&quot;],&quot;ScheduleName&quot;:&quot;a&quot;}</string>
+<set name="SCHEDULE_NAMES">
+<string>a</string>
+</set>
+</map>

@@ -1,12 +1,90 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="15dp"
     tools:context="edu.uta.ucs.SelectCourses">
 
-    <TextView android:text="@string/hello_world" android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/frameContainerColor"
+        android:padding="5dp">
 
-</RelativeLayout>
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/action_select_semester"
+            android:id="@+id/select_semester_button"
+            android:onClick="getSemesterInfo" />
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
+
+            <AutoCompleteTextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/course_department_edittext"
+                android:hint="@string/hint_course_department"
+                android:layout_weight=".5"
+                android:inputType="text"
+                android:dropDownWidth="300dp"
+                android:dropDownHeight="wrap_content" />
+
+            <AutoCompleteTextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:id="@+id/course_number_edittext"
+                android:hint="@string/hint_course_number"
+                android:layout_weight="1"
+                android:inputType="text"
+                android:dropDownWidth="match_parent"
+                android:dropDownHorizontalOffset = "-200dp"
+                android:dropDownHeight="wrap_content" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/action_add_course"
+                android:id="@+id/add_course_button"
+                android:layout_weight="0"
+                android:onClick="addCourse" />
+        </LinearLayout>
+
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:id="@+id/selected_courses_listview"
+            android:layout_weight="1" />
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="GENERATE SCHEDULE"
+                android:id="@+id/generate_schedules_button"
+                android:layout_gravity="center_horizontal"
+                android:layout_weight="1"
+                android:onClick="getCourseSections" />
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/action_set_blockout_times"
+                android:id="@+id/set_blockout_times_button"
+                android:layout_weight="1"
+                android:onClick="selectBlockoutTimes" />
+        </LinearLayout>
+    </LinearLayout>
+
+</FrameLayout>

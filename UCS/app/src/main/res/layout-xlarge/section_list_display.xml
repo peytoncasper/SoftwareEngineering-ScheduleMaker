@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:background="#FFFFFF">
+
+    <!--Course Label-->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="1dip"
+            android:paddingTop="2dip"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:text="@string/listitem_text_course"
+            android:id="@+id/courseTitle"
+            android:layout_weight="10" />
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_weight="1"
+            android:gravity="right">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="1dip"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/listitem_text_days"
+                android:id="@+id/sectionMeetingDays"
+                android:gravity="left" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="1dip"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/listitem_text_times"
+                android:id="@+id/sectionMeetingTimes"
+                android:gravity="right" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight="1">
+
+            <!--Days Label-->
+
+            <!--Room Label-->
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="1dip"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/listitem_text_room"
+                android:id="@+id/sectionRoom"
+                android:gravity="right"
+                android:singleLine="true" />
+
+            <!--Instructors Label-->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="1dip"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/listitem_text_instructors"
+                android:id="@+id/sectionInstructors"
+                android:gravity="left" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight="1">
+
+            <!--Times Label-->
+
+            <!--ID Label-->
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="1dip"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/listitem_text_id"
+                android:id="@+id/sectionID"
+                android:gravity="right" />
+
+            <!--Status Label-->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="1dip"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/listitem_text_full_designation"
+                android:id="@+id/sectionDesignation"
+                android:gravity="right" />
+
+        </LinearLayout>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="X"
+            android:id="@+id/section_delete_button"
+            android:layout_gravity="right"
+            android:background="#7fff8c8c"
+            android:visibility="gone" />
+    </LinearLayout>
+
+
+</LinearLayout>

@@ -1,0 +1,125 @@
+﻿{
+  "EMAIL": "a@a.a",
+  "BLOCKOUTTIMES": [
+    {
+      "CourseResults": [
+        {
+          "MeetingDays": [
+            "M"
+          ],
+          "MeetingTime": "12:00PM-12:00PM",
+          "Status": "OPEN",
+          "Section": 0,
+          "CourseNumber": -1,
+          "Room": "",
+          "Instructor": "Full Day"
+        },
+        {
+          "MeetingDays": [
+            "TU"
+          ],
+          "MeetingTime": "12:00PM-12:00PM",
+          "Status": "OPEN",
+          "Section": 0,
+          "CourseNumber": -1,
+          "Room": "",
+          "Instructor": "Full Day"
+        },
+        {
+          "MeetingDays": [
+            "W"
+          ],
+          "MeetingTime": "12:00PM-12:00PM",
+          "Status": "OPEN",
+          "Section": 0,
+          "CourseNumber": -1,
+          "Room": "",
+          "Instructor": "Full Day"
+        },
+        {
+          "MeetingDays": [
+            "TH"
+          ],
+          "MeetingTime": "12:00PM-12:00PM",
+          "Status": "OPEN",
+          "Section": 0,
+          "CourseNumber": -1,
+          "Room": "",
+          "Instructor": "Full Day"
+        },
+        {
+          "MeetingDays": [
+            "F"
+          ],
+          "MeetingTime": "12:00PM-12:00PM",
+          "Status": "OPEN",
+          "Section": 0,
+          "CourseNumber": -1,
+          "Room": "",
+          "Instructor": "Full Day"
+        },
+        {
+          "MeetingDays": [
+            "SA"
+          ],
+          "MeetingTime": "12:00PM-12:00PM",
+          "Status": "OPEN",
+          "Section": 0,
+          "CourseNumber": -1,
+          "Room": "",
+          "Instructor": "Full Day"
+        }
+      ],
+      "Department": "BLOCKOUT",
+      "CourseName": "Full Week",
+      "CourseId": "BLOCKOUT"
+    }
+  ],
+  "SCHEDULES": [
+    {
+      "ScheduleSemester": 2158,
+      "ScheduleCourses": [
+        {
+          "CourseResults": [
+            {
+              "MeetingDays": [
+                "TU",
+                "TH"
+              ],
+              "MeetingTime": "11:00AM-12:20PM",
+              "Status": "OPEN",
+              "Section": 1,
+              "CourseNumber": 86135,
+              "Room": "TBA",
+              "Instructor": "Joseph A Sabbagh"
+            }
+          ],
+          "Department": "LING",
+          "CourseName": "FORMAL SYNTAX",
+          "CourseId": "4303"
+        },
+        {
+          "CourseResults": [
+            {
+              "MeetingDays": [
+                "M",
+                "W",
+                "F"
+              ],
+              "MeetingTime": "2:30PM-3:50PM",
+              "Status": "OPEN",
+              "Section": 7,
+              "CourseNumber": 87986,
+              "Room": "TBA",
+              "Instructor": "Darin Brezeale"
+            }
+          ],
+          "Department": "CSE",
+          "CourseName": "INTRODUCTION TO COMPUTERS PROGRAMMING",
+          "CourseId": "1310"
+        }
+      ],
+      "ScheduleName": "Test"
+    }
+  ]
+}

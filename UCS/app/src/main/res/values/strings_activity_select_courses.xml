@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="text_monday">Monday</string>
+    <string name="text_tuesday">Tuesday</string>
+    <string name="text_wednesday">Wednesday</string>
+    <string name="text_thursday">Thursday</string>
+    <string name="text_friday">Friday</string>
+    <string name="text_saturday">Saturday</string>
+    <string name="text_starting_time">Starting Time</string>
+    <string name="text_ending_time">Ending Time</string>
+    <string name="action_load_blockout_times">LOAD TIMES</string>
+    <string name="action_save_blockout_times">SAVE TIMES</string>
+    <string name="action_use_blockout_times">USE THESE TIMES</string>
+    <string name="action_add_blockout_time">ADD</string>
+    <string name="prompt_blockout_time_name">Block-out Name</string>
+    <string name="action_select_semester">SELECT SEMESTER</string>
+    <string name="action_add_course">ADD</string>
+    <string name="hint_course_number">COURSE NUMBER</string>
+    <string name="hint_course_department">DEPT</string>
+    <string name="action_set_blockout_times">BLOCK-OUT TIMES</string>
+</resources>
