@@ -10,4 +10,10 @@
         android:key="@string/pref_key_update_email"
         android:summary="@string/pref_summary_update_email"/>
 
+    <SwitchPreference
+        android:title="@string/pref_title_allow_nonopen_classes"
+        android:summary="@string/pref_summary_allow_nonopen_classes"
+        android:key="@string/pref_key_allow_nonopen_classes"
+        android:defaultValue="false"/>
+
 </PreferenceScreen>

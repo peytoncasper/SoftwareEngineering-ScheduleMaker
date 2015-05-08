@@ -3,7 +3,7 @@
     <SwitchPreference
         android:key="@string/pref_key_spoof_server"
         android:title="@string/pref_title_spoof_server"
-        android:defaultValue="false"/>
+        android:defaultValue="true"/>
 
     <SwitchPreference
         android:key="@string/pref_key_military_time"

@@ -1076,47 +1076,8 @@ public class SelectCourses extends ActionBarActivity {
                     float timeTaken = Float.parseFloat(response.getString("TimeTaken"));
                     Log.d("New Request Time Taken:", Float.toString(timeTaken));
                     fetchedCourses = Course.buildCourseList(jsonCourses);
+                    generateSchedule(fetchedCourses);
 
-                    try {
-                        ArrayList<Section> blockoutSections;
-                        if (blockoutTimes != null)
-                            blockoutSections = blockoutTimes.getSectionList();
-                        else
-                            blockoutSections = new ArrayList<>();
-
-                        if (fetchedCourses != null)
-                            sectionArrayList = Schedule.scheduleGenerator(fetchedCourses, new ArrayList<Section>(), blockoutSections);
-                        if (sectionArrayList != null) {
-                            for (Section section : sectionArrayList){
-                                Log.i("Built Schedule Sections",section.getSourceCourse().getCourseTitle() + " " + section.getSourceCourse().getCourseNumber() + "-" + section.getSectionNumber() + "\t" + section.toJSON().toString());
-                            }
-                        }
-
-                        Schedule schedule = new Schedule("", selectedSemester.getSemesterNumber(), sectionArrayList);
-                        DetailedSchedule.ShowSchedule(schedule, SelectCourses.this);
-                        Log.i("Built Schedule", schedule.toJSON().toString());
-                    } catch (NoSchedulesPossibleException e) {
-                        e.printStackTrace();
-                        AlertDialog.Builder noSchedulesPossible = new AlertDialog.Builder(SelectCourses.this);
-                        noSchedulesPossible.setTitle("Schedule Could be generated. Issues:");
-                        noSchedulesPossible.setMessage(e.printConflict());
-                        noSchedulesPossible.setNeutralButton("CHANGE COURSES", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        });
-                        noSchedulesPossible.setPositiveButton("GENERATE ANYWAY", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Schedule schedule = new Schedule("", selectedSemester.getSemesterNumber(), Schedule.scheduleGenerator(fetchedCourses));
-                                DetailedSchedule.ShowSchedule(schedule, SelectCourses.this);
-                            }
-                        });
-                        noSchedulesPossible.create().show();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
                 }
 
             } catch (JSONException e) {
@@ -1128,16 +1089,80 @@ public class SelectCourses extends ActionBarActivity {
 
     }
 
+    public void generateSchedule(final ArrayList<Course> coursesToSchedule){
+
+        try {
+            ArrayList<Section> blockoutSections;
+            if (blockoutTimes != null)
+                blockoutSections = blockoutTimes.getSectionList();
+            else
+                blockoutSections = new ArrayList<>();
+
+
+            Schedule schedule = Schedule.scheduleFactory(coursesToSchedule, blockoutSections, selectedSemester.getSemesterNumber());
+            DetailedSchedule.ShowSchedule(schedule, SelectCourses.this);
+            Log.i("Built Schedule", schedule.toJSON().toString());
+        } catch (NoSchedulesPossibleException noSchedulesPossible) {
+            noSchedulesPossible.printStackTrace();
+            final AlertDialog.Builder noSchedulesPossibleDialog = new AlertDialog.Builder(SelectCourses.this);
+            noSchedulesPossibleDialog.setTitle("Schedule Could be generated. Issues:");
+            noSchedulesPossibleDialog.setMessage(noSchedulesPossible.printConflict());
+            noSchedulesPossibleDialog.setNeutralButton("CHANGE COURSES", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            noSchedulesPossibleDialog.setPositiveButton("GENERATE IGNORING CONFLICTS", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Schedule schedule = null;
+                    generateConflictSchedule(coursesToSchedule);
+                }
+            });
+            noSchedulesPossibleDialog.create().show();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void generateConflictSchedule(ArrayList<Course> coursesToSchedule){
+
+        Schedule schedule;
+        try {
+            schedule = Schedule.scheduleFactoryIgnoreConflicts(coursesToSchedule, selectedSemester.getSemesterNumber());
+            DetailedSchedule.ShowSchedule(schedule, SelectCourses.this);
+        } catch (NoSchedulesPossibleException noOpenSections) {
+            noOpenSections.printStackTrace();
+
+            AlertDialog.Builder noSchedulesPossibleDialog = new AlertDialog.Builder(SelectCourses.this);
+            noSchedulesPossibleDialog.setTitle("Schedule could not be generated. Issues:");
+            noSchedulesPossibleDialog.setMessage(noOpenSections.printConflict());
+            noSchedulesPossibleDialog.setNeutralButton("CHANGE COURSES", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            noSchedulesPossibleDialog.create().show();
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         String blockoutTimes;
-        if (data == null)
+
+        Log.i("Block-Out Time Result", "requestCode: " + requestCode + " resultCode: " + resultCode);
+        if (data == null) {
+            Log.i("Block-Out Time Result", "Data is null!");
             return;
-        if (data.hasExtra("BLOCKOUT"))
-            blockoutTimes = data.getStringExtra("BLOCKOUT");
-        else
-            return;
+        }
+        else {
+            Log.i("Block-Out Time Result", "Data is not null");
+        }
+        blockoutTimes = data.getStringExtra("BLOCKOUT");
+        Log.i("Block-Out Time Result", blockoutTimes);
         try {
             JSONObject jsonBlockoutTimes = new JSONObject(blockoutTimes);
             this.blockoutTimes = new Course(jsonBlockoutTimes);
@@ -1145,7 +1170,7 @@ public class SelectCourses extends ActionBarActivity {
             e.printStackTrace();
         }
         if (this.blockoutTimes != null)
-            Log.d("test", this.blockoutTimes.toJSON().toString());
+            Log.d("Got Block-Out Times", this.blockoutTimes.toJSON().toString());
     }
 
     public static ArrayList<SemesterInfo> loadSemesterInfoFromFile(Context context){

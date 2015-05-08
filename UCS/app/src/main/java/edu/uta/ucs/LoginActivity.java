@@ -197,6 +197,10 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         }
     }
 
+    /**
+     * Open createAccount Activity
+     * @param view View this function is called from
+     */
     public void createAccount(View view){
         mEmailView.setText("");
         mPasswordView.setText("");
@@ -223,7 +227,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 String email = input.getText().toString();
 
                 if (isEmailValid(email)){
-
 
                     HTTPService.FetchURL(EMAIL_EXISTS_URL + email, ACTION_RESET_PASSWORD, LoginActivity.this);
                 }

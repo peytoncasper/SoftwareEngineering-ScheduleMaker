@@ -20,10 +20,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 /**
- * Enum strores class statuses
+ * Enum strores class statuses from myMav
  */
+@SuppressWarnings("unused")
 enum ClassStatus {
-    OPEN("OPEN"), CLOSED("CLOSED"), WAIT_LIST("WAIT LIST"), CONFLICT("CONFLICT");
+
+    OPEN("OPEN"),
+    CLOSED("CLOSED"),
+    WAIT_LIST("WAIT_LIST"),
+    CONFLICT("CONFLICT"),
+    UNKNOWN("UNKNOWN");
 
     private String value;
 
@@ -39,10 +45,22 @@ enum ClassStatus {
 
 /**
  * Enum days of week
+ *
+ * M    - Monday
+ * TU   - Tuesday
+ * W    - Wednesday
+ * TH   - Thursday
+ * F    - Friday
+ * SA   - Saturday
  */
 @SuppressWarnings("unused")
 enum Day {
-    M("M"), TU("TU"), W("W"), TH("TH"), F("F"), SA("SA");
+    M("M"),
+    TU("TU"),
+    W("W"),
+    TH("TH"),
+    F("F"),
+    SA("SA");
 
     private String value;
 
@@ -120,6 +138,17 @@ class TimeShort {
 
 /**
  * This class contains all information used to identify a particular class at UT Arlington
+ *
+ * sectionID - UTA class ID number. Unique to every section offered at UTA and is usually an 5 or more digit number
+ * sectionNumber - section number with the course this section belongs to. Unique only within a course. Padded with 0 on the left at print.
+ * instructors - list of instructors for section.
+ * room - room the section will meet in
+ * startTime - time the lecture period will begin
+ * endTime - time the lecture period will end
+ * days - arrayList of days class will be meeting
+ * status - current class status (OPEN, CLOSED, WAIT_LIST, etc.)
+ * sourceCourse - the course the section is of
+ *
  */
 public class Section {
 
@@ -136,16 +165,16 @@ public class Section {
     /**
      * Constructor
      *
-     * Generates a new Section will all fields set to null
+     * Generates a new Section will all fields set to null and the Day arraylist initialized with no elements added.
      */
     @SuppressWarnings("unused")
     Section() {
         this.setSectionID(0);
         this.setInstructors(null);
         this.setRoom(null);
-        this.setStartTime(null);
-        this.setEndTime(null);
-        this.setDays(new ArrayList<Day>(1));
+        startTime = (null);
+        endTime = (null);
+        this.setDays(new ArrayList<Day>());
         this.setStatus(null);
         this.setSourceCourse(null);
     }
@@ -165,8 +194,8 @@ public class Section {
         this.setSectionID(sectionID);
         this.setInstructors(instructors);
         this.setRoom(room);
-        this.setStartTime(startTime);
-        this.setEndTime(endTime);
+        this.startTime = startTime;
+        this.endTime = endTime;
         this.setDays(days);
         this.setStatus(status);
         this.setSourceCourse(sourceCourse);
@@ -200,16 +229,16 @@ public class Section {
         String times[] = jsonObject.getString("MeetingTime").split("-");
         Log.i("New Start Time", times[0]);
         if (times[0].equalsIgnoreCase("UNKNOWN/TBA")){
-            this.setStartTime(new TimeShort(0,0));
-            this.setEndTime(new TimeShort(0,0));
+            startTime=(new TimeShort(0,0));
+            endTime=(new TimeShort(0,0));
         }
         else if (!times[0].equalsIgnoreCase("TBA")) {
-            this.setStartTime(new TimeShort(times[0]));
-            this.setEndTime(new TimeShort(times[1]));
+            startTime=(new TimeShort(times[0]));
+            endTime=(new TimeShort(times[1]));
         }
         else{
-            this.setStartTime(new TimeShort(0,0));
-            this.setEndTime(new TimeShort(0,0));
+            startTime=(new TimeShort(0,0));
+            endTime=(new TimeShort(0,0));
         }
 
         JSONArray jsonDaysArray = jsonObject.getJSONArray("MeetingDays");
@@ -225,14 +254,18 @@ public class Section {
         Collections.reverse(days);
         Log.i("New Section #of Days: ", ((Integer) days.size()).toString());
 
-        this.setStatus(ClassStatus.valueOf(jsonObject.getString("Status").toUpperCase()));
+        this.setStatus(ClassStatus.valueOf(jsonObject.getString("Status").toUpperCase().replace(" ", "_")));
 
         this.setSourceCourse(sourceCourse);
     }
 
+    /**
+     * Outputs a JSONObject matching the JSONObject used in {@link #Section(JSONObject, Course)}.
+     * @return JSONObject
+     */
     public JSONObject toJSON() {
         JSONObject section = new JSONObject();
-        JSONArray days = new JSONArray(getDays());
+        JSONArray days = new JSONArray(this.days);
         try {
             section.put("MeetingTime", getTimeString());
             section.put("CourseNumber", getSectionID());
@@ -247,6 +280,10 @@ public class Section {
         return section;
     }
 
+    /**
+     * Obtains the string of instructors.
+     * @return String
+     */
     public String getInstructors() {
         return instructors;
     }
@@ -256,24 +293,10 @@ public class Section {
         Log.i("New Section Instructor", instructors);
     }
 
-    public TimeShort getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(TimeShort startTime) {
-        this.startTime = startTime;
-        //Log.i("New Section Start Time", getStartTime().toString24h());
-    }
-
-    public TimeShort getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(TimeShort endTime) {
-        this.endTime = endTime;
-        //Log.i("New Section End Time", getEndTime().toString24h());
-    }
-
+    /**
+     * Outputs time
+     * @return Human readable time. Will output military time or AM/PM time based on user settings.
+     */
     public String getTimeString(){
 
         if(UserData.useMilitaryTime()){
@@ -282,9 +305,14 @@ public class Section {
         return startTime.toString12h() + "-" + endTime.toString12h();
     }
 
-    public ArrayList<Day> getDays() {
-        return days;
+    public TimeShort getEndTime(){
+        return endTime;
     }
+
+    public TimeShort getStartTime(){
+        return startTime;
+    }
+
 
     public String getDaysString(){
         StringBuilder daysStringBuilder = new StringBuilder("[");
@@ -346,6 +374,13 @@ public class Section {
         this.sourceCourse = sourceCourse;
     }
 
+    public String getDescription(){
+        if (getSourceCourse().getDepartmentAcronym().equalsIgnoreCase("BLOCKOUT"))
+            return getSourceCourse().getDepartmentAcronym() + ": " + getInstructors();
+        else
+            return getSourceCourse().getDepartmentAcronym() + " " + getSourceCourse().getCourseNumber() + " - " + getSectionNumber();
+    }
+
     /**
      * Compares this section against another section for conflicts.
      *
@@ -357,19 +392,26 @@ public class Section {
      *          <ul/>
      */
     public boolean conflictsWith(Section section) {
-        if (!Collections.disjoint(this.getDays(), section.getDays())) {     // If there is overlap between the two sets of days conflict is possible, run checks
+        Log.i("Section Conflict Check", "Comparing sections: \n" + toJSON() + " to \n" + section.toJSON().toString());
+        boolean returnValue;
+        if (!Collections.disjoint(days, section.days)) {     // If there is overlap between the two sets of days conflict is possible, run checks
 
-            if (this.getEndTime().equals(section.getEndTime()))                  // If this section's end time equals the other section's end time
+            if (endTime.equals(section.endTime))                  // If this section's end time equals the other section's end time
                 return true;
 
-            if (this.getStartTime().before(section.getStartTime()))             // If this section starts before the other section
-                return section.getStartTime().before(this.getEndTime());            //  check to see if this section ends before other section begins
+            if (startTime.before(section.startTime))             // If this section starts before the other section
+                return section.startTime.before(endTime);            //  check to see if this section ends before other section begins
 
             // If this section starts after the other section
             //  check to see if other section ends before this section begins
-            return !section.getStartTime().before(this.getStartTime()) || this.getStartTime().before(section.getEndTime());
+            returnValue =  !section.startTime.before(startTime) || startTime.before(section.endTime);
 
-        } else return false;                                                // Days are disjoint, no conflict possible
+        } else returnValue =  false;                                                // Days are disjoint, no conflict possible
+
+        if(returnValue)
+            Log.w("Schedule Conflict Error", "Conflict between " + getSourceCourse().getCourseTitle() + " " + getSourceCourse().getCourseNumber() + "-" + getSectionNumber() + " and "
+                    + section.getSourceCourse().getCourseTitle() + " " + section.getSourceCourse().getCourseNumber() + "-" + section.getSectionNumber());
+        return returnValue;
     }
 
     /**
@@ -494,7 +536,10 @@ class SectionArrayAdapter extends ArrayAdapter<Section> {
             else
                 instructorsText.setText(p.getInstructors());
 
-            timesText.setText(p.getDaysString() + " " + p.getTimeString());
+            if(p.getEndTime().getMinAfterMidnight() != 0 && p.getStartTime().getMinAfterMidnight() != 0)
+                timesText.setText(p.getDaysString() + " " + p.getTimeString());
+            else
+                timesText.setText(p.getDaysString() + " TBA");
 
             if (p.getSectionID() < 0)
                 sectionIDText.setVisibility(View.GONE);

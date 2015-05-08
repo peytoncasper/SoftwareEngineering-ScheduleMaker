@@ -386,6 +386,7 @@ public class SelectBlockoutTimes extends ActionBarActivity {
     ListView sectionListView;
     Button toggleTimePickersButton;
     Button addBlockoutTimesButton;
+    Button useBlockoutTimesButton;
     HorizontalScrollView timePickerView;
     LinearLayout toggleDaysLayout;
 
@@ -413,6 +414,7 @@ public class SelectBlockoutTimes extends ActionBarActivity {
         toggleDaysLayout = (LinearLayout) findViewById(R.id.toggle_days_layout);
 
         addBlockoutTimesButton= (Button) findViewById(R.id.add_blockout_time_button);
+        useBlockoutTimesButton = (Button) findViewById(R.id.use_blockout_times_button);
 
         startTimePicker = ((TimePicker) findViewById(R.id.start_timePicker));
         endTimePicker = ((TimePicker) findViewById(R.id.end_timePicker));
@@ -461,6 +463,7 @@ public class SelectBlockoutTimes extends ActionBarActivity {
         blockoutTimesListAdapter.setNotifyOnChange(true);
         sectionListView.setAdapter(blockoutTimesListAdapter);
 
+        // Set buttons to toggle colors. Can be discarded if a proper style is setup and used for buttons.
         mondayToggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -549,21 +552,24 @@ public class SelectBlockoutTimes extends ActionBarActivity {
     protected void onResume() {
         super.onResume();
 
-        /**
-         * Loads all blockout times from memory to make runtime tasks faster
-         */
-            savedBlockoutCourses = SelectBlockoutTimes.loadBlockoutTimesFromFile(SelectBlockoutTimes.this);
+        // Load blockout times from memory just before activity is shown to user.
+        savedBlockoutCourses = SelectBlockoutTimes.loadBlockoutTimesFromFile(SelectBlockoutTimes.this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
 
+        // Save blockout times to memory just after activity pauses.
         saveBlockoutCoursesToFile(SelectBlockoutTimes.this, savedBlockoutCourses);
 
     }
 
 
+    /**
+     * Adds a block-out time to the ArrayList stored by the activity.
+     * @param view View this function is called from.
+     */
     public void addBlockoutTime(View view){
 
         TimeShort newStartTime, newEndTime;
@@ -598,20 +604,6 @@ public class SelectBlockoutTimes extends ActionBarActivity {
         currentBlockoutTimes.add(newBlockoutTime);
         blockoutTimesListAdapter.notifyDataSetChanged();
 
-    }
-
-    public void useBlockoutTimes(View view){
-
-        if (blockoutSetName == null)
-            blockoutSetName = "";
-        currentBlockoutCourse = new Course("BLOCKOUT", "BLOCKOUT", blockoutSetName, currentBlockoutTimes);
-        Log.d("BlockoutTimes", currentBlockoutCourse.toJSON().toString());
-
-        Intent intent = new Intent(this, SelectBlockoutTimes.class);
-        intent.putExtra("BLOCKOUT", currentBlockoutCourse.toJSON().toString());
-        setResult(0, intent);
-
-        finish();
     }
 
     public void saveBlockoutTimes(View view){
@@ -719,6 +711,20 @@ public class SelectBlockoutTimes extends ActionBarActivity {
             }
         });
         saveName.show();
+    }
+
+    public void useBlockoutTimes(View view){
+
+        if (blockoutSetName == null)
+            blockoutSetName = "";
+        currentBlockoutCourse = new Course("BLOCKOUT", "BLOCKOUT", blockoutSetName, currentBlockoutTimes);
+        Log.d("BlockoutTimes", currentBlockoutCourse.toJSON().toString());
+
+        Intent intent = new Intent();
+        intent.putExtra("BLOCKOUT", currentBlockoutCourse.toJSON().toString());
+        setResult(currentBlockoutTimes.size(), intent);
+
+        finish();
     }
 
     public void removeBlockoutTimes(View view){

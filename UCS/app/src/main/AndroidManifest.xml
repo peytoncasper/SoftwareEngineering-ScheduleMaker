@@ -45,7 +45,6 @@
                 android:value="edu.uta.ucs.MainActivity" />
         </activity>
         <activity
-            android:launchMode= "singleTask"
             android:name=".SelectBlockoutTimes"
             android:label="@string/title_activity_select_blockout_times"
             android:parentActivityName=".SelectCourses" >

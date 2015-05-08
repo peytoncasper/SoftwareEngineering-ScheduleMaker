@@ -41,14 +41,19 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        scheduleArrayList = Schedule.loadSchedulesFromFile(MainActivity.this);
+
+        // Reload schedules from file.
+        scheduleArrayList = Schedule.loadSchedulesFromFile();
         ArrayList<String> scheduleNameArrayList = new ArrayList<>(scheduleArrayList.size());
+
+        // Display schedules that were loaded.
         for (Schedule schedule : scheduleArrayList){
             scheduleNameArrayList.add(schedule.getName());
         }
         scheduleNameAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_selectable_list_item, scheduleNameArrayList);
-
         scheduleListView.setAdapter(scheduleNameAdapter);
+
+        // Set on click listener to show DetailedSchedule Activty for selected schedule when user selects a schedule.
         scheduleListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -85,11 +90,6 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
-
     public void generateSchedule(View view){
         Log.d("MainActivity", "Opening Generate Schedule");
         Intent startSelectCoursesActivity = new Intent(MainActivity.this, SelectCourses.class);
@@ -99,6 +99,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        // Attempt to logout user if activity is destroyed
         UserData.logout(MainActivity.this);
     }
 
