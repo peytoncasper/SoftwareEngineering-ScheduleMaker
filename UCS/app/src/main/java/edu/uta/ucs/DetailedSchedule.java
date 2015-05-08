@@ -19,7 +19,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -30,10 +29,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
 
 
 /**
@@ -64,6 +61,7 @@ public class DetailedSchedule extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detailed_schedule);
 
+        // Find list view ID so that it can be populated.
         scheduleSections = (ListView) findViewById(R.id.schedule_section_listview);
 
     }
@@ -127,9 +125,14 @@ public class DetailedSchedule extends Activity {
     }
 
 
+    /**
+     * Saves the schedule being displayed to the sharedPrefs file.
+     * @param view view that button is launched from
+     */
     public void saveSchedule(View view){
 
 
+        // Presents the user with an AlertDialog to enter a name for the schedule.
         final AlertDialog.Builder saveNameDialog = new AlertDialog.Builder(this);
 
         saveNameDialog.setTitle("Save as");
@@ -149,9 +152,12 @@ public class DetailedSchedule extends Activity {
              */
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                // Get text from dialog
                 String scheduleSaveName = blockoutNameEditTextDialog.getEditableText().toString();
+                // Set schedule name
                 setName(scheduleSaveName);
-                saveScheduleToFile(scheduleToShow);
+                // Save schedule
+                saveScheduleToFile();
             }
         });
 
@@ -177,20 +183,35 @@ public class DetailedSchedule extends Activity {
     protected void onPause() {
         super.onPause();
 
+        // progressDialog Safety
         if(progressDialog != null)
             progressDialog.dismiss();
     }
 
+    /**
+     * Initializes verify schedule sequence
+     * @param view View this function is called from
+     */
     public void verifySchedule(View view){
-        getVerifySchedule();
+        scheduleToShow.verifySchedule(DetailedSchedule.this);
+        showProgressDialog("Verifying Class Statuses");
     }
 
-    public void deleteSchedule(View view){
-        removeScheduleFromFile(this.scheduleToShow.getName());
+    /**
+     * Removes this schedule from memory and then destroys the activity.
+     * @param view View this function is called from
+     */
+    public void deleteSchedule(View view) {
+        removeScheduleFromFile();
         finish();
     }
 
+    /**
+     * Initial dialog to edit schedule.
+     * @param view View this function is called from
+     */
     public void editSchedule(View view){
+        // Build ArrayAdapter to show possible sections to show.
         SectionArrayAdapter arrayAdapter = new SectionArrayAdapter(DetailedSchedule.this, R.layout.section_list_display, scheduleToShow.getSelectedSections());
 
         AlertDialog.Builder builder = new AlertDialog.Builder(DetailedSchedule.this);
@@ -198,64 +219,47 @@ public class DetailedSchedule extends Activity {
         builder.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                // Store section to swap so it can be removed if the user selects a replacement.
                 sectionToSwap = scheduleToShow.getSelectedSections().get(which);
-                //removeSection(sectionToSwap);
-                setSelection(which);
-                getAlternativeSections(sectionToSwap.getSourceCourse().getCourseDepartment(), sectionToSwap.getSourceCourse().getCourseNumber());
+                // Start server call to get alternate sections.
+                getAlternativeSections(sectionToSwap);
             }
         });
         builder.show();
     }
 
-    private void getVerifySchedule(){
-
-        Log.i("Verify Schedule", "About to attempt verify schedule");
-        ArrayList<Section> sectionsToUpdate = this.scheduleToShow.getSelectedSections();
-
-        StringBuilder semesterParam = new StringBuilder(URL_GET_COURSE_SECTIONS_PARAM_SEMESTER);
-        StringBuilder departmentParam = new StringBuilder(URL_GET_COURSE_SECTIONS_PARAM_DEPARTMENT);
-        StringBuilder classNumberParam = new StringBuilder(URL_GET_COURSE_SECTIONS_PARAM_CLASSNUMBER);
-
-        for (Section section : sectionsToUpdate){
-
-            semesterParam.append(this.scheduleToShow.getSemesterNumber()).append(",");
-            departmentParam.append(section.getSourceCourse().getCourseDepartment()).append(",");
-            classNumberParam.append(section.getSectionID()).append(",");
-        }
-
-        String semesterParamFinal = semesterParam.length() > 0 ? semesterParam.substring( 0, semesterParam.length() - 1 ): "";
-        String departmentParamFinal = departmentParam.length() > 0 ? departmentParam.substring( 0, departmentParam.length() - 1 ): "";
-        String courseNumberParamFinal = classNumberParam.length() > 0 ? classNumberParam.substring( 0, classNumberParam.length() - 1 ): "";
-
-        String urlFinal = URL_VALIDATE_COURSES + semesterParamFinal + departmentParamFinal + courseNumberParamFinal;
-
-        HTTPService.FetchURL(urlFinal, ACTION_VERIFY_SCHEDULE,DetailedSchedule.this);
-
-        showProgressDialog("Verifying Class Statuses");
-    }
-
-    private void setName(String name){
+    private void setName(String name) {
         scheduleToShow.setName(name);
         this.setTitle(name);
     }
 
-    private void saveScheduleToFile(Schedule schedule){
-        final ArrayList<String> savedScheduleNames = getSavedScheduleNames();
-        final String scheduleName = schedule.getName();
-        Log.i("Setting Schedule Name", scheduleName);
+    /**
+     * Saves the currently displayed schedule to file
+     */
+    private void saveScheduleToFile(){
 
         saveCheck = true;
 
-        for(String string : savedScheduleNames) {
-            Log.i("Existing Schedules", string);
-            if (string.equalsIgnoreCase(scheduleName)) {
+        SharedPreferences reader = getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, MODE_PRIVATE);
+        SharedPreferences.Editor editor = getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, MODE_PRIVATE).edit();
+        Map<String, ?> schedules = reader.getAll();
+
+        String scheduleToString = null;
+        String scheduleName = Schedule.SCHEDULE_NAMES+"_"+scheduleToShow.getName();
+        try {
+            scheduleToString = scheduleToShow.toJSON().toString();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        if (schedules.containsKey(scheduleName)) {
                 final AlertDialog.Builder confirmOverWrite = new AlertDialog.Builder(DetailedSchedule.this);
                 confirmOverWrite.setTitle("A Schedule with this name already exists");
                 confirmOverWrite.setMessage("Are you sure you want to overwrite it?");
                 confirmOverWrite.setPositiveButton("OVERWRITE", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        removeScheduleFromFile(scheduleName);
+                        removeScheduleFromFile();
                         saveCheck = true;
                         dialog.dismiss();
                     }
@@ -268,81 +272,35 @@ public class DetailedSchedule extends Activity {
                     }
                 });
                 confirmOverWrite.show();
-            }
         }
+
         if (saveCheck){
-            savedScheduleNames.add(schedule.getName());
-            SharedPreferences.Editor editor = getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, MODE_PRIVATE).edit();
-            editor.putStringSet(Schedule.SCHEDULE_NAMES, new HashSet<>(savedScheduleNames));
-            try {
-                String scheduleJSON = schedule.toJSON().toString();
-                Log.i("Schedule to Save", scheduleJSON);
-                editor.putString(Schedule.SCHEDULE_NAMES+"_"+schedule.getName(), scheduleJSON);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            editor.apply();
-        }
-    }
-
-    private void removeScheduleFromFile(String scheduleNameToRemove){
-        ArrayList<String> scheduleNamesArrayList = getSavedScheduleNames();
-        for(String scheduleName : scheduleNamesArrayList){
-            if (scheduleName.equalsIgnoreCase(scheduleNameToRemove)){
-                Log.i("Removing Schedule", scheduleName);
-                scheduleNamesArrayList.remove(scheduleName);
-                SharedPreferences.Editor editor = getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, MODE_PRIVATE).edit();
-                HashSet<String> newScheduleStingSet = new HashSet<>(scheduleNamesArrayList);
-                editor.putStringSet(Schedule.SCHEDULE_NAMES, newScheduleStingSet);
-                editor.remove(Schedule.SCHEDULE_NAMES + "_" + scheduleNameToRemove);
+            if(scheduleToString != null){
+                Log.i("Schedule to Save", scheduleToString);
+                editor.putString(Schedule.SCHEDULE_NAMES + "_" + scheduleToShow.getName(), scheduleToString);
                 editor.apply();
-                return;
-            }
-            else {
-                Log.i("Keeping Schedule", scheduleName);
             }
         }
     }
 
-    private ArrayList<String> getSavedScheduleNames(){
-        File f = new File(UserData.getContext().getFilesDir().getParentFile().getPath() +  "/shared_prefs/" + Schedule.SCHEDULE_SAVEFILE + ".xml");
-        Log.i("DetailedSchedule", "getSavedScheduleNames attempting load from file: " + f.getAbsolutePath());
-        if(f.exists()){
-            Log.i("DetailedSchedule", "getSavedScheduleNames found file");
+    /**
+     * Removes the schedule with name equal to this schedule
+     *
+     * Future suggestion: Perhaps it should only remove the schedule if the contents remain the same.
+     */
+    private void removeScheduleFromFile(){
 
-            SharedPreferences scheduleNames = getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, MODE_PRIVATE);
-            Set<String> scheduleNameSet = scheduleNames.getStringSet(Schedule.SCHEDULE_NAMES, null);
-            HashSet<String> result = null;
-            if (scheduleNameSet != null){
-                for (String string : scheduleNameSet){
-                    Log.i("Schedule Names:", string);
-                }
-                result = new HashSet<>(scheduleNameSet);
-            }
+        SharedPreferences reader = getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, MODE_PRIVATE);
+        SharedPreferences.Editor editor = getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, MODE_PRIVATE).edit();
+        Map<String, ?> schedules = reader.getAll();
 
-            ArrayList<String> scheduleNamesArrayList;
-            if(result != null) {
-                scheduleNamesArrayList = new ArrayList<>(result);
-                for (String string : scheduleNamesArrayList){
-                    Log.i("Schedules in file", string);
-                }
-            }
-            else scheduleNamesArrayList = new ArrayList<>();
+        String scheduleFileName = Schedule.SCHEDULE_NAMES + "_" + scheduleToShow.getName();
 
-            return scheduleNamesArrayList;
-        }
-        else{
-            Log.i("DetailedSchedule", "getSavedScheduleNames file not found");
 
-            SharedPreferences.Editor editor = getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, MODE_PRIVATE).edit();
+        if(schedules.containsKey(scheduleFileName)){
+            editor.remove(scheduleFileName);
             editor.apply();
-            return new ArrayList<>();
         }
-
-    }
-
-    private void setSelection(int selection){
-        this.selection = selection;
     }
 
     private void addSection(Section section){
@@ -357,7 +315,14 @@ public class DetailedSchedule extends Activity {
         adapter.notifyDataSetChanged();
     }
 
-    public void getAlternativeSections(String department, String classNumber){
+    /**
+     * Create a server request for all sections of a selected course
+     */
+    public void getAlternativeSections(Section section){
+
+        String department = section.getSourceCourse().getDepartmentAcronym();
+        String classNumber = section.getSourceCourse().getCourseNumber();
+
         String url = URL_GET_COURSE_SECTIONS
                 + URL_GET_COURSE_SECTIONS_PARAM_SEMESTER + scheduleToShow.getSemesterNumber()
                 + URL_GET_COURSE_SECTIONS_PARAM_DEPARTMENT + department
@@ -366,6 +331,7 @@ public class DetailedSchedule extends Activity {
         HTTPService.FetchURL(url, ACTION_GET_COURSE_SECTIONS, this);
 
         showProgressDialog("Getting alternate sections");
+
     }
 
     class CouresAlternatesReciever extends BroadcastReceiver{
@@ -415,7 +381,7 @@ public class DetailedSchedule extends Activity {
             ArrayList<Course> fetchedCourses;
 
             try {
-
+                // Standard server response info
                 response = new JSONObject(intent.getStringExtra(HTTPService.SERVER_RESPONSE));
                 success = response.getBoolean("Success");
                 if(response.has("Message")) {
@@ -428,15 +394,21 @@ public class DetailedSchedule extends Activity {
                     float timeTaken = Float.parseFloat(response.getString("TimeTaken"));
                     Log.d("New Request Time Taken:", Float.toString(timeTaken));
                 }
+                // End of standard server response info
+
                 if(success) {
                     JSONArray jsonCourses = response.getJSONArray("Results");
                     fetchedCourses = Course.buildCourseList(jsonCourses);
-                    for (Section section : fetchedCourses.get(0).getSectionList()) {
+                    ArrayList<Section> fetchedSections = new ArrayList<>();
+                    for(Course course : fetchedCourses){
+                        fetchedSections.addAll(course.getSectionList());
+                    }
+                    for (Section section : fetchedSections) {
                         if (section.getStatus() == ClassStatus.OPEN && section.conflictsWith(scheduleToShow.getSelectedSections()) && !section.equals(sectionToSwap)) {
                             section.setStatus(ClassStatus.CONFLICT);
                         }
                     }
-                    showAlternateChoices(fetchedCourses.get(0).getSectionList());
+                    showAlternateChoices(fetchedSections);
 
                 }
 
@@ -525,7 +497,7 @@ public class DetailedSchedule extends Activity {
                         for(Section fetchedSection : fetchedSections){
                             if (section.getSectionID() == fetchedSection.getSectionID()){
                                 if(section.getStatus() != fetchedSection.getStatus()){
-                                    String notification = section.getSourceCourse().getCourseDepartment() + " "
+                                    String notification = section.getSourceCourse().getDepartmentAcronym() + " "
                                             + section.getSourceCourse().getCourseNumber() + "-" + section.getSectionNumber() + " status has changed to: " + fetchedSection.getStatus().toString().replace("_", " ");
                                     Log.i("DetailedSchedule", "Verify Schedule detected status change: " + notification);
                                     notifications.add(notification);
@@ -568,6 +540,10 @@ public class DetailedSchedule extends Activity {
         context.startActivity(scheduleIntent);
     }
 
+    /**
+     * Display alternate choices for a particular section
+     * @param alternates ArrayList of Section from which user will select a schedule.
+     */
     private void showAlternateChoices(ArrayList<Section> alternates){
 
         final SectionArrayAdapter arrayAdapter = new SectionArrayAdapter(DetailedSchedule.this,R.layout.section_list_display,alternates);
@@ -577,7 +553,9 @@ public class DetailedSchedule extends Activity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 removeSection(sectionToSwap);
-                addSection(arrayAdapter.getItem(which));
+                Section selection = arrayAdapter.getItem(which);
+                selection.setStatus(ClassStatus.OPEN);
+                addSection(selection);
                 dialog.dismiss();
                 updateAdapter();
             }
@@ -587,6 +565,11 @@ public class DetailedSchedule extends Activity {
         }
     }
 
+    /**
+     * Show the user a list of strings as an AlertDialog with a listview.
+     *
+     * @param listToShow List of strings to show.
+     */
     private void showStatusChanges(ArrayList<String> listToShow){
 
         AlertDialog.Builder showStatusBuilder = new AlertDialog.Builder(this);

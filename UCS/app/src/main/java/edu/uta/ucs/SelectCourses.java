@@ -380,10 +380,17 @@ class DepartmentInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInf
                 List<SemesterInfo.DepartmentInfo> results = new ArrayList<>();
                 if (constraint != null){
                     for(SemesterInfo.DepartmentInfo departmentInfo : departmentInfoArrayList){
+
                         if(departmentInfo.getDepartmentAcronym().toUpperCase().contains(" NULL"))
                             continue;
                         if(departmentInfo.getDepartmentTitle().toUpperCase().contains(" NULL"))
                             continue;
+
+                        if(departmentInfo.getDepartmentAcronym()==null)
+                            continue;
+                        if(departmentInfo.getDepartmentTitle()==null)
+                            continue;
+
                         if(departmentInfo.getDepartmentAcronym().toUpperCase().startsWith(constraint.toString().toUpperCase())){
                             if (!results.contains(departmentInfo))
                                 results.add(departmentInfo);
@@ -392,6 +399,7 @@ class DepartmentInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInf
                             if (!results.contains(departmentInfo))
                                 results.add(departmentInfo);
                         }
+
                     }
                 }
                 filterResults.values = results;
@@ -589,7 +597,6 @@ public class SelectCourses extends ActionBarActivity {
     public static final String URL_GET_SEMESTER = UserData.getContext().getString(R.string.get_semester_data);
     public static final String ACTION_GET_SEMESTER ="edu.uta.ucs.intent.action.ACTION_GET_SEMESTER";
 
-
     private AutoCompleteTextView courseDepartment;
     private AutoCompleteTextView courseNumber;
 
@@ -619,7 +626,6 @@ public class SelectCourses extends ActionBarActivity {
 
         LocalBroadcastManager.getInstance(this).registerReceiver(new DepartmentCoursesReceiver(), new IntentFilter(ACTION_GET_SEMESTER));
         LocalBroadcastManager.getInstance(this).registerReceiver(new DesiredSectionsReceiver(), new IntentFilter(ACTION_GET_DESIRED_COURSE_SECTIONS));
-        LocalBroadcastManager.getInstance(this).registerReceiver(new LogoutReciever(), new IntentFilter(UserData.ACTION_LOGOUT));
 
         departmentInfoArrayAdapter = new DepartmentInfoArrayAdapter(this,R.layout.desired_courses_listview, departmentInfoArrayList);
         courseInfoArrayAdapter = new CourseInfoArrayAdapter(this,R.layout.desired_courses_listview, courseInfoArrayList);
@@ -998,15 +1004,6 @@ public class SelectCourses extends ActionBarActivity {
         courseNumber.setAdapter(courseInfoArrayAdapter);
     }
 
-    private class LogoutReciever extends BroadcastReceiver{
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.i("Select Courses", "Logging out");
-            finish();
-        }
-    }
-
     private class DepartmentCoursesReceiver extends BroadcastReceiver {
 
         @Override
@@ -1058,7 +1055,7 @@ public class SelectCourses extends ActionBarActivity {
             if(progressDialog!= null)
                 progressDialog.dismiss();
 
-            ArrayList<Course> fetchedCourses = null;
+            final ArrayList<Course> fetchedCourses;
             ArrayList<Section> sectionArrayList = null;
 
             try {
@@ -1091,11 +1088,11 @@ public class SelectCourses extends ActionBarActivity {
                             sectionArrayList = Schedule.scheduleGenerator(fetchedCourses, new ArrayList<Section>(), blockoutSections);
                         if (sectionArrayList != null) {
                             for (Section section : sectionArrayList){
-                                Log.i("Built Schedule Sections",section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseNumber() + "-" + section.getSectionNumber() + "\t" + section.toJSON().toString());
+                                Log.i("Built Schedule Sections",section.getSourceCourse().getCourseTitle() + " " + section.getSourceCourse().getCourseNumber() + "-" + section.getSectionNumber() + "\t" + section.toJSON().toString());
                             }
                         }
 
-                        Schedule schedule = new Schedule("Schedule Name", selectedSemester.getSemesterNumber(), sectionArrayList);
+                        Schedule schedule = new Schedule("", selectedSemester.getSemesterNumber(), sectionArrayList);
                         DetailedSchedule.ShowSchedule(schedule, SelectCourses.this);
                         Log.i("Built Schedule", schedule.toJSON().toString());
                     } catch (NoSchedulesPossibleException e) {
@@ -1103,10 +1100,17 @@ public class SelectCourses extends ActionBarActivity {
                         AlertDialog.Builder noSchedulesPossible = new AlertDialog.Builder(SelectCourses.this);
                         noSchedulesPossible.setTitle("Schedule Could be generated. Issues:");
                         noSchedulesPossible.setMessage(e.printConflict());
-                        noSchedulesPossible.setNeutralButton("OKAY", new DialogInterface.OnClickListener() {
+                        noSchedulesPossible.setNeutralButton("CHANGE COURSES", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
+                            }
+                        });
+                        noSchedulesPossible.setPositiveButton("GENERATE ANYWAY", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Schedule schedule = new Schedule("", selectedSemester.getSemesterNumber(), Schedule.scheduleGenerator(fetchedCourses));
+                                DetailedSchedule.ShowSchedule(schedule, SelectCourses.this);
                             }
                         });
                         noSchedulesPossible.create().show();

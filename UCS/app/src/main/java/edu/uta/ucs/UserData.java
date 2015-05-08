@@ -3,6 +3,7 @@ package edu.uta.ucs;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -13,7 +14,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 /**
- * Stores some userdata at login and thoughout application lifecycle. Kind of a hack around, but what else can you do?
+ * Stores some userdata at login and though out application lifecycle. Kind of a hack around, but what else can you do?
+ * Because it was convenient this also stores some static methods which are used thorught the app.
  *
  * !!Replace with superior implementation if one is thought up!!
  */
@@ -23,22 +25,22 @@ public class UserData extends Application {
     private static String email;
     private static boolean militaryTime;
 
+    // Intent filter tag.
     public static final String ACTION_LOGOUT = "ACTION_LOGOUT";
 
-    public static Context getContext() {
-        return UserData.context;
-    }
 
     @Override
     public void onCreate() {
         super.onCreate();
+
         UserData.context = getApplicationContext();
-        UserData.setEmail(null);
 
         Context context = UserData.getContext();
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-        UserData.setMilitaryTime(settings.getBoolean(context.getResources().getString(R.string.pref_key_military_time), false));
 
+
+        UserData.setEmail(null);
+        UserData.setMilitaryTime(settings.getBoolean(context.getResources().getString(R.string.pref_key_military_time), false));
     }
 
     /**
@@ -51,11 +53,17 @@ public class UserData extends Application {
         super();
     }
 
-    UserData(JSONObject userDataJSON) throws JSONException {
-        if(userDataJSON.has("Email"))
+    public static void setUserData(JSONObject userDataJSON) throws JSONException {
+
+        if(userDataJSON.has("Email")) {
+            Log.i("UserData Login","Found Email in login data");
             UserData.setEmail(userDataJSON.getString("Email"));
-        if(userDataJSON.has("MilitaryTime"))
+            Log.i("UserData Login","email set to: "+ UserData.getEmail());
+        }
+        if(userDataJSON.has("MilitaryTime")) {
+            Log.i("UserData Login","Found MilitaryTime Setting in login data");
             UserData.setMilitaryTime(userDataJSON.getBoolean("MilitaryTime"));
+        }
 
         if(userDataJSON.has("SCHEDULES")){
             Log.i("UserData Login","Found Schedules in login data");
@@ -100,24 +108,38 @@ public class UserData extends Application {
 
         JSONObject logoutJSON;
 
+        if(UserData.getEmail() == null) {
+            Log.i("UserData Logout", "No user to logout");
+            new Exception("Stack trace").printStackTrace();
+            return;
+        }
+
         try {
             logoutJSON = UserData.toJSON();
+            Log.i("UserData JSON", logoutJSON.toString());
         } catch (JSONException e) {
             e.printStackTrace();
             logoutJSON = new JSONObject();
         }
 
+        String logoutURL = UserData.getContext().getResources().getString(R.string.logout_base);
 
         SharedPreferences.Editor logoutLog = context.getSharedPreferences("LOGOUT_LOG", Context.MODE_PRIVATE).edit();
         logoutLog.putString(((Long) System.currentTimeMillis()).toString(), logoutJSON.toString());
         logoutLog.apply();
 
-        HTTPService.PostJSON(LoginActivity.getLOGOUT_URL(), logoutJSON, LoginActivity.ACTION_LOGOUT, UserData.getContext());
+        HTTPService.PostJSON(logoutURL, logoutJSON, LoginActivity.ACTION_LOGOUT, UserData.getContext());
 
         Log.i("UserData Logout", "LOGOUT JSON: " + logoutJSON.toString());
 
+        UserData.setEmail(null);
+        UserData.setMilitaryTime(false);
+
     }
 
+    public static Context getContext() {
+        return UserData.context;
+    }
 
     public static String getEmail() {
         return email;
@@ -125,6 +147,7 @@ public class UserData extends Application {
 
     public static void setEmail(String email) {
         UserData.email = email;
+        Log.i("UserData","email set to: " + UserData.getEmail());
     }
 
     public static Boolean useMilitaryTime() {
@@ -143,12 +166,21 @@ public class UserData extends Application {
 
     }
 
+    public static void log(String logString){
+        SharedPreferences.Editor logger = UserData.getContext().getSharedPreferences("LOG", MODE_PRIVATE).edit();
+        logger.putString(String.valueOf(System.currentTimeMillis()), logString);
+        logger.apply();
+    }
+
     public static boolean spoofServer() {
 
         Context context = UserData.getContext();
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        boolean spoof = settings.getBoolean(context.getResources().getString(R.string.pref_key_spoof_server), false);
 
-        return settings.getBoolean(context.getResources().getString(R.string.pref_key_spoof_server), false);
+        Log.i("UserData spoofServer", String.valueOf(spoof));
+
+        return spoof;
     }
 
 }

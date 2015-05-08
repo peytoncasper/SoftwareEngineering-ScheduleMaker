@@ -23,7 +23,7 @@ import java.util.Collections;
  * Enum strores class statuses
  */
 enum ClassStatus {
-    OPEN("OPEN"), CLOSED("CLOSED"), WAIT_LIST("WAIT_LIST"), CONFLICT("CONFLICT");
+    OPEN("OPEN"), CLOSED("CLOSED"), WAIT_LIST("WAIT LIST"), CONFLICT("CONFLICT");
 
     private String value;
 
@@ -450,7 +450,7 @@ class SectionArrayAdapter extends ArrayAdapter<Section> {
 
         if (p != null) {
 
-            TextView courseText = (TextView) v.findViewById(R.id.courseName);
+            TextView courseText = (TextView) v.findViewById(R.id.courseTitle);
 
             TextView daysText = (TextView) v.findViewById(R.id.sectionMeetingDays);
             TextView roomText = (TextView) v.findViewById(R.id.sectionRoom);
@@ -473,13 +473,13 @@ class SectionArrayAdapter extends ArrayAdapter<Section> {
             designationText.setTextColor(Color.BLACK);
 
             if (p.getSourceCourse() != null) {
-                if ((p.getSourceCourse().getCourseName() == null && p.getInstructors() != null) || (p.getSourceCourse().getCourseNumber().equalsIgnoreCase("BLOCKOUT"))) {
+                if ((p.getSourceCourse().getCourseTitle() == null && p.getInstructors() != null) || (p.getSourceCourse().getCourseNumber().equalsIgnoreCase("BLOCKOUT"))) {
                     courseText.setText(p.getInstructors());
                     instructorsText.setVisibility(View.GONE);
-                } else if (p.getSourceCourse().getCourseName().contains("-"))
-                    courseText.setText(p.getSourceCourse().getCourseName().split("-")[1].substring(1));
+                } else if (p.getSourceCourse().getCourseTitle().contains("-"))
+                    courseText.setText(p.getSourceCourse().getCourseTitle().split("-")[1].substring(1));
                 else
-                    courseText.setText(p.getSourceCourse().getCourseName());
+                    courseText.setText(p.getSourceCourse().getCourseTitle());
             }
 
             daysText.setVisibility(View.GONE);
@@ -504,7 +504,7 @@ class SectionArrayAdapter extends ArrayAdapter<Section> {
             if (p.getSectionNumber() < 0 || p.getSectionNumber() == 0)
                 designationText.setVisibility(View.GONE);
             else
-                designationText.setText(p.getSourceCourse().getCourseDepartment() + " " + p.getSourceCourse().getCourseNumber() + "-" + String.format("%03d", p.getSectionNumber()));
+                designationText.setText(p.getSourceCourse().getDepartmentAcronym() + " " + p.getSourceCourse().getCourseNumber() + "-" + String.format("%03d", p.getSectionNumber()));
 
             switch (p.getStatus()) {
                 case OPEN:

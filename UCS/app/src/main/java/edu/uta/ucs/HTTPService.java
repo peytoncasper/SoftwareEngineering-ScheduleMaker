@@ -30,8 +30,8 @@ import java.net.URL;
  * An {@link IntentService} subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
  * <p/>
- * This IntentService is designed to interact with a web page and either get or send information there
- * helper methods.
+ * This IntentService is designed to interact with a web page and either get or send information there through the use of helper methods.
+ * Use the Facory patterns provided at the bottom to ensure least problems.
  */
 public class HTTPService extends IntentService {
 
@@ -149,7 +149,7 @@ public class HTTPService extends IntentService {
     public void onCreate() {
         super.onCreate();
         //Toast.makeText(getBaseContext(), "HTTPGetService has been created", Toast.LENGTH_LONG).show();
-        Log.d("Service Test", "HTTPGetService has been created");
+        Log.d("HTTPService", "IntentService onCreate() called");
         //messenger = new Messenger(new MessageHandler());
     }
 
@@ -157,13 +157,12 @@ public class HTTPService extends IntentService {
     public void onDestroy() {
         super.onDestroy();
         //Toast.makeText(getBaseContext(), "HTTPGetService has been stopped", Toast.LENGTH_LONG).show();
-        Log.d("Service Test", "HTTPGetService has been stopped");
+        Log.d("HTTPService", "IntentService onDestroy() called");
     }
 
     public String postJSON(URL targetURL, String jsonString){
 
         String response;
-
 
         try {
 
@@ -173,13 +172,16 @@ public class HTTPService extends IntentService {
             HttpClient httpClient = new DefaultHttpClient(httpParams);
             HttpPost httpPost = new HttpPost(targetURL.toURI());
 
+
+            Log.i("HTTPService", "postJSON httpPost.getMethod: " + httpPost.getMethod());
+
             // Prepare JSON to send by setting the entity
             httpPost.setEntity(new StringEntity(jsonString, "UTF-8"));
 
             // Set up the header types needed to properly transfer JSON
-            httpPost.setHeader("Content-Type", "application/json");
-            httpPost.setHeader("Accept-Encoding", "application/json");
-            httpPost.setHeader("Accept-Language", "en-US");
+            //httpPost.setHeader("Content-Type", "application/json");
+            //httpPost.setHeader("Accept-Encoding", "application/json");
+            //httpPost.setHeader("Accept-Language", "en-US");
 
             // Execute POST
             HttpResponse httpResponse = httpClient.execute(httpPost);
@@ -242,6 +244,8 @@ public class HTTPService extends IntentService {
      */
     public static void PostJSON(String targetURL, JSONObject jsonToPost,String recieverTag, Context context){
 
+        targetURL = UserData.getContext().getResources().getString(R.string.domain) + targetURL;
+
         Intent intent = new Intent(context, HTTPService.class);
         intent.putExtra(HTTPService.REQUEST_TYPE, HTTPService.REQUEST_JSON_POST);
         intent.putExtra(HTTPService.REQUEST_JSON_POST, jsonToPost.toString());
@@ -294,6 +298,8 @@ public class HTTPService extends IntentService {
      */
     public static void FetchURL(String urlToFetch, String recieverTag, Context context){
 
+        urlToFetch = UserData.getContext().getResources().getString(R.string.domain) + urlToFetch;
+
         Intent intent = new Intent(context, HTTPService.class);
         intent.putExtra(HTTPService.REQUEST_TYPE, HTTPService.REQUEST_URL);
 
@@ -334,6 +340,12 @@ public class HTTPService extends IntentService {
         context.startService(intent);
     }
 
+    /**
+     * Will attempt to load a spoof URL reponse from the spoof_data.json file.
+     * If there is a matching Key in the file the method will return the associated token.
+     * @param url Key to load from spoof_data.json
+     * @return String of spoof data if found, null otherwise
+     */
     private static String loadSpoofData(String url){
         String spoofData;
 
@@ -354,6 +366,11 @@ public class HTTPService extends IntentService {
     }
 
 
+    /**
+     * Loads a file and converts content to a string.
+     * @param fileName filename string to load.
+     * @return file content as String.
+     */
     private static String loadStringFromAsset(String fileName){
         String fileContent;
 
@@ -381,8 +398,14 @@ public class HTTPService extends IntentService {
         return fileContent;
     }
 
+    /**
+     * Test to see if a given string is a valid JSON. It will test the string by attempting to create a JSON object from the string.
+     * @param stringToTest String which could be a JSON. Maybe.
+     * @return returns true if a JSONObject could be built from the string, false if the JSONObject constructor throws a JSONException.
+     */
     private static boolean isJSON(String stringToTest){
         Log.i("HTTPService isJSON", stringToTest);
+        UserData.log(stringToTest);
         try {
             JSONObject testOBJ = new JSONObject(stringToTest);
             return true;

@@ -22,7 +22,7 @@
             android:textSize="20sp"
             android:textStyle="bold"
             android:text="@string/listitem_text_course"
-            android:id="@+id/courseName"
+            android:id="@+id/courseTitle"
             android:layout_weight="10" />
 
         <LinearLayout

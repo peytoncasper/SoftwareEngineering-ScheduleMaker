@@ -57,7 +57,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     private static final String[] LOGIN_PARAMS ={
             UserData.getContext().getString(R.string.login_param_username),
             UserData.getContext().getString(R.string.login_param_password)};
-    private static final String LOGOUT_URL = UserData.getContext().getString(R.string.logout_base);
     private static final String EMAIL_EXISTS_URL = UserData.getContext().getString(R.string.email_exists_base);
 
     /**
@@ -71,10 +70,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
-
-    public static String getLOGOUT_URL() {
-        return LOGOUT_URL;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -154,8 +149,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         String password = mPasswordView.getText().toString();
 
         String url = LOGIN_URL + LOGIN_PARAMS[0] + email + LOGIN_PARAMS[1] + password;
-
-
 
         boolean cancel = false;
         View focusView = null;
@@ -410,7 +403,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 if (success) {
                     mEmailView.setText("");
                     mPasswordView.setText("");
-                    new UserData(response);
+                    UserData.setUserData(response);
                     Intent launchMainActivity = new Intent(LoginActivity.this, MainActivity.class);
                     LoginActivity.this.startActivity(launchMainActivity);
                 } else {
@@ -422,6 +415,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+            Intent launchMainActivity = new Intent(LoginActivity.this, MainActivity.class);
+            LoginActivity.this.startActivity(launchMainActivity);
         }
     }
 
@@ -459,8 +454,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                     blockoutTimesEditor.clear();
                     blockoutTimesEditor.apply();
 
-                    UserData.setEmail(null);
-                    UserData.setMilitaryTime(false);
+                    //UserData.setEmail(null);
+                    //UserData.setMilitaryTime(false);
 
 
                     Log.i("LoginActivity", "Successful logout");

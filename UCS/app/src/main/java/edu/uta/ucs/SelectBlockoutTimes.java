@@ -170,7 +170,7 @@ class BlockoutCoursesAdapter extends BaseExpandableListAdapter {
     @Override
     public View getGroupView(final int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
 
-        String courseName = ((Course) getGroup(groupPosition)).getCourseName();
+        String courseName = ((Course) getGroup(groupPosition)).getCourseTitle();
         if (convertView == null){
             LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.list_group_course, null);
@@ -240,7 +240,7 @@ class BlockoutCoursesAdapter extends BaseExpandableListAdapter {
 
         if (childSection != null) {
 
-            TextView courseText = (TextView) convertView.findViewById(R.id.courseName);
+            TextView courseText = (TextView) convertView.findViewById(R.id.courseTitle);
 
             TextView daysText = (TextView) convertView.findViewById(R.id.sectionMeetingDays);
             TextView roomText = (TextView) convertView.findViewById(R.id.sectionRoom);
@@ -261,14 +261,14 @@ class BlockoutCoursesAdapter extends BaseExpandableListAdapter {
             designationText.setTextColor(Color.BLACK);
 
             if(childSection.getSourceCourse()!=null) {
-                if ((childSection.getSourceCourse().getCourseName() == null && childSection.getInstructors() != null) || (childSection.getSourceCourse().getCourseNumber().equalsIgnoreCase("BLOCKOUT")) ){
+                if ((childSection.getSourceCourse().getCourseTitle() == null && childSection.getInstructors() != null) || (childSection.getSourceCourse().getCourseNumber().equalsIgnoreCase("BLOCKOUT")) ){
                     courseText.setText(childSection.getInstructors());
                     instructorsText.setVisibility(View.GONE);
                 }
-                else if (childSection.getSourceCourse().getCourseName().contains("-"))
-                    courseText.setText(childSection.getSourceCourse().getCourseName().split("-")[1].substring(1));
+                else if (childSection.getSourceCourse().getCourseTitle().contains("-"))
+                    courseText.setText(childSection.getSourceCourse().getCourseTitle().split("-")[1].substring(1));
                 else
-                    courseText.setText(childSection.getSourceCourse().getCourseName());
+                    courseText.setText(childSection.getSourceCourse().getCourseTitle());
             }
 
             daysText.setText(childSection.getDaysString());
@@ -293,7 +293,7 @@ class BlockoutCoursesAdapter extends BaseExpandableListAdapter {
             if (childSection.getSectionNumber()<0 || childSection.getSectionNumber() == 0)
                 designationText.setVisibility(View.GONE);
             else
-                designationText.setText(childSection.getSourceCourse().getCourseName().split("-")[0] + "- " + String.format("%03d", childSection.getSectionNumber()));
+                designationText.setText(childSection.getSourceCourse().getCourseTitle().split("-")[0] + "- " + String.format("%03d", childSection.getSectionNumber()));
 
             switch (childSection.getStatus()){
                 case OPEN:
@@ -401,7 +401,6 @@ public class SelectBlockoutTimes extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_blockout_times);
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(new LogoutReciever(), new IntentFilter(UserData.ACTION_LOGOUT));
 
         nameBlockoutTime = ((EditText) findViewById(R.id.blockout_time_name_edittext));
 
@@ -878,14 +877,5 @@ public class SelectBlockoutTimes extends ActionBarActivity {
 
         return blockoutTimes;
         }
-
-    private class LogoutReciever extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.i("Select Blockout", "Logging out");
-            SelectBlockoutTimes.this.finish();
-        }
-    }
 
 }

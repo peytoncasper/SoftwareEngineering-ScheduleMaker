@@ -20,25 +20,28 @@ import org.json.JSONObject;
 
 
 /**
- * This Activity is the input form for a user to create a new account
+ * This Activity is the input form for a user to create a new account. It should only be launched from the login screen.
  */
 public class CreateAccount extends Activity {
     public static final String ACTION_CREATE_ACCOUNT ="edu.uta.ucs.intent.action.CREATE_ACCOUNT";
 
+    // URL Extensions which make the create account URL
     public static final String CREATE_ACCOUNT_URL[] = {
             UserData.getContext().getString(R.string.create_account_base),
             UserData.getContext().getString(R.string.create_account_param_username),
             UserData.getContext().getString(R.string.create_account_param_password),
             UserData.getContext().getString(R.string.create_account_param_email)};
 
+    // ProgressDialog to show after url request is sent to server. The reciever will dismiss it, so it must be referable outside of the method which will create and start it.
     ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Load layout
         setContentView(R.layout.activity_create_account);
 
-        // Register this receiver with LocalBroadcastManager
+        // Register receivers with LocalBroadcastManager
         LocalBroadcastManager.getInstance(this).registerReceiver(new CreateAccountReceiver(), new IntentFilter(ACTION_CREATE_ACCOUNT));
     }
 
@@ -134,7 +137,8 @@ public class CreateAccount extends Activity {
         }
         else {
             HTTPService.FetchURL(url, ACTION_CREATE_ACCOUNT, this);
-            /* Depreciated with implementation of HTTPService.FetchURL()
+
+            /* Removed after implementation of HTTPService.FetchURL()
             // Spoof data switch
             if (spoofData) {
                 // Put spoof request instead of url in intent extras
@@ -148,7 +152,7 @@ public class CreateAccount extends Activity {
             startService(intent);
             */
 
-
+            // Create progress dialog to inform app is waiting for server response.
             progressDialog = new ProgressDialog(CreateAccount.this);
             progressDialog.setTitle("Attempting to create account");
             progressDialog.setMessage("please wait for server response...");
@@ -163,7 +167,7 @@ public class CreateAccount extends Activity {
      * @return boolean
      */
     private boolean emailIsValid(String email){
-        return email.contains("@");
+        return email.contains("@") && email.contains(".") && email.endsWith("");
     }
 
     /**
@@ -188,6 +192,9 @@ public class CreateAccount extends Activity {
     }
 
 
+    /**
+     * Receiver class for BroadcastManager.
+     */
     private class CreateAccountReceiver extends BroadcastReceiver {
 
         @Override
@@ -195,27 +202,41 @@ public class CreateAccount extends Activity {
             JSONObject response;
             boolean success;
             String message;
+
             try {
 
+                // create JSONObject from server response. Should always work.
                 response = new JSONObject(intent.getStringExtra(HTTPService.SERVER_RESPONSE));
+                // Server generated. Represents a valid server request.
                 success = response.getBoolean("Success");
+
+                // If server sent a message with the response, show it.
                 if(response.has("Message")) {
                     if(success)
                         message = response.getString("Message");
                     else message = "Error: " + response.getString("Message");
                     Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
                 }
+
+                // If server sent a time taken tag, display it.
                 if(response.has("TimeTaken")){
                     float timeTaken = Float.parseFloat(response.getString("TimeTaken"));
                     Log.d("New Request Time Taken:", Float.toString(timeTaken));
                 }
 
                 if(success){
+                    // User account details from server response. Should only have Email at this point.
+                    UserData.setUserData(response);
+
+                    // Launch Main Activity
                     Intent launchMainActivity = new Intent(getApplicationContext(), MainActivity.class);
                     startActivity(launchMainActivity);
+
+                    // Destroy this activity.
                     finish();
                 }
                 else {
+                    // Clears passwords fields. Just in case...
                     ((EditText) findViewById(R.id.create_account_password)).setText("");
                     ((EditText) findViewById(R.id.create_account_confirm_password)).setText("");
 

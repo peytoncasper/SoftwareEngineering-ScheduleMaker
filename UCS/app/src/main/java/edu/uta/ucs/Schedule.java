@@ -11,6 +11,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -26,6 +27,8 @@ public class Schedule {
 
     public static final String SCHEDULE_NAMES = "SCHEDULE_NAMES";
     public static final String SCHEDULE_SAVEFILE = "SCHEDULE_SAVEFILE";
+
+    private static final String ACTION_VERIFY_SCHEDULE = "ACTION_VERIFY_SCHEDULE";
 
     private String name;
     private int semesterNumber;
@@ -63,10 +66,6 @@ public class Schedule {
 
     public ArrayList<Section> getSelectedSections() {
         return selectedSections;
-    }
-
-    public void setSelectedSections(ArrayList<Section> selectedSections) {
-        this.selectedSections = selectedSections;
     }
 
     public JSONObject toJSON() throws JSONException {
@@ -150,31 +149,52 @@ public class Schedule {
 
     }
 
+    public void verifySchedule(Context context){
+
+        Log.i("Verify Schedule", "About to attempt verify schedule");
+
+        StringBuilder semesterParam = new StringBuilder(UserData.getContext().getString(R.string.validate_courses_param_semester));
+        StringBuilder departmentParam = new StringBuilder(UserData.getContext().getString(R.string.validate_courses_param_department));
+        StringBuilder classNumberParam = new StringBuilder(UserData.getContext().getString(R.string.validate_courses_param_class_number));
+
+        for (Section section : selectedSections){
+
+            semesterParam.append(semesterNumber).append(",");
+            departmentParam.append(section.getSourceCourse().getDepartmentAcronym()).append(",");
+            classNumberParam.append(section.getSectionID()).append(",");
+        }
+
+        String semesterParamFinal = semesterParam.length() > 0 ? semesterParam.substring( 0, semesterParam.length() - 1 ): "";
+        String departmentParamFinal = departmentParam.length() > 0 ? departmentParam.substring( 0, departmentParam.length() - 1 ): "";
+        String courseNumberParamFinal = classNumberParam.length() > 0 ? classNumberParam.substring( 0, classNumberParam.length() - 1 ): "";
+
+        String urlFinal = UserData.getContext().getString(R.string.validate_courses_base) + semesterParamFinal + departmentParamFinal + courseNumberParamFinal;
+
+        HTTPService.FetchURL(urlFinal, ACTION_VERIFY_SCHEDULE, context);
+
+    }
+
+
     public static ArrayList<Schedule> loadSchedulesFromFile(Context context){
 
         SharedPreferences scheduleFile = context.getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, Context.MODE_PRIVATE);
+        Map<String, ?> schedulesOnFile = scheduleFile.getAll();
 
-        Set<String> scheduleNames = scheduleFile.getStringSet(Schedule.SCHEDULE_NAMES, null);
-        if (scheduleNames == null)
-            return  new ArrayList<>();
-        ArrayList<Schedule> scheduleArrayList = new ArrayList<>(scheduleNames.size());
-        for (String string : scheduleNames){
-
-            String scheduleName = Schedule.SCHEDULE_NAMES + "_" + string;
-            Log.i("Load Schedules", "Schedule Name" + scheduleName);
-
-            String scheduleString = scheduleFile.getString(scheduleName, null);
-            Log.i("Load Schedules", "Schedule String" + scheduleString);
+        ArrayList<Schedule> scheduleArrayList = new ArrayList<>(schedulesOnFile.size());
+        for(String key : schedulesOnFile.keySet()){
+            String scheduleName = key;
+            Log.i("Load Schedules", "Loading Schedule Name: " + scheduleName);
+            String scheduleBody = schedulesOnFile.get(key).toString();
+            Log.i("Load Schedules", "Loading Schedule body: " + scheduleBody);
 
             try {
-                JSONObject scheduleJSON = new JSONObject(scheduleString);
+                JSONObject scheduleJSON = new JSONObject(scheduleBody);
                 Schedule schedule = new Schedule(scheduleJSON);
                 Log.i("Load Schedules", "Schedule JSON" + schedule.toJSON().toString());
                 scheduleArrayList.add(schedule);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
         }
 
         return scheduleArrayList;
@@ -206,8 +226,8 @@ public class Schedule {
                     if(scheduleConflict != null)
                         scheduleConflict.addConflict(section, sectionToCompare);
                     else scheduleConflict = new NoSchedulesPossibleException(section, sectionToCompare);
-                    Log.e("Schedule Conflict Error", "Conflict between " + section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseNumber() + "-" + section.getSectionNumber() + " and "
-                            + sectionToCompare.getSourceCourse().getCourseName() + " " + sectionToCompare.getSourceCourse().getCourseNumber() + "-" + sectionToCompare.getSectionNumber());
+                    Log.e("Schedule Conflict Error", "Conflict between " + section.getSourceCourse().getCourseTitle() + " " + section.getSourceCourse().getCourseNumber() + "-" + section.getSectionNumber() + " and "
+                            + sectionToCompare.getSourceCourse().getCourseTitle() + " " + sectionToCompare.getSourceCourse().getCourseNumber() + "-" + sectionToCompare.getSectionNumber());
                     continue checkPossibleSections;
                 }
             }
@@ -217,7 +237,7 @@ public class Schedule {
                         if(scheduleConflict != null)
                             scheduleConflict.addConflict(section, sectionToCompare);
                         else scheduleConflict = new NoSchedulesPossibleException(section, sectionToCompare);
-                    Log.e("Schedule Conflict Error", "Conflict between " + section.getSourceCourse().getCourseName() + " " + section.getSourceCourse().getCourseNumber() + "-" + section.getSectionNumber() + " and "
+                    Log.e("Schedule Conflict Error", "Conflict between " + section.getSourceCourse().getCourseTitle() + " " + section.getSourceCourse().getCourseNumber() + "-" + section.getSectionNumber() + " and "
                             + sectionToCompare.getSourceCourse().getCourseNumber() + " " + sectionToCompare.getInstructors());
                     continue checkPossibleSections;
                 }
@@ -234,6 +254,16 @@ public class Schedule {
 
         }throw scheduleConflict;
 
+    }
+
+    public static ArrayList<Section> scheduleGenerator(ArrayList<Course> courseArrayList){
+        ArrayList<Section> possibleSections = new ArrayList<>();
+        for(Course course : courseArrayList){
+            Collections.shuffle(course.getSectionList());
+            possibleSections.add(course.getSectionList().get(0));
+        }
+
+        return possibleSections;
     }
 
     public int getSemesterNumber() {
@@ -253,26 +283,26 @@ class NoSchedulesPossibleException extends Exception {
     }
 
     public NoSchedulesPossibleException(Section sourceSection, Section conflictingSection){
-        if(conflictingSection.getSourceCourse().getCourseDepartment().equalsIgnoreCase("BLOCKOUT")){
-            this.message = "Conflict between " + sourceSection.getSourceCourse().getCourseDepartment() +  " " + sourceSection.getSourceCourse().getCourseNumber() + "-" + sourceSection.getSectionNumber()
-                    + " and " + conflictingSection.getSourceCourse().getCourseDepartment() +  ": " + conflictingSection.getInstructors();
+        if(conflictingSection.getSourceCourse().getDepartmentAcronym().equalsIgnoreCase("BLOCKOUT")){
+            this.message = "Conflict between " + sourceSection.getSourceCourse().getDepartmentAcronym() +  " " + sourceSection.getSourceCourse().getCourseNumber() + "-" + sourceSection.getSectionNumber()
+                    + " and " + conflictingSection.getSourceCourse().getDepartmentAcronym() +  ": " + conflictingSection.getInstructors();
         }
         else
-            this.message = "Conflict between " + sourceSection.getSourceCourse().getCourseDepartment() +  " " + sourceSection.getSourceCourse().getCourseNumber() + "-" + sourceSection.getSectionNumber()
-                + " and " + conflictingSection.getSourceCourse().getCourseDepartment() +  " " + conflictingSection.getSourceCourse().getCourseNumber() + "-" + conflictingSection.getSectionNumber();
+            this.message = "Conflict between " + sourceSection.getSourceCourse().getDepartmentAcronym() +  " " + sourceSection.getSourceCourse().getCourseNumber() + "-" + sourceSection.getSectionNumber()
+                + " and " + conflictingSection.getSourceCourse().getDepartmentAcronym() +  " " + conflictingSection.getSourceCourse().getCourseNumber() + "-" + conflictingSection.getSectionNumber();
     }
 
     public void addConflict(Section sourceSection, Section conflictingSection){
 
-        if(conflictingSection.getSourceCourse().getCourseDepartment().equalsIgnoreCase("BLOCKOUT")){
+        if(conflictingSection.getSourceCourse().getDepartmentAcronym().equalsIgnoreCase("BLOCKOUT")){
             this.message = this.message + "\n" +
-                    "Conflict between " + sourceSection.getSourceCourse().getCourseDepartment() +  " " + sourceSection.getSourceCourse().getCourseNumber() + "-" + sourceSection.getSectionNumber()
-                    + " and " + conflictingSection.getSourceCourse().getCourseDepartment() +  ": " + conflictingSection.getInstructors();
+                    "Conflict between " + sourceSection.getSourceCourse().getDepartmentAcronym() +  " " + sourceSection.getSourceCourse().getCourseNumber() + "-" + sourceSection.getSectionNumber()
+                    + " and " + conflictingSection.getSourceCourse().getDepartmentAcronym() +  ": " + conflictingSection.getInstructors();
         }
         else
             this.message = this.message + "\n" +
-                    "Conflict between " + sourceSection.getSourceCourse().getCourseDepartment() +  " " + sourceSection.getSourceCourse().getCourseNumber() + "-" + sourceSection.getSectionNumber()
-                    + " and " + conflictingSection.getSourceCourse().getCourseDepartment() +  " " + conflictingSection.getSourceCourse().getCourseNumber() + "-" + conflictingSection.getSectionNumber();
+                    "Conflict between " + sourceSection.getSourceCourse().getDepartmentAcronym() +  " " + sourceSection.getSourceCourse().getCourseNumber() + "-" + sourceSection.getSectionNumber()
+                    + " and " + conflictingSection.getSourceCourse().getDepartmentAcronym() +  " " + conflictingSection.getSourceCourse().getCourseNumber() + "-" + conflictingSection.getSectionNumber();
     }
 
     public String printConflict(){
