@@ -2,15 +2,12 @@ package edu.uta.ucs;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,7 +17,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.ArrayAdapter;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.Adapter;
 import android.widget.Button;
@@ -318,6 +314,7 @@ class BlockoutCoursesAdapter extends BaseExpandableListAdapter {
         confirmDelete.setPositiveButton("DELETE", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                //noinspection SuspiciousMethodCalls
                 courseArrayList.remove(getGroup(position));
                 dialog.dismiss();
             }
@@ -386,6 +383,7 @@ public class SelectBlockoutTimes extends ActionBarActivity {
     ListView sectionListView;
     Button toggleTimePickersButton;
     Button addBlockoutTimesButton;
+    Button useBlockoutTimesButton;
     HorizontalScrollView timePickerView;
     LinearLayout toggleDaysLayout;
 
@@ -413,6 +411,7 @@ public class SelectBlockoutTimes extends ActionBarActivity {
         toggleDaysLayout = (LinearLayout) findViewById(R.id.toggle_days_layout);
 
         addBlockoutTimesButton= (Button) findViewById(R.id.add_blockout_time_button);
+        useBlockoutTimesButton = (Button) findViewById(R.id.use_blockout_times_button);
 
         startTimePicker = ((TimePicker) findViewById(R.id.start_timePicker));
         endTimePicker = ((TimePicker) findViewById(R.id.end_timePicker));
@@ -461,6 +460,7 @@ public class SelectBlockoutTimes extends ActionBarActivity {
         blockoutTimesListAdapter.setNotifyOnChange(true);
         sectionListView.setAdapter(blockoutTimesListAdapter);
 
+        // Set buttons to toggle colors. These can all be discarded if a proper style is setup and used for buttons.
         mondayToggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -527,6 +527,7 @@ public class SelectBlockoutTimes extends ActionBarActivity {
         });
 
 
+        // Check to see if creating intent had blocout times stored in it.
         Intent intent = getIntent();
         if (intent.hasExtra("BLOCKOUT TIMES")){
             String blockOutTimes = intent.getStringExtra("BLOCKOUT TIMES");
@@ -549,21 +550,23 @@ public class SelectBlockoutTimes extends ActionBarActivity {
     protected void onResume() {
         super.onResume();
 
-        /**
-         * Loads all blockout times from memory to make runtime tasks faster
-         */
-            savedBlockoutCourses = SelectBlockoutTimes.loadBlockoutTimesFromFile(SelectBlockoutTimes.this);
+        // Load blockout times from memory just before activity is shown to user.
+        savedBlockoutCourses = SelectBlockoutTimes.loadBlockoutTimesFromFile(SelectBlockoutTimes.this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
 
+        // Save blockout times to memory just after activity pauses.
         saveBlockoutCoursesToFile(SelectBlockoutTimes.this, savedBlockoutCourses);
 
     }
 
 
+    /**
+     * Adds a block-out time to the ArrayList stored by the activity.
+     */
     public void addBlockoutTime(View view){
 
         TimeShort newStartTime, newEndTime;
@@ -600,20 +603,10 @@ public class SelectBlockoutTimes extends ActionBarActivity {
 
     }
 
-    public void useBlockoutTimes(View view){
-
-        if (blockoutSetName == null)
-            blockoutSetName = "";
-        currentBlockoutCourse = new Course("BLOCKOUT", "BLOCKOUT", blockoutSetName, currentBlockoutTimes);
-        Log.d("BlockoutTimes", currentBlockoutCourse.toJSON().toString());
-
-        Intent intent = new Intent(this, SelectBlockoutTimes.class);
-        intent.putExtra("BLOCKOUT", currentBlockoutCourse.toJSON().toString());
-        setResult(0, intent);
-
-        finish();
-    }
-
+    /**
+     * Shows a dialogue to enable user to save a plockout time to file
+     *
+     */
     public void saveBlockoutTimes(View view){
 
         AlertDialog.Builder saveName = new AlertDialog.Builder(this);
@@ -663,6 +656,9 @@ public class SelectBlockoutTimes extends ActionBarActivity {
         saveName.show();
     }
 
+    /**
+     * Shows a dialog with a listview in it to allow the user to load times from file
+     */
     public void loadBlockoutTimes(View view){
 
         ExpandableListView blockoutListView = new ExpandableListView(this);
@@ -721,57 +717,27 @@ public class SelectBlockoutTimes extends ActionBarActivity {
         saveName.show();
     }
 
-    public void removeBlockoutTimes(View view){
+    /**
+     * Passes the currently selected blockout times to calling function via setResult and then closes this activity
+     */
+    public void useBlockoutTimes(View view){
 
-        final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(SelectBlockoutTimes.this,android.R.layout.select_dialog_singlechoice);
-        for(Section section : currentBlockoutTimes){
-            arrayAdapter.add(section.getInstructors()+"\t"+section.getDaysString()+" "+section.getTimeString());
-        }
+        if (blockoutSetName == null)
+            blockoutSetName = "";
+        currentBlockoutCourse = new Course("BLOCKOUT", "BLOCKOUT", blockoutSetName, currentBlockoutTimes);
+        Log.d("BlockoutTimes", currentBlockoutCourse.toJSON().toString());
 
-        AlertDialog.Builder builderSingle = new AlertDialog.Builder(SelectBlockoutTimes.this);
-        builderSingle.setTitle("Select Time to Remove:-");
-        builderSingle.setNegativeButton("CANCEL",
-                new DialogInterface.OnClickListener() {
+        Intent intent = new Intent();
+        intent.putExtra("BLOCKOUT", currentBlockoutCourse.toJSON().toString());
+        setResult(currentBlockoutTimes.size(), intent);
 
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-        builderSingle.setAdapter(arrayAdapter,
-                new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String strName = arrayAdapter.getItem(which);
-                        final Section selectedSection = currentBlockoutTimes.get(which);
-                        AlertDialog.Builder builderInner = new AlertDialog.Builder(SelectBlockoutTimes.this);
-                        builderInner.setMessage(strName);
-                        builderInner.setTitle("Are you sure you want to remove this?\nIt can't be undone");
-                        builderInner.setPositiveButton("OK",
-                                new DialogInterface.OnClickListener() {
-
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        currentBlockoutTimes.remove(selectedSection);
-                                        blockoutTimesListAdapter.notifyDataSetChanged();
-                                        dialog.dismiss();
-                                    }
-                                });
-                        builderInner.setNegativeButton("CANCEL",
-                                new DialogInterface.OnClickListener() {
-
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        dialog.dismiss();
-                                    }
-                                });
-                        builderInner.show();
-                    }
-                });
-        builderSingle.show();
+        finish();
     }
 
+
+    /**
+     * Show or hide the blockout time setup
+     */
     public void toggleTimepickers(View view){
 
         if(toggleDaysLayout.getVisibility() == View.VISIBLE)
@@ -789,8 +755,18 @@ public class SelectBlockoutTimes extends ActionBarActivity {
         else
             addBlockoutTimesButton.setVisibility(View.VISIBLE);
 
+        if(nameBlockoutTime.getVisibility() == View.VISIBLE)
+            nameBlockoutTime.setVisibility(View.GONE);
+        else
+            nameBlockoutTime.setVisibility(View.VISIBLE);
+
     }
 
+    /**
+     * Internal function which will create a {@code TimeShort} from a passed TimePicker object.
+     * @param timePicker the timepicker from which to get the time from
+     * @return TimeShort
+     */
     private TimeShort getTime(TimePicker timePicker){
         TimeShort result;
         result = new TimeShort(timePicker.getCurrentHour(), timePicker.getCurrentMinute());

@@ -197,6 +197,10 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         }
     }
 
+    /**
+     * Open createAccount Activity
+     * @param view View this function is called from
+     */
     public void createAccount(View view){
         mEmailView.setText("");
         mPasswordView.setText("");
@@ -223,7 +227,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 String email = input.getText().toString();
 
                 if (isEmailValid(email)){
-
 
                     HTTPService.FetchURL(EMAIL_EXISTS_URL + email, ACTION_RESET_PASSWORD, LoginActivity.this);
                 }
@@ -342,6 +345,9 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         mEmailView.setAdapter(adapter);
     }
 
+    /**
+     * Receiver class for BroadcastManager.
+     */
     private class ResetPasswordReceiver extends BroadcastReceiver{
 
 
@@ -380,6 +386,9 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         }
     }
 
+    /**
+     * Receiver class for BroadcastManager.
+     */
     private class LoginReceiver extends BroadcastReceiver {
 
         @Override
@@ -403,6 +412,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 if (success) {
                     mEmailView.setText("");
                     mPasswordView.setText("");
+                    
+                    // Set UserData to be called from various places in the app
                     UserData.setUserData(response);
                     Intent launchMainActivity = new Intent(LoginActivity.this, MainActivity.class);
                     LoginActivity.this.startActivity(launchMainActivity);
@@ -415,12 +426,12 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            Intent launchMainActivity = new Intent(LoginActivity.this, MainActivity.class);
-            LoginActivity.this.startActivity(launchMainActivity);
         }
     }
 
-
+    /**
+     * Receiver class for BroadcastManager.
+     */
     private class LogoutReceiver extends BroadcastReceiver {
 
         @Override

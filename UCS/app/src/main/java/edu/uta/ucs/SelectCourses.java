@@ -9,7 +9,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
@@ -51,12 +50,12 @@ class SemesterInfo{
 
 
     public static ArrayList<SemesterInfo> SemesterInfoFactory(JSONObject SemesterRaw) throws JSONException {
-        /*if(SemesterRaw.getBoolean("Success"))
-            return null;*/
+
         JSONArray semestersArray = SemesterRaw.getJSONArray("Semesters");
         ArrayList<SemesterInfo> results = new ArrayList<>(semestersArray.length());
 
         for(int index = semestersArray.length(); index != 0;index--){
+
             SemesterInfo parsedSemester = new SemesterInfo(semestersArray.getJSONObject( index-1 ));
             results.add(parsedSemester);
         }
@@ -72,29 +71,6 @@ class SemesterInfo{
 
     public String getSemesterName() {
         return semesterName;
-    }
-
-    @SuppressWarnings("unused")
-    private class SemesterInfoFactoryASYNC extends AsyncTask<JSONObject, Void, ArrayList>{
-
-        /**
-         * Override this method to perform a computation on a background thread. The
-         * specified parameters are the parameters passed to {@link #execute}
-         * by the caller of this task.
-         * <p/>
-         * This method can call {@link #publishProgress} to publish updates
-         * on the UI thread.
-         *
-         * @param params The parameters of the task.
-         * @return A result, defined by the subclass of this task.
-         * @see #onPreExecute()
-         * @see #onPostExecute
-         * @see #publishProgress
-         */
-        @Override
-        protected ArrayList doInBackground(JSONObject... params) {
-            return null;
-        }
     }
 
     /**
@@ -311,6 +287,11 @@ class SemesterInfo{
     }
 }
 
+/**
+ * ArrayAdapter for DepartmentInfo Objects. This will display a list of Departments in a listview using an instance of the desired_courses_listview.xml layout file to display each object.
+ * Mainly follows the standard ArrayAdapter setup. All visual setup is done in the getView method. All Filtering is done in the new Filter object.
+ * Refter to {@link CourseInfoArrayAdapter} for better commenting, since this is very structurally similar.
+ */
 class DepartmentInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInfo> implements Filterable{
 
     private ArrayList<SemesterInfo.DepartmentInfo> departmentInfoArrayList = new ArrayList<>();
@@ -357,6 +338,7 @@ class DepartmentInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInf
         TextView departmentID = ((TextView) convertView.findViewById(R.id.desiredCourseDepartment));
         TextView departmentNumber = ((TextView) convertView.findViewById(R.id.desiredCourseNumber));
         TextView departmentTitle = ((TextView) convertView.findViewById(R.id.desiredCourseTitle));
+        departmentTitle.setSelected(true);
 
         SemesterInfo.DepartmentInfo departmentInfo = departmentInfoArrayList.get(position);
 
@@ -381,14 +363,7 @@ class DepartmentInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInf
                 if (constraint != null){
                     for(SemesterInfo.DepartmentInfo departmentInfo : departmentInfoArrayList){
 
-                        if(departmentInfo.getDepartmentAcronym().toUpperCase().contains(" NULL"))
-                            continue;
-                        if(departmentInfo.getDepartmentTitle().toUpperCase().contains(" NULL"))
-                            continue;
-
-                        if(departmentInfo.getDepartmentAcronym()==null)
-                            continue;
-                        if(departmentInfo.getDepartmentTitle()==null)
+                        if(departmentInfo.getDepartmentTitle().equals("null"))
                             continue;
 
                         if(departmentInfo.getDepartmentAcronym().toUpperCase().startsWith(constraint.toString().toUpperCase())){
@@ -422,11 +397,16 @@ class DepartmentInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInf
     }
 }
 
+/**
+ * ArrayAdapter for CourseInfo Objects. This will display a list of Courses in a listview using an instance of the desired_courses_listview.xml layout file to display each object.
+ * Mainly follows the standard ArrayAdapter setup. All visual setup is done in the getView method. All Filtering is done in the new Filter object.
+ */
 class CourseInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInfo.CourseInfo> implements Filterable{
 
     private ArrayList<SemesterInfo.DepartmentInfo.CourseInfo> courseInfoArrayList = new ArrayList<>();
     private ArrayList<SemesterInfo.DepartmentInfo.CourseInfo> courseInfoArrayListAll = new ArrayList<>();
     private Context context;
+    private boolean showDeleteButton;
 
     /**
      * Constructor
@@ -436,8 +416,9 @@ class CourseInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInfo.Co
      *                 instantiating views.
      * @param objects  The objects to represent in the ListView.
      */
-    public CourseInfoArrayAdapter(Context context, int resource, ArrayList<SemesterInfo.DepartmentInfo.CourseInfo> objects) {
+    public CourseInfoArrayAdapter(Context context, int resource, ArrayList<SemesterInfo.DepartmentInfo.CourseInfo> objects, boolean showDeleteButton) {
         super(context, resource, objects);
+        this.showDeleteButton = showDeleteButton;
         this.courseInfoArrayList = objects;
         this.courseInfoArrayListAll = objects;
         this.context = context;
@@ -459,7 +440,8 @@ class CourseInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInfo.Co
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
+
         if (convertView == null){
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.desired_courses_listview, parent, false);
@@ -468,15 +450,27 @@ class CourseInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInfo.Co
         TextView departmentID = ((TextView) convertView.findViewById(R.id.desiredCourseDepartment));
         TextView departmentNumber = ((TextView) convertView.findViewById(R.id.desiredCourseNumber));
         TextView departmentTitle = ((TextView) convertView.findViewById(R.id.desiredCourseTitle));
+        departmentTitle.setSelected(true);
 
-        SemesterInfo.DepartmentInfo.CourseInfo courseInfo = courseInfoArrayList.get(position);
+        Button removeThisItemButton = ((Button) convertView.findViewById(R.id.desiredCourseButton));
 
-        //departmentID.setText(courseInfo.getDepartmentInfo().getDepartmentAcronym());
+        final SemesterInfo.DepartmentInfo.CourseInfo courseInfo = courseInfoArrayList.get(position);
+
+        departmentID.setText(courseInfo.getDepartmentInfo().getDepartmentAcronym());
         departmentID.setText("");
         departmentNumber.setText(((Integer) courseInfo.getCourseNumber()).toString());
         departmentTitle.setText("\t" + courseInfo.getCourseTitle());
 
-        convertView.findViewById(R.id.desiredCourseButton).setVisibility(View.GONE);
+        if(showDeleteButton)
+            removeThisItemButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                courseInfoArrayList.remove(getItem(position));
+                notifyDataSetChanged();
+            }
+        });
+        else
+            removeThisItemButton.setVisibility(View.GONE);
 
         return convertView;
     }
@@ -485,6 +479,9 @@ class CourseInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInfo.Co
     public Filter getFilter() {
 
         return new Filter() {
+            /**
+             * Will filter the entire ArrayList of objects to try to find anything that meets the given criterion and returns it.
+             */
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
                 FilterResults filterResults = new FilterResults();
@@ -492,13 +489,17 @@ class CourseInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInfo.Co
                 List<SemesterInfo.DepartmentInfo.CourseInfo> results = new ArrayList<>();
                 if (constraint != null){
                     for(SemesterInfo.DepartmentInfo.CourseInfo courseInfo : courseInfoArrayList){
-                        if(courseInfo.getCourseTitle().toUpperCase().contains(" NULL"))
+                        // If text in getCourseTitle ends with null do not add this object to the results list. Skip any remaining filtering.
+                        // According to the internet the only word that ends with null should be 'null' so this should not cause errors.
+                        if(courseInfo.getCourseTitle().toUpperCase().endsWith("NULL"))
                             continue;
+                        // If text in constraint matches the course number add it to results
                         if(((Integer) courseInfo.getCourseNumber()).toString().contains(constraint.toString())){
                             if (!results.contains(courseInfo))
                                 results.add(courseInfo);
                         }
-                        if(courseInfo.getCourseTitle().toUpperCase().contains(constraint.toString().toUpperCase())){
+                        // If text in constraint is contained anywhere within the course title add it to the results list
+                        if(courseInfo.getCourseTitle().toUpperCase().replace(" ", "").contains(constraint.toString().toUpperCase())){
                             if (!results.contains(courseInfo))
                                 results.add(courseInfo);
                         }
@@ -524,67 +525,6 @@ class CourseInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInfo.Co
     }
 }
 
-class DesiredCoursesArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInfo.CourseInfo>{
-
-    ArrayList<SemesterInfo.DepartmentInfo.CourseInfo> courseInfoArrayList;
-
-    /**
-     * Constructor
-     *
-     * @param context  The current context.
-     * @param resource The resource ID for a layout file containing a TextView to use when
-     */
-    public DesiredCoursesArrayAdapter(Context context, int resource, ArrayList<SemesterInfo.DepartmentInfo.CourseInfo> item ) {
-        super(context, resource, item);
-        courseInfoArrayList = item;
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-
-        View view = convertView;
-
-        if (view == null) {
-            LayoutInflater vi;
-            vi = LayoutInflater.from(getContext());
-            view = vi.inflate(R.layout.desired_courses_listview, null);
-        }
-
-        final SemesterInfo.DepartmentInfo.CourseInfo courseInfo = getItem(position);
-
-        if (courseInfo != null){
-            TextView desiredCourseDepartment = ((TextView) view.findViewById(R.id.desiredCourseDepartment));
-            TextView desiredCourseNumber = ((TextView) view.findViewById(R.id.desiredCourseNumber));
-            TextView desiredCourseTitle = ((TextView) view.findViewById(R.id.desiredCourseTitle));
-
-            Button desiredCourseRemoveButton = ((Button) view.findViewById(R.id.desiredCourseButton));
-
-            String Department = courseInfo.getDepartmentInfo().getDepartmentAcronym();
-            String Number = " - " + ((Integer) courseInfo.getCourseNumber()).toString();
-            String Title = "\t" + courseInfo.getCourseTitle();
-
-            if (Department != null){
-                desiredCourseDepartment.setText(Department);
-            }
-
-            desiredCourseNumber.setText(Number);
-
-            desiredCourseTitle.setText(Title);
-
-            desiredCourseRemoveButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    courseInfoArrayList.remove(courseInfo);
-                    notifyDataSetChanged();
-                }
-            });
-        }
-
-        return view;
-    }
-}
-
-
 public class SelectCourses extends ActionBarActivity {
 
     public static final String URL_GET_COURSE_SECTIONS = UserData.getContext().getString(R.string.get_course_section_base);
@@ -601,7 +541,7 @@ public class SelectCourses extends ActionBarActivity {
     private AutoCompleteTextView courseNumber;
 
     private ListView desiredCoursesListView;
-    private DesiredCoursesArrayAdapter desiredCoursesArrayAdapter;
+    private CourseInfoArrayAdapter desiredCoursesArrayAdapter;
     private DepartmentInfoArrayAdapter departmentInfoArrayAdapter;
     private CourseInfoArrayAdapter courseInfoArrayAdapter;
 
@@ -624,11 +564,12 @@ public class SelectCourses extends ActionBarActivity {
 
         setTitle("Schedule Setup");
 
+        // Register receivers with LocalBoradcastManager
         LocalBroadcastManager.getInstance(this).registerReceiver(new DepartmentCoursesReceiver(), new IntentFilter(ACTION_GET_SEMESTER));
         LocalBroadcastManager.getInstance(this).registerReceiver(new DesiredSectionsReceiver(), new IntentFilter(ACTION_GET_DESIRED_COURSE_SECTIONS));
 
         departmentInfoArrayAdapter = new DepartmentInfoArrayAdapter(this,R.layout.desired_courses_listview, departmentInfoArrayList);
-        courseInfoArrayAdapter = new CourseInfoArrayAdapter(this,R.layout.desired_courses_listview, courseInfoArrayList);
+        courseInfoArrayAdapter = new CourseInfoArrayAdapter(this,R.layout.desired_courses_listview, courseInfoArrayList, false);
 
         desiredCoursesListView = (ListView) findViewById(R.id.selected_courses_listview);
 
@@ -702,9 +643,8 @@ public class SelectCourses extends ActionBarActivity {
         });
 
         desiredCoursesArrayList = new ArrayList<>();
-        desiredCoursesArrayAdapter = new DesiredCoursesArrayAdapter(SelectCourses.this, R.layout.desired_courses_listview, desiredCoursesArrayList);
+        desiredCoursesArrayAdapter = new CourseInfoArrayAdapter(SelectCourses.this, R.layout.desired_courses_listview, desiredCoursesArrayList, true);
         desiredCoursesListView.setAdapter(desiredCoursesArrayAdapter);
-
     }
 
     @Override
@@ -858,7 +798,6 @@ public class SelectCourses extends ActionBarActivity {
         StringBuilder semesterParam = new StringBuilder(URL_GET_COURSE_SECTIONS_PARAM_SEMESTER);
         StringBuilder departmentParam = new StringBuilder(URL_GET_COURSE_SECTIONS_PARAM_DEPARTMENT);
         StringBuilder courseNumberParam = new StringBuilder(URL_GET_COURSE_SECTIONS_PARAM_COURSENUMBER);
-        //urlBuilder.append(((Integer) selectedSemester.getSemesterNumber()).toString() + "*");
 
         for (SemesterInfo.DepartmentInfo.CourseInfo courseInfo : desiredCoursesArrayList){
             semesterParam.append(selectedSemester.getSemesterNumber()).append(",");
@@ -894,7 +833,7 @@ public class SelectCourses extends ActionBarActivity {
 
         Log.i("Get Semesters", "Getting Semesters");
 
-        ArrayList <SemesterInfo> fileSemesters = loadSemesterInfoFromFile(SelectCourses.this);
+        ArrayList <SemesterInfo> fileSemesters = loadSemesterInfoFromFile();
         Log.i("Get Semesters", "Semesters found on file: " + fileSemesters.size());
 
         if (fileSemesters.size() == 0)
@@ -965,6 +904,8 @@ public class SelectCourses extends ActionBarActivity {
     public void setSelectedSemester(SemesterInfo semesterInfo){
         this.selectedSemester = semesterInfo;
         updateDepartmentInfoAdapter(semesterInfo.getDepartmentArrayList());
+        desiredCoursesArrayList.clear();
+        desiredCoursesArrayAdapter.notifyDataSetChanged();
     }
 
     private void fetchSemesters(){
@@ -985,6 +926,9 @@ public class SelectCourses extends ActionBarActivity {
         showProgressDialog("Getting Semester Data");
     }
 
+    /**
+     * Opens the blockout time activity and passes it any blockout times currently in blockout times list.
+     */
     public void selectBlockoutTimes(View view){
         Intent startSelectCoursesActivity = new Intent(SelectCourses.this, SelectBlockoutTimes.class);
         if (blockoutTimes != null) {
@@ -997,10 +941,11 @@ public class SelectCourses extends ActionBarActivity {
     private void updateDepartmentInfoAdapter(ArrayList<SemesterInfo.DepartmentInfo> departmentInfo){
         departmentInfoArrayAdapter = new DepartmentInfoArrayAdapter(this,R.layout.desired_courses_listview, departmentInfo);
         courseDepartment.setAdapter(departmentInfoArrayAdapter);
+        courseInfoArrayAdapter.clear();
     }
 
     private void updateCourseInfoAdapter(ArrayList<SemesterInfo.DepartmentInfo.CourseInfo> courseInfo){
-        courseInfoArrayAdapter = new CourseInfoArrayAdapter(this,R.layout.desired_courses_listview, courseInfo);
+        courseInfoArrayAdapter = new CourseInfoArrayAdapter(this,R.layout.desired_courses_listview, courseInfo, false);
         courseNumber.setAdapter(courseInfoArrayAdapter);
     }
 
@@ -1056,7 +1001,6 @@ public class SelectCourses extends ActionBarActivity {
                 progressDialog.dismiss();
 
             final ArrayList<Course> fetchedCourses;
-            ArrayList<Section> sectionArrayList = null;
 
             try {
                 response = new JSONObject(intent.getStringExtra(HTTPService.SERVER_RESPONSE));
@@ -1076,47 +1020,7 @@ public class SelectCourses extends ActionBarActivity {
                     float timeTaken = Float.parseFloat(response.getString("TimeTaken"));
                     Log.d("New Request Time Taken:", Float.toString(timeTaken));
                     fetchedCourses = Course.buildCourseList(jsonCourses);
-
-                    try {
-                        ArrayList<Section> blockoutSections;
-                        if (blockoutTimes != null)
-                            blockoutSections = blockoutTimes.getSectionList();
-                        else
-                            blockoutSections = new ArrayList<>();
-
-                        if (fetchedCourses != null)
-                            sectionArrayList = Schedule.scheduleGenerator(fetchedCourses, new ArrayList<Section>(), blockoutSections);
-                        if (sectionArrayList != null) {
-                            for (Section section : sectionArrayList){
-                                Log.i("Built Schedule Sections",section.getSourceCourse().getCourseTitle() + " " + section.getSourceCourse().getCourseNumber() + "-" + section.getSectionNumber() + "\t" + section.toJSON().toString());
-                            }
-                        }
-
-                        Schedule schedule = new Schedule("", selectedSemester.getSemesterNumber(), sectionArrayList);
-                        DetailedSchedule.ShowSchedule(schedule, SelectCourses.this);
-                        Log.i("Built Schedule", schedule.toJSON().toString());
-                    } catch (NoSchedulesPossibleException e) {
-                        e.printStackTrace();
-                        AlertDialog.Builder noSchedulesPossible = new AlertDialog.Builder(SelectCourses.this);
-                        noSchedulesPossible.setTitle("Schedule Could be generated. Issues:");
-                        noSchedulesPossible.setMessage(e.printConflict());
-                        noSchedulesPossible.setNeutralButton("CHANGE COURSES", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        });
-                        noSchedulesPossible.setPositiveButton("GENERATE ANYWAY", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Schedule schedule = new Schedule("", selectedSemester.getSemesterNumber(), Schedule.scheduleGenerator(fetchedCourses));
-                                DetailedSchedule.ShowSchedule(schedule, SelectCourses.this);
-                            }
-                        });
-                        noSchedulesPossible.create().show();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                    generateSchedule(fetchedCourses);
                 }
 
             } catch (JSONException e) {
@@ -1128,16 +1032,91 @@ public class SelectCourses extends ActionBarActivity {
 
     }
 
+    /**
+     * Attempts to create a schedule from the courses that are passed to it.
+     * @param coursesToSchedule Courses from which the schedule should be generated from.
+     */
+    public void generateSchedule(final ArrayList<Course> coursesToSchedule){
+
+        try {
+            ArrayList<Section> blockoutSections;
+            if (blockoutTimes != null)
+                blockoutSections = blockoutTimes.getSectionList();
+            else
+                blockoutSections = new ArrayList<>();
+
+
+            Schedule schedule = Schedule.scheduleFactory(coursesToSchedule, blockoutSections, selectedSemester.getSemesterNumber());
+
+            DetailedSchedule.ShowSchedule(schedule, SelectCourses.this);
+            Log.i("Built Schedule", schedule.toJSON().toString());
+        } catch (NoSchedulesPossibleException noSchedulesPossible) {
+            noSchedulesPossible.printStackTrace();
+            AlertDialog.Builder noSchedulesPossibleDialog = new AlertDialog.Builder(SelectCourses.this);
+            noSchedulesPossibleDialog.setTitle("Schedule Could be generated. Issues:");
+            noSchedulesPossibleDialog.setMessage(noSchedulesPossible.printConflict());
+            noSchedulesPossibleDialog.setNeutralButton("CHANGE COURSES", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            noSchedulesPossibleDialog.setPositiveButton("GENERATE IGNORING CONFLICTS", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    generateConflictSchedule(coursesToSchedule);
+                }
+            });
+            noSchedulesPossibleDialog.create().show();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Attempts to create a schedule from the courses that are passed to it. This version will allow generation with conflicts that the user can attempt to resolve themselves
+     * @param coursesToSchedule Courses from which the schedule should be generated from.
+     */
+    public void generateConflictSchedule(ArrayList<Course> coursesToSchedule){
+
+        Schedule schedule;
+        try {
+            schedule = Schedule.scheduleFactoryIgnoreConflicts(coursesToSchedule, selectedSemester.getSemesterNumber());
+            DetailedSchedule.ShowSchedule(schedule, SelectCourses.this);
+        } catch (NoSchedulesPossibleException noOpenSections) {
+            noOpenSections.printStackTrace();
+
+            AlertDialog.Builder noSchedulesPossibleDialog = new AlertDialog.Builder(SelectCourses.this);
+            noSchedulesPossibleDialog.setTitle("Schedule could not be generated. Issues:");
+            noSchedulesPossibleDialog.setMessage(noOpenSections.printConflict());
+            noSchedulesPossibleDialog.setNeutralButton("CHANGE COURSES", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            noSchedulesPossibleDialog.create().show();
+        }
+    }
+
+    /**
+     * Called when Select Blockout times activity posts a result.
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         String blockoutTimes;
-        if (data == null)
+
+        Log.i("Block-Out Time Result", "requestCode: " + requestCode + " resultCode: " + resultCode);
+        if (data == null) {
+            Log.i("Block-Out Time Result", "Data is null!");
             return;
-        if (data.hasExtra("BLOCKOUT"))
-            blockoutTimes = data.getStringExtra("BLOCKOUT");
-        else
-            return;
+        }
+        else {
+            Log.i("Block-Out Time Result", "Data is not null");
+        }
+        blockoutTimes = data.getStringExtra("BLOCKOUT");
+        Log.i("Block-Out Time Result", blockoutTimes);
         try {
             JSONObject jsonBlockoutTimes = new JSONObject(blockoutTimes);
             this.blockoutTimes = new Course(jsonBlockoutTimes);
@@ -1145,14 +1124,18 @@ public class SelectCourses extends ActionBarActivity {
             e.printStackTrace();
         }
         if (this.blockoutTimes != null)
-            Log.d("test", this.blockoutTimes.toJSON().toString());
+            Log.d("Got Block-Out Times", this.blockoutTimes.toJSON().toString());
     }
 
-    public static ArrayList<SemesterInfo> loadSemesterInfoFromFile(Context context){
+    /**
+     * Load semester info from file into an arraylist of SemesterInfo
+     * @return ArrayList of semesters which the user will be able to select from
+     */
+    public static ArrayList<SemesterInfo> loadSemesterInfoFromFile(){
 
         Log.i("Load Semester", "Preparing to load");
 
-        SharedPreferences savedSemesters = context.getSharedPreferences(SemesterInfo.getSEMESTER_INFO(), MODE_PRIVATE);
+        SharedPreferences savedSemesters = UserData.getContext().getSharedPreferences(SemesterInfo.getSEMESTER_INFO(), MODE_PRIVATE);
 
         Map<String, ?> allEntries = savedSemesters.getAll();
 

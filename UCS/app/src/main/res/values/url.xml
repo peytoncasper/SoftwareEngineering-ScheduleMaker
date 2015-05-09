@@ -10,7 +10,7 @@
 
     <string name="validate_courses_base">/UTA/ValidateCourses?</string>
     <string name="validate_courses_param_semester">semester=</string>
-    <string name="validate_courses_param_department"><![CDATA[&departments=]]></string>
+    <string name="validate_courses_param_department"><![CDATA[&department=]]></string>
     <string name="validate_courses_param_course_number"><![CDATA[&courseNumber=]]></string>
     <string name="validate_courses_param_class_number"><![CDATA[&classNumbers=]]></string>
 
@@ -31,4 +31,5 @@
     <string name="get_semester_data">/UTA/GetDepartmentClassData</string>
 
     <string name="change_settings_base">/UTA/Change</string>
+    <string name="delete_account">/UTA/DeleteAccount?email=</string>
 </resources>

@@ -223,6 +223,10 @@ public class Course {
         return departmentAcronym;
     }
 
+    public String getCourseDescription(){
+        return getDepartmentAcronym() + " " + getCourseNumber() + " - " + getCourseTitle();
+    }
+
 
     /**
      * Obtains the course title/description stored in this course.<br>EX: "RHETORIC AND COMPOSITION I" for "ENGL 1301".

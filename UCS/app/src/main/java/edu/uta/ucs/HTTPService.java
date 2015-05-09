@@ -62,6 +62,7 @@ public class HTTPService extends IntentService {
 
         String requestType = intent.getStringExtra(REQUEST_TYPE);
 
+        // Get request type from intent
         switch (requestType){
             case REQUEST_URL:
                 getURL(intent);
@@ -73,6 +74,10 @@ public class HTTPService extends IntentService {
         }
     }
 
+    /**
+     * Handles JSON posts directly from intent.
+     * @param intent the intent the HTTPService was started with
+     */
     private void postJSON(Intent intent){
 
         String response;
@@ -109,6 +114,10 @@ public class HTTPService extends IntentService {
         //sendBroadcast(broadcastIntent);
     }
 
+    /**
+     * Handles URL gets directly from intent.
+     * @param intent the intent the HTTPService was started with
+     */
     private void getURL(Intent intent){
 
         String response;
@@ -160,6 +169,12 @@ public class HTTPService extends IntentService {
         Log.d("HTTPService", "IntentService onDestroy() called");
     }
 
+    /**
+     * Will attempt to post given string to target URL as a StringEntity
+     * @param targetURL URL to target
+     * @param jsonString JSON as String to post to target URL.
+     * @return raw response from the parsed to a string.
+     */
     public String postJSON(URL targetURL, String jsonString){
 
         String response;
@@ -407,7 +422,7 @@ public class HTTPService extends IntentService {
         Log.i("HTTPService isJSON", stringToTest);
         UserData.log(stringToTest);
         try {
-            JSONObject testOBJ = new JSONObject(stringToTest);
+            new JSONObject(stringToTest);
             return true;
         } catch (JSONException e) {
             e.printStackTrace();

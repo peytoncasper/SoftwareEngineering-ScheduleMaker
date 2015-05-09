@@ -39,10 +39,10 @@ import java.util.Map;
 public class DetailedSchedule extends Activity {
 
     public static final String URL_GET_COURSE_SECTIONS =UserData.getContext().getString(R.string.get_course_info_base);
-    public static final String URL_VALIDATE_COURSES =UserData.getContext().getString(R.string.validate_courses_base);
+    //public static final String URL_VALIDATE_COURSES =UserData.getContext().getString(R.string.validate_courses_base); // No longer used
     public static final String URL_GET_COURSE_SECTIONS_PARAM_SEMESTER =UserData.getContext().getString(R.string.validate_courses_param_semester);
     public static final String URL_GET_COURSE_SECTIONS_PARAM_DEPARTMENT =UserData.getContext().getString(R.string.validate_courses_param_department);
-    public static final String URL_GET_COURSE_SECTIONS_PARAM_CLASSNUMBER =UserData.getContext().getString(R.string.validate_courses_param_class_number);
+    public static final String URL_GET_COURSE_SECTIONS_PARAM_CLASSNUMBER =UserData.getContext().getString(R.string.validate_courses_param_course_number);
 
     private static final String ACTION_GET_COURSE_SECTIONS = "ACTION_GET_COURSE_SECTIONS";
     private static final String ACTION_VERIFY_SCHEDULE = "ACTION_VERIFY_SCHEDULE";
@@ -53,7 +53,6 @@ public class DetailedSchedule extends Activity {
     private SectionArrayAdapter adapter;
     private ProgressDialog progressDialog;
 
-    int selection;
     boolean saveCheck = false;
 
     @Override
@@ -91,7 +90,6 @@ public class DetailedSchedule extends Activity {
 
         return super.onOptionsItemSelected(item);
     }
-
 
     @Override
     protected void onStart() {
@@ -202,8 +200,23 @@ public class DetailedSchedule extends Activity {
      * @param view View this function is called from
      */
     public void deleteSchedule(View view) {
-        removeScheduleFromFile();
-        finish();
+        AlertDialog.Builder confirmDelete = new AlertDialog.Builder(DetailedSchedule.this);
+        confirmDelete.setTitle("Are you sure you want to delete this?");
+        confirmDelete.setPositiveButton("DELETE", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Schedule.removeScheduleFromFile(scheduleToShow);
+                dialog.dismiss();
+                finish();
+            }
+        });
+        confirmDelete.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        confirmDelete.create().show();
     }
 
     /**
@@ -236,72 +249,41 @@ public class DetailedSchedule extends Activity {
     /**
      * Saves the currently displayed schedule to file
      */
-    private void saveScheduleToFile(){
+    private void saveScheduleToFile() {
 
         saveCheck = true;
 
         SharedPreferences reader = getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, MODE_PRIVATE);
-        SharedPreferences.Editor editor = getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, MODE_PRIVATE).edit();
         Map<String, ?> schedules = reader.getAll();
 
-        String scheduleToString = null;
-        String scheduleName = Schedule.SCHEDULE_NAMES+"_"+scheduleToShow.getName();
-        try {
-            scheduleToString = scheduleToShow.toJSON().toString();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        String scheduleName = scheduleToShow.fileName();
 
         if (schedules.containsKey(scheduleName)) {
-                final AlertDialog.Builder confirmOverWrite = new AlertDialog.Builder(DetailedSchedule.this);
-                confirmOverWrite.setTitle("A Schedule with this name already exists");
-                confirmOverWrite.setMessage("Are you sure you want to overwrite it?");
-                confirmOverWrite.setPositiveButton("OVERWRITE", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        removeScheduleFromFile();
-                        saveCheck = true;
-                        dialog.dismiss();
-                    }
-                });
-                confirmOverWrite.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        saveCheck = false;
-                        dialog.dismiss();
-                    }
-                });
-                confirmOverWrite.show();
+            final AlertDialog.Builder confirmOverWrite = new AlertDialog.Builder(DetailedSchedule.this);
+            confirmOverWrite.setTitle("A Schedule with this name already exists");
+            confirmOverWrite.setMessage("Are you sure you want to overwrite it?");
+            confirmOverWrite.setPositiveButton("OVERWRITE", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    saveCheck = true;
+                    dialog.dismiss();
+                }
+            });
+            confirmOverWrite.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    saveCheck = false;
+                    dialog.dismiss();
+                }
+            });
+            confirmOverWrite.show();
         }
 
-        if (saveCheck){
-            if(scheduleToString != null){
-                Log.i("Schedule to Save", scheduleToString);
-                editor.putString(Schedule.SCHEDULE_NAMES + "_" + scheduleToShow.getName(), scheduleToString);
-                editor.apply();
-            }
+        if (saveCheck) {
+            Schedule.saveScheduleToFile(scheduleToShow);
         }
     }
 
-    /**
-     * Removes the schedule with name equal to this schedule
-     *
-     * Future suggestion: Perhaps it should only remove the schedule if the contents remain the same.
-     */
-    private void removeScheduleFromFile(){
-
-        SharedPreferences reader = getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, MODE_PRIVATE);
-        SharedPreferences.Editor editor = getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, MODE_PRIVATE).edit();
-        Map<String, ?> schedules = reader.getAll();
-
-        String scheduleFileName = Schedule.SCHEDULE_NAMES + "_" + scheduleToShow.getName();
-
-
-        if(schedules.containsKey(scheduleFileName)){
-            editor.remove(scheduleFileName);
-            editor.apply();
-        }
-    }
 
     private void addSection(Section section){
         scheduleToShow.getSelectedSections().add(section);
@@ -330,10 +312,13 @@ public class DetailedSchedule extends Activity {
 
         HTTPService.FetchURL(url, ACTION_GET_COURSE_SECTIONS, this);
 
-        showProgressDialog("Getting alternate sections");
+        showProgressDialog("Fetching Class Details", "Getting alternate sections for class:\n" + section.getDescription());
 
     }
 
+    /**
+     * Receiver class for BroadcastManager.
+     */
     class CouresAlternatesReciever extends BroadcastReceiver{
 
         /**
@@ -422,6 +407,9 @@ public class DetailedSchedule extends Activity {
         }
     }
 
+    /**
+     * Receiver class for BroadcastManager.
+     */
     class VerifyScheduleReciever extends BroadcastReceiver{
 
         /**
@@ -497,8 +485,7 @@ public class DetailedSchedule extends Activity {
                         for(Section fetchedSection : fetchedSections){
                             if (section.getSectionID() == fetchedSection.getSectionID()){
                                 if(section.getStatus() != fetchedSection.getStatus()){
-                                    String notification = section.getSourceCourse().getDepartmentAcronym() + " "
-                                            + section.getSourceCourse().getCourseNumber() + "-" + section.getSectionNumber() + " status has changed to: " + fetchedSection.getStatus().toString().replace("_", " ");
+                                    String notification = section.getDescription() + " status has changed to: " + fetchedSection.getStatus().toString().replace("_", " ");
                                     Log.i("DetailedSchedule", "Verify Schedule detected status change: " + notification);
                                     notifications.add(notification);
                                     section.setStatus(fetchedSection.getStatus());
@@ -604,6 +591,13 @@ public class DetailedSchedule extends Activity {
         progressDialog = new ProgressDialog(DetailedSchedule.this);
         progressDialog.setTitle(title);
         progressDialog.setMessage("Please wait while data is fetched...");
+        progressDialog.show();
+    }
+
+    private void showProgressDialog(String title, String message){
+        progressDialog = new ProgressDialog(DetailedSchedule.this);
+        progressDialog.setTitle(title);
+        progressDialog.setMessage(message + "\nPlease wait while data is fetched...");
         progressDialog.show();
     }
 }

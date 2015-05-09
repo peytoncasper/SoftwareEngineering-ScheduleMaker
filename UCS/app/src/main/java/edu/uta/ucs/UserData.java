@@ -84,7 +84,7 @@ public class UserData extends Application {
     public static JSONObject toJSON() throws JSONException {
         JSONObject userDataJSON = new JSONObject();
 
-        ArrayList<Schedule> schedules = Schedule.loadSchedulesFromFile(UserData.getContext());
+        ArrayList<Schedule> schedules = Schedule.loadSchedulesFromFile();
         JSONArray schedulesJSON = new JSONArray();
         for(Schedule schedule : schedules){
             schedulesJSON.put(schedule.toJSON());

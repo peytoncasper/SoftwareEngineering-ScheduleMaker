@@ -65,8 +65,6 @@ public class SettingsActivity extends PreferenceActivity {
             return;
         }
 
-        addPreferencesFromResource(R.xml.pref_server);
-
         // In the simplified UI, fragments are not used at all and we instead
         // use the older PreferenceActivity APIs.
 
@@ -95,6 +93,15 @@ public class SettingsActivity extends PreferenceActivity {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     updateElementDialog("Email", SettingsActivity.this);
+                    return false;
+                }
+            });
+
+            Preference deleteAccountButton = findPreference(getString(R.string.pref_key_delete_account));
+            deleteAccountButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    deleteAccountDialog(SettingsActivity.this);
                     return false;
                 }
             });
@@ -264,31 +271,65 @@ public class SettingsActivity extends PreferenceActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_account);
 
-            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-            // to their values. When their values change, their summaries are
-            // updated to reflect the new value, per the Android Design
-            // guidelines.
-            //bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
-            Preference updatePasswordButton = findPreference(getString(R.string.pref_key_update_password));
-            updatePasswordButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    updateElementDialog("Password", getActivity());
-                    return false;
-                }
-            });
 
-            Preference updateEmailButton = findPreference(getString(R.string.pref_key_update_email));
-            updateEmailButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    updateElementDialog("Email", getActivity());
-                    return false;
-                }
-            });
+            if(UserData.getEmail() != null) {
+                addPreferencesFromResource(R.xml.pref_account);
+
+                // Bind the summaries of EditText/List/Dialog/Ringtone preferences
+                // to their values. When their values change, their summaries are
+                // updated to reflect the new value, per the Android Design
+                // guidelines.
+                //bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
+                Preference updatePasswordButton = findPreference(getString(R.string.pref_key_update_password));
+                updatePasswordButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                    @Override
+                    public boolean onPreferenceClick(Preference preference) {
+                        updateElementDialog("Password", getActivity());
+                        return false;
+                    }
+                });
+
+
+                Preference updateEmailButton = findPreference(getString(R.string.pref_key_update_email));
+                updateEmailButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                    @Override
+                    public boolean onPreferenceClick(Preference preference) {
+                        updateElementDialog("Email", getActivity());
+                        return false;
+                    }
+                });
+
+                Preference deleteAccountButton = findPreference(getString(R.string.pref_key_delete_account));
+                deleteAccountButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                    @Override
+                    public boolean onPreferenceClick(Preference preference) {
+                        deleteAccountDialog(getActivity());
+                        return false;
+                    }
+                });
+            }
         }
+    }
+
+    private static void deleteAccountDialog(final Context context){
+
+        AlertDialog.Builder confirmDelete = new AlertDialog.Builder(context);
+        confirmDelete.setTitle("Are you sure you want to delete your account?");
+        confirmDelete.setPositiveButton("DELETE", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String deleteAccountURL = UserData.getContext().getString(R.string.delete_account) + UserData.getEmail();
+                HTTPService.FetchURL(deleteAccountURL, "null", context);
+            }
+        });
+        confirmDelete.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        confirmDelete.create().show();
     }
 
 

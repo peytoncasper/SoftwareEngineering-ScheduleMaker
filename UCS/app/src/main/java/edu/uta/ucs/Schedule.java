@@ -2,6 +2,7 @@ package edu.uta.ucs;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -12,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * This class is used to store schedules.
@@ -34,12 +34,31 @@ public class Schedule {
     private int semesterNumber;
     private ArrayList<Section> selectedSections;
 
+    /**
+     * Constructs a new Schedule object with the provided information
+     *
+     * @param name String name for this schedule.
+     * @param semesterNumber Semester Number this schedule is built for. Must match UTA semester numbers
+     * @param sectionArrayList Arraylist of sections to show in this schedule.
+     */
     Schedule(String name, int semesterNumber, ArrayList<Section> sectionArrayList){
         this.name = name;
         this.semesterNumber = semesterNumber;
         this.selectedSections = sectionArrayList;
     }
 
+    /**
+     * Constructs a new Schedule object from a JSONObject
+     *
+     * @param scheduleJSON JSON Object must have the following keys present:
+     *                   <ul>
+     *                   <li>"ScheduleName" - String, name of the schedule to be built</li>
+     *                   <li>"ScheduleSemester" - int, Semester Number this schedule is built for.</li>
+     *                   <li>"ScheduleCourses" - JSONArray, Arraylist of courses this schedule will have. Each course should only have one section in it.
+     *                     See {@link Course#Course(JSONObject)} for required keys in the JSONObjects this JSONArray should have in it. </li>
+     *                   <ul/>
+     * @throws JSONException
+     */
     Schedule(JSONObject scheduleJSON) throws JSONException {
 
         name = scheduleJSON.getString("ScheduleName");
@@ -64,10 +83,22 @@ public class Schedule {
         this.name = name;
     }
 
+    /**
+     * Obtains all sections in the schedule
+     * @return ArrayList<Section>
+     */
     public ArrayList<Section> getSelectedSections() {
         return selectedSections;
     }
 
+    /**
+     * Constucts a JSONObject with the same parameters expected by this object's JSON constructor.
+     *
+     *
+     * @return JSONObject
+     * @throws JSONException
+     * @see #Schedule(JSONObject)
+     */
     public JSONObject toJSON() throws JSONException {
         JSONObject result = new JSONObject();
 
@@ -116,6 +147,10 @@ public class Schedule {
         return scheduleList;
     }
 
+    public String fileName(){
+        return Schedule.SCHEDULE_NAMES + "_" + name;
+    }
+
     /**
      * Saves all schedules in the list of schedules provided to a sharedPreferance file. This will overwrite all schedules currently in that file.
      *
@@ -149,6 +184,87 @@ public class Schedule {
 
     }
 
+    /**
+     *
+     * @param schedule The schedule to save to file
+     */
+    public static void saveScheduleToFile(Schedule schedule){
+
+        Context context = UserData.getContext();
+
+        SharedPreferences.Editor editor = context.getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, Context.MODE_PRIVATE).edit();
+
+        String scheduleToString;
+        try {
+            scheduleToString = schedule.toJSON().toString();
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        String scheduleName = schedule.fileName();
+        Log.i("Schedule to Save", "Name: " + scheduleName + " JSON: " + scheduleToString);
+
+        editor.putString(scheduleName, scheduleToString);
+        editor.apply();
+
+    }
+
+    /**
+     * Loads all schedules from the Schedule Savefile into an ArrayList.
+     * @return An arraylist of all schedules which could be parsed from the shared preference file 'SCHEDULE_SAVEFILE'
+     */
+    public static ArrayList<Schedule> loadSchedulesFromFile(){
+
+        SharedPreferences scheduleFile = UserData.getContext().getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, Context.MODE_PRIVATE);
+        Map<String, ?> schedulesOnFile = scheduleFile.getAll();
+
+        ArrayList<Schedule> scheduleArrayList = new ArrayList<>(schedulesOnFile.size());
+        for(String key : schedulesOnFile.keySet()){
+            Log.i("Load Schedules", "Loading Schedule Name: " + key);
+            String scheduleBody = schedulesOnFile.get(key).toString();
+            Log.i("Load Schedules", "Loading Schedule body: " + scheduleBody);
+
+            try {
+                JSONObject scheduleJSON = new JSONObject(scheduleBody);
+                Schedule schedule = new Schedule(scheduleJSON);
+                Log.i("Load Schedules", "Schedule JSON" + schedule.toJSON().toString());
+                scheduleArrayList.add(schedule);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return scheduleArrayList;
+    }
+
+
+    /**
+     * Removes the schedule with name equal to this schedule
+     *
+     * Future suggestion: Perhaps it should only remove the schedule if the contents remain the same.
+     */
+    public static void removeScheduleFromFile(Schedule schedule){
+
+        Context context = UserData.getContext();
+
+        SharedPreferences reader = context.getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = context.getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, Context.MODE_PRIVATE).edit();
+        Map<String, ?> schedules = reader.getAll();
+
+        String scheduleFileName = schedule.fileName();
+
+
+        if(schedules.containsKey(scheduleFileName)){
+            editor.remove(scheduleFileName);
+            editor.apply();
+        }
+    }
+
+    /**
+     * Creates a query to check if the statuses of sections in this schedule have changed.
+     * @param context The context from which this method was called. Used to ensure HTTPService can function without errors.
+     */
     public void verifySchedule(Context context){
 
         Log.i("Verify Schedule", "About to attempt verify schedule");
@@ -174,140 +290,225 @@ public class Schedule {
 
     }
 
+    /**
+     * Initial schedule generator call. Will initialize the recursive version of schedule generator to execute logic.
+     *
+     * @param courseArrayList Arraylist with all courses this schedule can pick from.
+     * @param blockOutTimesList Arraylist of Block-Out Times this schedule should avoid conflicts with.
+     * @return a schedule built with the selected courses
+     * @throws NoSchedulesPossibleException
+     */
+    public static Schedule scheduleFactory(ArrayList<Course> courseArrayList, ArrayList<Section> blockOutTimesList, int semesterNumber) throws NoSchedulesPossibleException{
 
-    public static ArrayList<Schedule> loadSchedulesFromFile(Context context){
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(UserData.getContext());
+        boolean allowNonOpenClassesSetting = settings.getBoolean(UserData.getContext().getResources().getString(R.string.pref_key_allow_nonopen_classes), false);
 
-        SharedPreferences scheduleFile = context.getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, Context.MODE_PRIVATE);
-        Map<String, ?> schedulesOnFile = scheduleFile.getAll();
-
-        ArrayList<Schedule> scheduleArrayList = new ArrayList<>(schedulesOnFile.size());
-        for(String key : schedulesOnFile.keySet()){
-            String scheduleName = key;
-            Log.i("Load Schedules", "Loading Schedule Name: " + scheduleName);
-            String scheduleBody = schedulesOnFile.get(key).toString();
-            Log.i("Load Schedules", "Loading Schedule body: " + scheduleBody);
-
-            try {
-                JSONObject scheduleJSON = new JSONObject(scheduleBody);
-                Schedule schedule = new Schedule(scheduleJSON);
-                Log.i("Load Schedules", "Schedule JSON" + schedule.toJSON().toString());
-                scheduleArrayList.add(schedule);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return scheduleArrayList;
+        ArrayList<Section> selectedSections = scheduleBuilder(0, courseArrayList, new ArrayList<Section>(), blockOutTimesList, allowNonOpenClassesSetting);
+        return new Schedule("Generated Schedule", semesterNumber, selectedSections);
     }
 
-    public static ArrayList<Section> scheduleGenerator( ArrayList<Course> courseArrayList, ArrayList<Section> sectionArrayList, ArrayList<Section> blockOutTimesList) throws NoSchedulesPossibleException{
-        return scheduleGenerator(0, courseArrayList,sectionArrayList,blockOutTimesList);
-    }
+    /**
+     * Recursively builds schedules using the provided information.
+     * It will get the course at the provided index, shuffle the arraylist of courses to ensure any two executions of the generator will be unique, and select a section.
+     * If the allowNonOpenClasses boolean is set to false the function will only allow selection of a section if the section status is {@link ClassStatus#OPEN}, otherwise it will allow any section.
+     * It will then compare the selected section it to all sections in the already selected sections ArrayList for conflicts.
+     * It will then compare the selected section it to all sections in the block-out times ArrayList for conflicts.
+     * If no conflics are detected the section is added to the already selected sections Arraylist, and the function is recursively called with an incremented index.
+     * If a conflict is detected the next section in the course is selected.
+     * If all sections in the course have been tested and all of them conflict with the selected sections arraylist or the blockout times list the function will throw a NoSchedulesPossible error.
+     *
+     * If the recursive call throws a NoSchedulesPossible error the last selected section is removed from the selected sections list and the function selects the next section on the current index.
+     *
+     * @param index index of course in courseArrayList which will be attempted to be added to the schedule
+     * @param courseArrayList Arraylist of courses to select sections from.
+     * @param alreadySelectedSections Arraylist of sections which have already been considered for this schedule.
+     *                                Selected section is not permitted to conflict with this.
+     * @param blockOutTimesList Arraylist of block-out times which a user had defined.
+     *                                Selected section is not permitted to conflict with this.
+     * @param allowNonOpenClasses Boolean toggle which allows classes to be added if they are not open
+     * @return Arraylist of section which do not conflict with each other or the provided block-out times.
+     * @throws NoSchedulesPossibleException if no section could be selected without conflicts.
+     */
+    public static ArrayList<Section> scheduleBuilder(int index, ArrayList<Course> courseArrayList, ArrayList<Section> alreadySelectedSections, ArrayList<Section> blockOutTimesList, boolean allowNonOpenClasses) throws NoSchedulesPossibleException{
 
-    public static ArrayList<Section> scheduleGenerator(int index, ArrayList<Course> courseArrayList, ArrayList<Section> sectionArrayList, ArrayList<Section> blockOutTimesList) throws NoSchedulesPossibleException{
-
-        NoSchedulesPossibleException scheduleConflict = null; //new NoSchedulesPossibleException();
+        // Create an error to throw if no schedule can be built. It will buffer all errors so that
+        NoSchedulesPossibleException scheduleConflict = new NoSchedulesPossibleException("");
         Log.i("schedule Factory", "Loop Counter:" + ((Integer) index).toString());
         if (index == courseArrayList.size()){
-            return sectionArrayList;
+            return alreadySelectedSections;
         }
         Course course = courseArrayList.get(index);
         ArrayList<Section> possibleSections = new ArrayList<>(course.getSectionList().size());
         possibleSections.addAll(course.getSectionList());
         Collections.shuffle(possibleSections);
-        // Shuffle sectionArrayList
-        checkPossibleSections:
 
         for (Section section : possibleSections){
-            if(section.getStatus() != ClassStatus.OPEN)
-                continue;
-            for (Section sectionToCompare : sectionArrayList){
-                if (section.conflictsWith(sectionToCompare)){
-                    if(scheduleConflict != null)
-                        scheduleConflict.addConflict(section, sectionToCompare);
-                    else scheduleConflict = new NoSchedulesPossibleException(section, sectionToCompare);
-                    Log.e("Schedule Conflict Error", "Conflict between " + section.getSourceCourse().getCourseTitle() + " " + section.getSourceCourse().getCourseNumber() + "-" + section.getSectionNumber() + " and "
-                            + sectionToCompare.getSourceCourse().getCourseTitle() + " " + sectionToCompare.getSourceCourse().getCourseNumber() + "-" + sectionToCompare.getSectionNumber());
-                    continue checkPossibleSections;
+
+            if(!allowNonOpenClasses)
+                if(section.getStatus() != ClassStatus.OPEN)
+                    continue;
+
+            boolean conflictDetected = false;
+
+            try {
+                for (Section sectionToCompare : blockOutTimesList) {
+                    if (section.conflictsWith(sectionToCompare)) {
+                        throw new NoSchedulesPossibleException(section, sectionToCompare);
+                    }
                 }
+            } catch (NoSchedulesPossibleException innerException){
+                Log.w("Schedule Generator", "Conflict With Block-Out time detected");
+                scheduleConflict.addConflict(innerException);
+                conflictDetected = true;
             }
-            for (Section sectionToCompare : blockOutTimesList){
-                if (section.conflictsWith(sectionToCompare)){
-                    if (section.conflictsWith(sectionToCompare))
-                        if(scheduleConflict != null)
-                            scheduleConflict.addConflict(section, sectionToCompare);
-                        else scheduleConflict = new NoSchedulesPossibleException(section, sectionToCompare);
-                    Log.e("Schedule Conflict Error", "Conflict between " + section.getSourceCourse().getCourseTitle() + " " + section.getSourceCourse().getCourseNumber() + "-" + section.getSectionNumber() + " and "
-                            + sectionToCompare.getSourceCourse().getCourseNumber() + " " + sectionToCompare.getInstructors());
-                    continue checkPossibleSections;
+
+            try {
+                for (Section sectionToCompare : alreadySelectedSections) {
+                    if (section.conflictsWith(sectionToCompare)) {
+                        throw new NoSchedulesPossibleException(section, sectionToCompare);
+                    }
                 }
+            } catch (NoSchedulesPossibleException innerException){
+                Log.w("Schedule Generator", "Conflict With already selected sections detected");
+                scheduleConflict.addConflict(innerException);
+                conflictDetected = true;
             }
-            Log.i("Adding Section to List", section.toJSON().toString());
-            sectionArrayList.add(section);
-            try{
-                return scheduleGenerator(index + 1, courseArrayList, sectionArrayList, blockOutTimesList);
-            } catch (NoSchedulesPossibleException exception){
-                exception.printStackTrace();
-                sectionArrayList.remove(index);
-                scheduleConflict = new NoSchedulesPossibleException(exception);
+
+            if(!conflictDetected){
+                Log.i("Adding Section to List", section.toJSON().toString());
+                alreadySelectedSections.add(section);
+
+                try{
+                    return scheduleBuilder(index + 1, courseArrayList, alreadySelectedSections, blockOutTimesList, allowNonOpenClasses);
+                } catch (NoSchedulesPossibleException exception){
+                    exception.printStackTrace();
+                    alreadySelectedSections.remove(index);
+                    scheduleConflict = exception;
+                }
+
             }
 
         }throw scheduleConflict;
 
     }
 
-    public static ArrayList<Section> scheduleGenerator(ArrayList<Course> courseArrayList){
-        ArrayList<Section> possibleSections = new ArrayList<>();
-        for(Course course : courseArrayList){
-            Collections.shuffle(course.getSectionList());
-            possibleSections.add(course.getSectionList().get(0));
+
+    /**
+     * Initial schedule generator call. Will initialize the recursive version of schedule generator to execute logic.
+     *
+     * @param courseArrayList Arraylist with all courses this schedule can pick from.
+     * @return a schedule constructed with these courses
+     * @throws NoSchedulesPossibleException
+     */
+    public static Schedule scheduleFactoryIgnoreConflicts(ArrayList<Course> courseArrayList, int semesterNumber) throws NoSchedulesPossibleException{
+
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(UserData.getContext());
+        boolean allowNonOpenClassesSetting = settings.getBoolean(UserData.getContext().getResources().getString(R.string.pref_key_allow_nonopen_classes), false);
+
+        ArrayList<Section> selectedSections = scheduleBuilderIgnoreConflicts(0, courseArrayList, new ArrayList<Section>(), allowNonOpenClassesSetting);
+        return new Schedule("Generated Schedule", semesterNumber, selectedSections);
+    }
+
+    /**
+     * Recursively builds schedules using the provided information.
+     * It will get the course at the provided index, shuffle the arraylist of courses to ensure any two executions of the generator will be unique, and select a section.
+     * If the allowNonOpenClasses boolean is set to false the function will only allow selection of a section if the section status is {@link ClassStatus#OPEN}, otherwise it will allow any section.
+     * If all sections in the course have been tested and none of the sections is suitable the function will throw a NoSchedulesPossible error.
+     *
+     * If the recursive call throws a NoSchedulesPossible error the last selected section is removed from the selected sections list and the function selects the next section on the current index.
+     *
+     * @param index index of course in courseArrayList which will be attempted to be added to the schedule
+     * @param courseArrayList Arraylist of courses to select sections from.
+     * @param alreadySelectedSections Arraylist of sections which have already been considered for this schedule.
+     *                                Selected section is not permitted to conflict with this.
+     * @param allowNonOpenClasses Boolean toggle which allows classes to be added if they are not open
+     * @return Arraylist of section which do not conflict with each other or the provided block-out times.
+     * @throws NoSchedulesPossibleException if no section could be selected without conflicts.
+     */
+    public static ArrayList<Section> scheduleBuilderIgnoreConflicts(int index, ArrayList<Course> courseArrayList,ArrayList<Section> alreadySelectedSections, boolean allowNonOpenClasses) throws NoSchedulesPossibleException {
+
+        Log.i("schedule Factory", "Loop Counter:" + ((Integer) index).toString());
+
+        if (index == courseArrayList.size()){
+            return alreadySelectedSections;
         }
 
-        return possibleSections;
+        ArrayList<Section>  possibleSections = courseArrayList.get(index).getSectionList();
+        Collections.shuffle(possibleSections);
+        for (Section section : possibleSections) {
+
+            if (!allowNonOpenClasses)
+                if (section.getStatus() != ClassStatus.OPEN) {
+                    continue;
+                }
+
+            alreadySelectedSections.add(section);
+            return scheduleBuilderIgnoreConflicts(index + 1, courseArrayList, alreadySelectedSections, allowNonOpenClasses);
+
+        } throw new NoSchedulesPossibleException("No Open Classes found for course: "+ courseArrayList.get(index).getCourseDescription());
+
     }
 
     public int getSemesterNumber() {
         return semesterNumber;
     }
+
 }
 
+/**
+ * Exception for schedule generation. It will hold onto any error passed to it in string form to show the user after generation is complete.
+ */
 class NoSchedulesPossibleException extends Exception {
 
-    String message;
+    StringBuilder message;
 
+    /**
+     * Constructs a new exception with the message initialized to the string passed to it.
+     */
+    public NoSchedulesPossibleException(String message) {
+        this.message = new StringBuilder(message);
+    }
+
+    /**
+     * Constructs a new exception with the message initialized to match the content of the exception passed to it.
+     */
+    @SuppressWarnings("unused")
     public NoSchedulesPossibleException(NoSchedulesPossibleException innerError) {
-        if(innerError != null)
-            this.message = this.message + "\n" + innerError.message;
-        else
-            this.message = "";
+        this.message = new StringBuilder(innerError.message.toString());
     }
 
-    public NoSchedulesPossibleException(Section sourceSection, Section conflictingSection){
-        if(conflictingSection.getSourceCourse().getDepartmentAcronym().equalsIgnoreCase("BLOCKOUT")){
-            this.message = "Conflict between " + sourceSection.getSourceCourse().getDepartmentAcronym() +  " " + sourceSection.getSourceCourse().getCourseNumber() + "-" + sourceSection.getSectionNumber()
-                    + " and " + conflictingSection.getSourceCourse().getDepartmentAcronym() +  ": " + conflictingSection.getInstructors();
-        }
-        else
-            this.message = "Conflict between " + sourceSection.getSourceCourse().getDepartmentAcronym() +  " " + sourceSection.getSourceCourse().getCourseNumber() + "-" + sourceSection.getSectionNumber()
-                + " and " + conflictingSection.getSourceCourse().getDepartmentAcronym() +  " " + conflictingSection.getSourceCourse().getCourseNumber() + "-" + conflictingSection.getSectionNumber();
+    /**
+     * Constructs a new exception and sets the content of the message carried in it to a string describing the conflicting sections passed to the constructor.
+     */
+    public NoSchedulesPossibleException(Section firstSection, Section secondSection){
+        this.message = new StringBuilder("Conflict between " + firstSection.getDescription() + " and " + secondSection.getDescription());
     }
 
-    public void addConflict(Section sourceSection, Section conflictingSection){
+    /**
+     * Adds the content of the exception passed to the current message.
+     * Adds a new line if the current message has no previous content.
+     */
+    public void addConflict(NoSchedulesPossibleException innerError){
 
-        if(conflictingSection.getSourceCourse().getDepartmentAcronym().equalsIgnoreCase("BLOCKOUT")){
-            this.message = this.message + "\n" +
-                    "Conflict between " + sourceSection.getSourceCourse().getDepartmentAcronym() +  " " + sourceSection.getSourceCourse().getCourseNumber() + "-" + sourceSection.getSectionNumber()
-                    + " and " + conflictingSection.getSourceCourse().getDepartmentAcronym() +  ": " + conflictingSection.getInstructors();
-        }
-        else
-            this.message = this.message + "\n" +
-                    "Conflict between " + sourceSection.getSourceCourse().getDepartmentAcronym() +  " " + sourceSection.getSourceCourse().getCourseNumber() + "-" + sourceSection.getSectionNumber()
-                    + " and " + conflictingSection.getSourceCourse().getDepartmentAcronym() +  " " + conflictingSection.getSourceCourse().getCourseNumber() + "-" + conflictingSection.getSectionNumber();
+        this.message.append((this.message.length() == 0) ? "" : "\n").append(innerError.message.toString());
+
+        Log.w("Conflict Added", this.message.toString());
+    }
+
+    /**
+     * Adds the a string describing the conflicting sections passed to the method.
+     * Adds a new line if the current message has no previous content.
+     */
+    @SuppressWarnings("unused")
+    public void addConflict(Section firstSection, Section secondSection){
+        this.message.append((this.message.length() == 0) ? "" : "\n").append("Conflict between ").append(firstSection.getDescription()).append(" and ").append(secondSection.getDescription());
+
+        Log.w("Conflict Added", this.message.toString());
     }
 
     public String printConflict(){
-        Log.e("Cannot Generate", message);
-        return message;
+        Log.e("Cannot Generate", message.toString());
+        return message.toString();
     }
 
 }
