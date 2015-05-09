@@ -412,6 +412,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 if (success) {
                     mEmailView.setText("");
                     mPasswordView.setText("");
+                    
+                    // Set UserData to be called from various places in the app
                     UserData.setUserData(response);
                     Intent launchMainActivity = new Intent(LoginActivity.this, MainActivity.class);
                     LoginActivity.this.startActivity(launchMainActivity);
