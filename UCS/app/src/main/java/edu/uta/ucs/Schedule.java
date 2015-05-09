@@ -3,6 +3,7 @@ package edu.uta.ucs;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.text.StaticLayout;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -147,6 +148,10 @@ public class Schedule {
         return scheduleList;
     }
 
+    public String fileName(){
+        return Schedule.SCHEDULE_NAMES + "_" + name;
+    }
+
     /**
      * Saves all schedules in the list of schedules provided to a sharedPreferance file. This will overwrite all schedules currently in that file.
      *
@@ -181,34 +186,30 @@ public class Schedule {
     }
 
     /**
-     * Creates a query to check if the statuses of sections in this schedule have changed.
-     * @param context
+     *
+     * @param schedule
      */
-    public void verifySchedule(Context context){
+    public static void saveScheduleToFile(Schedule schedule){
 
-        Log.i("Verify Schedule", "About to attempt verify schedule");
+        Context context = UserData.getContext();
 
-        StringBuilder semesterParam = new StringBuilder(UserData.getContext().getString(R.string.validate_courses_param_semester));
-        StringBuilder departmentParam = new StringBuilder(UserData.getContext().getString(R.string.validate_courses_param_department));
-        StringBuilder classNumberParam = new StringBuilder(UserData.getContext().getString(R.string.validate_courses_param_class_number));
+        SharedPreferences.Editor editor = context.getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, context.MODE_PRIVATE).edit();
 
-        for (Section section : selectedSections){
-
-            semesterParam.append(semesterNumber).append(",");
-            departmentParam.append(section.getSourceCourse().getDepartmentAcronym()).append(",");
-            classNumberParam.append(section.getSectionID()).append(",");
+        String scheduleToString;
+        try {
+            scheduleToString = schedule.toJSON().toString();
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return;
         }
 
-        String semesterParamFinal = semesterParam.length() > 0 ? semesterParam.substring( 0, semesterParam.length() - 1 ): "";
-        String departmentParamFinal = departmentParam.length() > 0 ? departmentParam.substring( 0, departmentParam.length() - 1 ): "";
-        String courseNumberParamFinal = classNumberParam.length() > 0 ? classNumberParam.substring( 0, classNumberParam.length() - 1 ): "";
+        String scheduleName = schedule.fileName();
+        Log.i("Schedule to Save", "Name: " + scheduleName + " JSON: " + scheduleToString);
 
-        String urlFinal = UserData.getContext().getString(R.string.validate_courses_base) + semesterParamFinal + departmentParamFinal + courseNumberParamFinal;
-
-        HTTPService.FetchURL(urlFinal, ACTION_VERIFY_SCHEDULE, context);
+        editor.putString(scheduleName, scheduleToString);
+        editor.apply();
 
     }
-
 
     /**
      * Loads all schedules from the Schedule Savefile into an ArrayList.
@@ -239,6 +240,59 @@ public class Schedule {
         return scheduleArrayList;
     }
 
+
+    /**
+     * Removes the schedule with name equal to this schedule
+     *
+     * Future suggestion: Perhaps it should only remove the schedule if the contents remain the same.
+     */
+    public static void removeScheduleFromFile(Schedule schedule){
+
+        Context context = UserData.getContext();
+
+        SharedPreferences reader = context.getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = context.getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, context.MODE_PRIVATE).edit();
+        Map<String, ?> schedules = reader.getAll();
+
+        String scheduleFileName = schedule.fileName();
+
+
+        if(schedules.containsKey(scheduleFileName)){
+            editor.remove(scheduleFileName);
+            editor.apply();
+        }
+    }
+
+    /**
+     * Creates a query to check if the statuses of sections in this schedule have changed.
+     * @param context
+     */
+    public void verifySchedule(Context context){
+
+        Log.i("Verify Schedule", "About to attempt verify schedule");
+
+        StringBuilder semesterParam = new StringBuilder(UserData.getContext().getString(R.string.validate_courses_param_semester));
+        StringBuilder departmentParam = new StringBuilder(UserData.getContext().getString(R.string.validate_courses_param_department));
+        StringBuilder classNumberParam = new StringBuilder(UserData.getContext().getString(R.string.validate_courses_param_class_number));
+
+        for (Section section : selectedSections){
+
+            semesterParam.append(semesterNumber).append(",");
+            departmentParam.append(section.getSourceCourse().getDepartmentAcronym()).append(",");
+            classNumberParam.append(section.getSectionID()).append(",");
+        }
+
+        String semesterParamFinal = semesterParam.length() > 0 ? semesterParam.substring( 0, semesterParam.length() - 1 ): "";
+        String departmentParamFinal = departmentParam.length() > 0 ? departmentParam.substring( 0, departmentParam.length() - 1 ): "";
+        String courseNumberParamFinal = classNumberParam.length() > 0 ? classNumberParam.substring( 0, classNumberParam.length() - 1 ): "";
+
+        String urlFinal = UserData.getContext().getString(R.string.validate_courses_base) + semesterParamFinal + departmentParamFinal + courseNumberParamFinal;
+
+        HTTPService.FetchURL(urlFinal, ACTION_VERIFY_SCHEDULE, context);
+
+    }
+
+
     /**
      * Initial schedule generator call. Will initialize the recursive version of schedule generator to execute logic.
      *
@@ -250,7 +304,7 @@ public class Schedule {
     public static Schedule scheduleFactory(ArrayList<Course> courseArrayList, ArrayList<Section> blockOutTimesList, int semesterNumber) throws NoSchedulesPossibleException{
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(UserData.getContext());
-        boolean allowNonOpenClassesSetting = settings.getBoolean(UserData.getContext().getResources().getString(R.string.pref_key_military_time), false);
+        boolean allowNonOpenClassesSetting = settings.getBoolean(UserData.getContext().getResources().getString(R.string.pref_key_allow_nonopen_classes), false);
 
         ArrayList<Section> selectedSections = scheduleBuilder(0, courseArrayList, new ArrayList<Section>(), blockOutTimesList, allowNonOpenClassesSetting);
         return new Schedule("Generated Schedule", semesterNumber, selectedSections);
@@ -352,7 +406,7 @@ public class Schedule {
     public static Schedule scheduleFactoryIgnoreConflicts(ArrayList<Course> courseArrayList, int semesterNumber) throws NoSchedulesPossibleException{
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(UserData.getContext());
-        boolean allowNonOpenClassesSetting = settings.getBoolean(UserData.getContext().getResources().getString(R.string.pref_key_military_time), false);
+        boolean allowNonOpenClassesSetting = settings.getBoolean(UserData.getContext().getResources().getString(R.string.pref_key_allow_nonopen_classes), false);
 
         ArrayList<Section> selectedSections = scheduleBuilderIgnoreConflicts(0, courseArrayList, new ArrayList<Section>(), allowNonOpenClassesSetting);
         return new Schedule("Generated Schedule", semesterNumber, selectedSections);

@@ -31,4 +31,5 @@
     <string name="get_semester_data">/UTA/GetDepartmentClassData</string>
 
     <string name="change_settings_base">/UTA/Change</string>
+    <string name="delete_account">/UTA/DeleteAccount?email=</string>
 </resources>

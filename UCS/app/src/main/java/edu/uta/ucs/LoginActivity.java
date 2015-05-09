@@ -418,8 +418,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            Intent launchMainActivity = new Intent(LoginActivity.this, MainActivity.class);
-            LoginActivity.this.startActivity(launchMainActivity);
         }
     }
 

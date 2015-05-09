@@ -96,6 +96,15 @@ public class SettingsActivity extends PreferenceActivity {
                     return false;
                 }
             });
+
+            Preference deleteAccountButton = findPreference(getString(R.string.pref_key_delete_account));
+            updateEmailButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    deleteAccountDialog(SettingsActivity.this);
+                    return false;
+                }
+            });
         }
 
         /*
@@ -286,7 +295,36 @@ public class SettingsActivity extends PreferenceActivity {
                     return false;
                 }
             });
+
+            Preference deleteAccountButton = findPreference(getString(R.string.pref_key_delete_account));
+            updateEmailButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    deleteAccountDialog(getActivity());
+                    return false;
+                }
+            });
         }
+    }
+
+    private static void deleteAccountDialog(final Context context){
+
+        AlertDialog.Builder confirmDelete = new AlertDialog.Builder(context);
+        confirmDelete.setTitle("Are you sure you want to delete your account?");
+        confirmDelete.setPositiveButton("DELETE", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String deleteAccountURL = UserData.getContext().getString(R.string.delete_account) + UserData.getEmail();
+                HTTPService.FetchURL(deleteAccountURL, "null", context);
+            }
+        });
+        confirmDelete.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        confirmDelete.create().show();
     }
 
 

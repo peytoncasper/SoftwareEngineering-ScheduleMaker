@@ -1100,11 +1100,12 @@ public class SelectCourses extends ActionBarActivity {
 
 
             Schedule schedule = Schedule.scheduleFactory(coursesToSchedule, blockoutSections, selectedSemester.getSemesterNumber());
+
             DetailedSchedule.ShowSchedule(schedule, SelectCourses.this);
             Log.i("Built Schedule", schedule.toJSON().toString());
         } catch (NoSchedulesPossibleException noSchedulesPossible) {
             noSchedulesPossible.printStackTrace();
-            final AlertDialog.Builder noSchedulesPossibleDialog = new AlertDialog.Builder(SelectCourses.this);
+            AlertDialog.Builder noSchedulesPossibleDialog = new AlertDialog.Builder(SelectCourses.this);
             noSchedulesPossibleDialog.setTitle("Schedule Could be generated. Issues:");
             noSchedulesPossibleDialog.setMessage(noSchedulesPossible.printConflict());
             noSchedulesPossibleDialog.setNeutralButton("CHANGE COURSES", new DialogInterface.OnClickListener() {

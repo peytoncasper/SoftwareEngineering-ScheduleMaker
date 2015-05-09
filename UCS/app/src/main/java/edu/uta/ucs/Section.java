@@ -374,11 +374,16 @@ public class Section {
         this.sourceCourse = sourceCourse;
     }
 
+    /**
+     * String description for this section in format of DEPARTMENT CourseNumber - Section Number
+     * <br>EX: The first section of English, Rhetoric and Composition I would return a string "ENGL 1301-001".
+     * @return
+     */
     public String getDescription(){
         if (getSourceCourse().getDepartmentAcronym().equalsIgnoreCase("BLOCKOUT"))
             return getSourceCourse().getDepartmentAcronym() + ": " + getInstructors();
         else
-            return getSourceCourse().getDepartmentAcronym() + " " + getSourceCourse().getCourseNumber() + " - " + getSectionNumber();
+            return getSourceCourse().getDepartmentAcronym() + " " + getSourceCourse().getCourseNumber() + "-" + String.format("%03d", getSectionNumber());
     }
 
     /**
@@ -549,7 +554,7 @@ class SectionArrayAdapter extends ArrayAdapter<Section> {
             if (p.getSectionNumber() < 0 || p.getSectionNumber() == 0)
                 designationText.setVisibility(View.GONE);
             else
-                designationText.setText(p.getSourceCourse().getDepartmentAcronym() + " " + p.getSourceCourse().getCourseNumber() + "-" + String.format("%03d", p.getSectionNumber()));
+                designationText.setText(p.getDescription());
 
             switch (p.getStatus()) {
                 case OPEN:

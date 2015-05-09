@@ -778,6 +778,8 @@ public class SelectBlockoutTimes extends ActionBarActivity {
         builderSingle.show();
     }
 
+
+
     public void toggleTimepickers(View view){
 
         if(toggleDaysLayout.getVisibility() == View.VISIBLE)
@@ -794,6 +796,11 @@ public class SelectBlockoutTimes extends ActionBarActivity {
             addBlockoutTimesButton.setVisibility(View.GONE);
         else
             addBlockoutTimesButton.setVisibility(View.VISIBLE);
+
+        if(nameBlockoutTime.getVisibility() == View.VISIBLE)
+            nameBlockoutTime.setVisibility(View.GONE);
+        else
+            nameBlockoutTime.setVisibility(View.VISIBLE);
 
     }
 

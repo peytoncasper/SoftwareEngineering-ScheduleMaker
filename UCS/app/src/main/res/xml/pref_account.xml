@@ -10,6 +10,11 @@
         android:key="@string/pref_key_update_email"
         android:summary="@string/pref_summary_update_email"/>
 
+    <Preference
+        android:title="@string/pref_title_delete_account"
+        android:key="@string/pref_key_delete_account"
+        android:summary="@string/pref_summary_delete_account"/>
+
     <SwitchPreference
         android:title="@string/pref_title_allow_nonopen_classes"
         android:summary="@string/pref_summary_allow_nonopen_classes"

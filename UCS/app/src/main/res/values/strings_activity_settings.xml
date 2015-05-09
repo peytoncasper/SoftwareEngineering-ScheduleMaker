@@ -72,11 +72,16 @@
     <string name="pref_key_allow_nonopen_classes">allow_non_open_classes</string>
     <string name="pref_summary_allow_nonopen_classes">Allow the use of closed classes or classes with a waitlist when generating schedules</string>
 
-    <string name="pref_title_update_password">Update password</string>
+    <string name="pref_title_update_password">Update Password</string>
     <string name="pref_key_update_password">update_password</string>
     <string name="pref_summary_update_password">Change your password to a new one</string>
 
-    <string name="pref_title_update_email">Update email</string>
+    <string name="pref_title_update_email">Update Email</string>
     <string name="pref_key_update_email">update_email</string>
     <string name="pref_summary_update_email">Update your email to a new one</string>
+
+
+    <string name="pref_title_delete_account">Delete Account</string>
+    <string name="pref_key_delete_account">pref_key_delete_account</string>
+    <string name="pref_summary_delete_account">Remove your account from the server and wipe all schedules from memory</string>
 </resources>
