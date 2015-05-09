@@ -189,13 +189,6 @@
                 android:id="@+id/add_blockout_time_button"
                 android:onClick="addBlockoutTime"/>
 
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="REMOVE"
-                android:id="@+id/remove_blockout_time_button"
-                android:onClick="removeBlockoutTimes"
-                android:visibility="gone" />
         </LinearLayout>
 
         <ListView

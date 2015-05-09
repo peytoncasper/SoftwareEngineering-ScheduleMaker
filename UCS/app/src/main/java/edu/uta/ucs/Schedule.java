@@ -2,6 +2,7 @@ package edu.uta.ucs;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.text.StaticLayout;
 import android.util.Log;
@@ -292,7 +293,6 @@ public class Schedule {
 
     }
 
-
     /**
      * Initial schedule generator call. Will initialize the recursive version of schedule generator to execute logic.
      *
@@ -386,7 +386,7 @@ public class Schedule {
                 } catch (NoSchedulesPossibleException exception){
                     exception.printStackTrace();
                     alreadySelectedSections.remove(index);
-                    scheduleConflict.addConflict(exception);
+                    scheduleConflict = exception;
                 }
 
             }

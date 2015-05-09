@@ -25,7 +25,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:launchMode= "singleTask"
             android:name=".MainActivity"
             android:label="@string/title_activity_main" >
         </activity>
@@ -36,7 +35,6 @@
         </service>
 
         <activity
-            android:launchMode= "singleTask"
             android:name=".SelectCourses"
             android:label="@string/title_activity_select_courses"
             android:parentActivityName=".MainActivity" >
@@ -53,7 +51,6 @@
                 android:value="edu.uta.ucs.SelectCourses" />
         </activity>
         <activity
-            android:launchMode= "singleTask"
             android:name=".CreateAccount"
             android:label="@string/title_activity_create_account"
             android:theme="@android:style/Theme.Dialog" >
@@ -62,11 +59,9 @@
             android:name=".DetailedSchedule"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_detailed_schedule"
-            android:theme="@android:style/Theme.Dialog"
-            android:launchMode="singleTop">
+            android:theme="@android:style/Theme.Dialog">
         </activity>
         <activity
-            android:launchMode= "singleTask"
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings" >
         </activity>

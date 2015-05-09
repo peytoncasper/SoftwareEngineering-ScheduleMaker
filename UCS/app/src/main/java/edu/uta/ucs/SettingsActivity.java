@@ -98,7 +98,7 @@ public class SettingsActivity extends PreferenceActivity {
             });
 
             Preference deleteAccountButton = findPreference(getString(R.string.pref_key_delete_account));
-            updateEmailButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            deleteAccountButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     deleteAccountDialog(SettingsActivity.this);
@@ -287,6 +287,7 @@ public class SettingsActivity extends PreferenceActivity {
                 }
             });
 
+
             Preference updateEmailButton = findPreference(getString(R.string.pref_key_update_email));
             updateEmailButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
@@ -297,7 +298,7 @@ public class SettingsActivity extends PreferenceActivity {
             });
 
             Preference deleteAccountButton = findPreference(getString(R.string.pref_key_delete_account));
-            updateEmailButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            deleteAccountButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     deleteAccountDialog(getActivity());

@@ -345,6 +345,9 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         mEmailView.setAdapter(adapter);
     }
 
+    /**
+     * Receiver class for BroadcastManager.
+     */
     private class ResetPasswordReceiver extends BroadcastReceiver{
 
 
@@ -383,6 +386,9 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         }
     }
 
+    /**
+     * Receiver class for BroadcastManager.
+     */
     private class LoginReceiver extends BroadcastReceiver {
 
         @Override
@@ -421,7 +427,9 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         }
     }
 
-
+    /**
+     * Receiver class for BroadcastManager.
+     */
     private class LogoutReceiver extends BroadcastReceiver {
 
         @Override

@@ -42,7 +42,7 @@ public class DetailedSchedule extends Activity {
     public static final String URL_VALIDATE_COURSES =UserData.getContext().getString(R.string.validate_courses_base);
     public static final String URL_GET_COURSE_SECTIONS_PARAM_SEMESTER =UserData.getContext().getString(R.string.validate_courses_param_semester);
     public static final String URL_GET_COURSE_SECTIONS_PARAM_DEPARTMENT =UserData.getContext().getString(R.string.validate_courses_param_department);
-    public static final String URL_GET_COURSE_SECTIONS_PARAM_CLASSNUMBER =UserData.getContext().getString(R.string.validate_courses_param_class_number);
+    public static final String URL_GET_COURSE_SECTIONS_PARAM_CLASSNUMBER =UserData.getContext().getString(R.string.validate_courses_param_course_number);
 
     private static final String ACTION_GET_COURSE_SECTIONS = "ACTION_GET_COURSE_SECTIONS";
     private static final String ACTION_VERIFY_SCHEDULE = "ACTION_VERIFY_SCHEDULE";
@@ -53,7 +53,6 @@ public class DetailedSchedule extends Activity {
     private SectionArrayAdapter adapter;
     private ProgressDialog progressDialog;
 
-    int selection;
     boolean saveCheck = false;
 
     @Override
@@ -91,7 +90,6 @@ public class DetailedSchedule extends Activity {
 
         return super.onOptionsItemSelected(item);
     }
-
 
     @Override
     protected void onStart() {
@@ -318,6 +316,9 @@ public class DetailedSchedule extends Activity {
 
     }
 
+    /**
+     * Receiver class for BroadcastManager.
+     */
     class CouresAlternatesReciever extends BroadcastReceiver{
 
         /**
@@ -406,6 +407,9 @@ public class DetailedSchedule extends Activity {
         }
     }
 
+    /**
+     * Receiver class for BroadcastManager.
+     */
     class VerifyScheduleReciever extends BroadcastReceiver{
 
         /**
