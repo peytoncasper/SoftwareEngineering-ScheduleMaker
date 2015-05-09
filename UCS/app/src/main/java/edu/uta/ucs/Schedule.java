@@ -2,9 +2,7 @@ package edu.uta.ucs;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.preference.PreferenceManager;
-import android.text.StaticLayout;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -188,13 +186,13 @@ public class Schedule {
 
     /**
      *
-     * @param schedule
+     * @param schedule The schedule to save to file
      */
     public static void saveScheduleToFile(Schedule schedule){
 
         Context context = UserData.getContext();
 
-        SharedPreferences.Editor editor = context.getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, context.MODE_PRIVATE).edit();
+        SharedPreferences.Editor editor = context.getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, Context.MODE_PRIVATE).edit();
 
         String scheduleToString;
         try {
@@ -214,7 +212,7 @@ public class Schedule {
 
     /**
      * Loads all schedules from the Schedule Savefile into an ArrayList.
-     * @return
+     * @return An arraylist of all schedules which could be parsed from the shared preference file 'SCHEDULE_SAVEFILE'
      */
     public static ArrayList<Schedule> loadSchedulesFromFile(){
 
@@ -223,8 +221,7 @@ public class Schedule {
 
         ArrayList<Schedule> scheduleArrayList = new ArrayList<>(schedulesOnFile.size());
         for(String key : schedulesOnFile.keySet()){
-            String scheduleName = key;
-            Log.i("Load Schedules", "Loading Schedule Name: " + scheduleName);
+            Log.i("Load Schedules", "Loading Schedule Name: " + key);
             String scheduleBody = schedulesOnFile.get(key).toString();
             Log.i("Load Schedules", "Loading Schedule body: " + scheduleBody);
 
@@ -251,8 +248,8 @@ public class Schedule {
 
         Context context = UserData.getContext();
 
-        SharedPreferences reader = context.getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = context.getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, context.MODE_PRIVATE).edit();
+        SharedPreferences reader = context.getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = context.getSharedPreferences(Schedule.SCHEDULE_SAVEFILE, Context.MODE_PRIVATE).edit();
         Map<String, ?> schedules = reader.getAll();
 
         String scheduleFileName = schedule.fileName();
@@ -266,7 +263,7 @@ public class Schedule {
 
     /**
      * Creates a query to check if the statuses of sections in this schedule have changed.
-     * @param context
+     * @param context The context from which this method was called. Used to ensure HTTPService can function without errors.
      */
     public void verifySchedule(Context context){
 
@@ -475,6 +472,7 @@ class NoSchedulesPossibleException extends Exception {
     /**
      * Constructs a new exception with the message initialized to match the content of the exception passed to it.
      */
+    @SuppressWarnings("unused")
     public NoSchedulesPossibleException(NoSchedulesPossibleException innerError) {
         this.message = new StringBuilder(innerError.message.toString());
     }
@@ -501,6 +499,7 @@ class NoSchedulesPossibleException extends Exception {
      * Adds the a string describing the conflicting sections passed to the method.
      * Adds a new line if the current message has no previous content.
      */
+    @SuppressWarnings("unused")
     public void addConflict(Section firstSection, Section secondSection){
         this.message.append((this.message.length() == 0) ? "" : "\n").append("Conflict between ").append(firstSection.getDescription()).append(" and ").append(secondSection.getDescription());
 

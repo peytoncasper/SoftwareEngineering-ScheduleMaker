@@ -9,12 +9,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -444,7 +442,6 @@ class CourseInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInfo.Co
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
 
-        final int itemPosition = position;
         if (convertView == null){
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.desired_courses_listview, parent, false);
@@ -468,7 +465,7 @@ class CourseInfoArrayAdapter extends ArrayAdapter<SemesterInfo.DepartmentInfo.Co
             removeThisItemButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                courseInfoArrayList.remove(getItem(itemPosition));
+                courseInfoArrayList.remove(getItem(position));
                 notifyDataSetChanged();
             }
         });
@@ -1004,7 +1001,6 @@ public class SelectCourses extends ActionBarActivity {
                 progressDialog.dismiss();
 
             final ArrayList<Course> fetchedCourses;
-            ArrayList<Section> sectionArrayList = null;
 
             try {
                 response = new JSONObject(intent.getStringExtra(HTTPService.SERVER_RESPONSE));
@@ -1068,7 +1064,6 @@ public class SelectCourses extends ActionBarActivity {
             noSchedulesPossibleDialog.setPositiveButton("GENERATE IGNORING CONFLICTS", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    Schedule schedule = null;
                     generateConflictSchedule(coursesToSchedule);
                 }
             });

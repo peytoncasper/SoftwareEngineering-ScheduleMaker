@@ -39,7 +39,7 @@ import java.util.Map;
 public class DetailedSchedule extends Activity {
 
     public static final String URL_GET_COURSE_SECTIONS =UserData.getContext().getString(R.string.get_course_info_base);
-    public static final String URL_VALIDATE_COURSES =UserData.getContext().getString(R.string.validate_courses_base);
+    //public static final String URL_VALIDATE_COURSES =UserData.getContext().getString(R.string.validate_courses_base); // No longer used
     public static final String URL_GET_COURSE_SECTIONS_PARAM_SEMESTER =UserData.getContext().getString(R.string.validate_courses_param_semester);
     public static final String URL_GET_COURSE_SECTIONS_PARAM_DEPARTMENT =UserData.getContext().getString(R.string.validate_courses_param_department);
     public static final String URL_GET_COURSE_SECTIONS_PARAM_CLASSNUMBER =UserData.getContext().getString(R.string.validate_courses_param_course_number);

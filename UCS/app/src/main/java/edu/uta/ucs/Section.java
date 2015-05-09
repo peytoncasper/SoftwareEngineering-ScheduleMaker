@@ -377,7 +377,7 @@ public class Section {
     /**
      * String description for this section in format of DEPARTMENT CourseNumber - Section Number
      * <br>EX: The first section of English, Rhetoric and Composition I would return a string "ENGL 1301-001".
-     * @return
+     * @return returns a human readable string describing this section.
      */
     public String getDescription(){
         if (getSourceCourse().getDepartmentAcronym().equalsIgnoreCase("BLOCKOUT"))

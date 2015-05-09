@@ -76,7 +76,7 @@ public class HTTPService extends IntentService {
 
     /**
      * Handles JSON posts directly from intent.
-     * @param intent
+     * @param intent the intent the HTTPService was started with
      */
     private void postJSON(Intent intent){
 
@@ -116,7 +116,7 @@ public class HTTPService extends IntentService {
 
     /**
      * Handles URL gets directly from intent.
-     * @param intent
+     * @param intent the intent the HTTPService was started with
      */
     private void getURL(Intent intent){
 
@@ -173,7 +173,7 @@ public class HTTPService extends IntentService {
      * Will attempt to post given string to target URL as a StringEntity
      * @param targetURL URL to target
      * @param jsonString JSON as String to post to target URL.
-     * @return
+     * @return raw response from the parsed to a string.
      */
     public String postJSON(URL targetURL, String jsonString){
 
@@ -422,7 +422,7 @@ public class HTTPService extends IntentService {
         Log.i("HTTPService isJSON", stringToTest);
         UserData.log(stringToTest);
         try {
-            JSONObject testOBJ = new JSONObject(stringToTest);
+            new JSONObject(stringToTest);
             return true;
         } catch (JSONException e) {
             e.printStackTrace();
