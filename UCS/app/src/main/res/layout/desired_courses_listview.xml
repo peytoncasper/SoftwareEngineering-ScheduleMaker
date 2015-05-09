@@ -25,15 +25,20 @@
     <TextView
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="Course Title"
         android:textSize="@dimen/mediumlTextSize"
         android:id="@+id/desiredCourseTitle"
-        android:layout_weight="1" />
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:scrollHorizontally="true"
+        android:singleLine="true"
+        android:enabled="true" />
 
     <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="50dp"
+        android:layout_height="35dp"
         android:text="X"
         android:id="@+id/desiredCourseButton"
         android:background="#7fff8c8c"/>
