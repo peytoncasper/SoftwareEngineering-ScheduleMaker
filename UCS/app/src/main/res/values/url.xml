@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="domain">http://ucs.azurewebsites.net</string>
-    <string name="create_account_base">/UTA/CreateAccount?</string>
+    <string name="domain">http://192.168.2.12/UCS</string>
+    <string name="create_account_base">/CreateAccount?</string>
     <string name="create_account_param_username">username=</string>
     <string name="create_account_param_password"><![CDATA[&password=]]></string>
+    <string name="create_account_param_hashedpwd"><![CDATA[&hashedpwd=]]></string>
     <string name="create_account_param_email"><![CDATA[&email=]]></string>
 
-    <string name="get_course_info_base">/UTA/GetCourseInfo?</string>
+    <string name="get_course_info_base">/GetCourseInfo?</string>
 
-    <string name="validate_courses_base">/UTA/ValidateCourses?</string>
+    <string name="validate_courses_base">/ValidateCourses?</string>
     <string name="validate_courses_param_semester">semester=</string>
     <string name="validate_courses_param_department"><![CDATA[&department=]]></string>
     <string name="validate_courses_param_course_number"><![CDATA[&courseNumber=]]></string>
@@ -16,20 +17,21 @@
 
     <string name="email_exists_base">/UTA/EmailExists?email=</string>
 
-    <string name="logout_base">/UTA/Logout</string>
+    <string name="logout_base">/Logout</string>
     <string name="logout_param_email">email=</string>
     <string name="logout_param_account_settings"><![CDATA[&accountSettings]]></string>
 
-    <string name="login_base">/UTA/ValidateLogin?</string>
+    <string name="login_base">/PHPincludes/login_user.php?</string>
     <string name="login_param_username">username=</string>
     <string name="login_param_password"><![CDATA[&password=]]></string>
+    <string name="login_param_hashedpwd"><![CDATA[&hashedpwd=]]></string>
 
-    <string name="get_course_section_base">/UTA/GetCourseInfo?</string>
+    <string name="get_course_section_base">/GetCourseInfo?</string>
     <string name="get_course_sections_param_semester">semester=</string>
     <string name="get_course_sections_param_department"><![CDATA[&department=]]></string>
 
-    <string name="get_semester_data">/UTA/GetDepartmentClassData</string>
+    <string name="get_semester_data">/GetDepartmentClassData</string>
 
-    <string name="change_settings_base">/UTA/Change</string>
-    <string name="delete_account">/UTA/DeleteAccount?email=</string>
+    <string name="change_settings_base">/Change</string>
+    <string name="delete_account">/DeleteAccount?email=</string>
 </resources>
