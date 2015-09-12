@@ -3,9 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/UCS/app/src/androidTest/androidTest.iml" filepath="$PROJECT_DIR$/UCS/app/src/androidTest/androidTest.iml" />
-      <module fileurl="file://$PROJECT_DIR$/Android_Prototype/HttpRequestExample/app/src/androidTest/androidTest1.iml" filepath="$PROJECT_DIR$/Android_Prototype/HttpRequestExample/app/src/androidTest/androidTest1.iml" />
       <module fileurl="file://$PROJECT_DIR$/UCS/app/src/main/main.iml" filepath="$PROJECT_DIR$/UCS/app/src/main/main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/Android_Prototype/HttpRequestExample/app/src/main/main1.iml" filepath="$PROJECT_DIR$/Android_Prototype/HttpRequestExample/app/src/main/main1.iml" />
     </modules>
   </component>
 </project>
