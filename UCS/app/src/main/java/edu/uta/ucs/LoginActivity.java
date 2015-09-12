@@ -40,8 +40,11 @@ import android.widget.Toast;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.security.MessageDigest;
+
 
 
 /**
@@ -56,7 +59,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     private static final String LOGIN_URL = UserData.getContext().getString(R.string.login_base);
     private static final String[] LOGIN_PARAMS ={
             UserData.getContext().getString(R.string.login_param_username),
-            UserData.getContext().getString(R.string.login_param_password)};
+            UserData.getContext().getString(R.string.login_param_hashedpwd)};
     private static final String EMAIL_EXISTS_URL = UserData.getContext().getString(R.string.email_exists_base);
 
     /**
@@ -147,8 +150,41 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         // Store values at the time of the login attempt.
         String email = mEmailView.getText().toString();
         String password = mPasswordView.getText().toString();
+        String hashedpwd = "";
 
-        String url = LOGIN_URL + LOGIN_PARAMS[0] + email + LOGIN_PARAMS[1] + password;
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-512");
+            md.update(password.getBytes());
+
+            byte byteData[] = md.digest();
+
+            //convert the byte to hex format method 1
+            StringBuffer sb = new StringBuffer();
+            for (int i = 0; i < byteData.length; i++) {
+                sb.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
+            }
+
+            //convert the byte to hex format method 2
+            StringBuffer hexString = new StringBuffer();
+            for (int i=0;i<byteData.length;i++) {
+                String hex=Integer.toHexString(0xff & byteData[i]);
+                if(hex.length()==1) hexString.append('0');
+                hexString.append(hex);
+            }
+            hashedpwd = hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
+        JSONObject loginData = new JSONObject();
+
+        try {
+            loginData.put("username",email);
+            loginData.put("hashedpwd",hashedpwd);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        String url = LOGIN_URL + LOGIN_PARAMS[0] + email + LOGIN_PARAMS[1] + hashedpwd;
 
         boolean cancel = false;
         View focusView = null;
@@ -183,7 +219,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             // perform the user login attempt.
             showProgress(true);
 
-            HTTPService.FetchURL(url, ACTION_LOGIN, this);
+            //HTTPService.FetchURL(url, ACTION_LOGIN, this);
+            HTTPService.PostJSON(LOGIN_URL, loginData,ACTION_LOGIN,this);
 
             /*
             Intent intent = new Intent(this, HTTPService.class);
@@ -398,7 +435,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             String message;
             try {
                 response = new JSONObject(intent.getStringExtra(HTTPService.SERVER_RESPONSE));
-                success = response.getBoolean("Success");
+                success = response.getBoolean("SUCCESS");
                 if(response.has("Message")) {
                     if(success)
                         message = response.getString("Message");

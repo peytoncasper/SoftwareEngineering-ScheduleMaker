@@ -8,11 +8,14 @@ import android.util.Log;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
@@ -25,6 +28,8 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -179,7 +184,19 @@ public class HTTPService extends IntentService {
 
         String response;
 
+        ArrayList<NameValuePair> parsedJSON = new ArrayList<>();
+
         try {
+
+            JSONObject tempJSON = new JSONObject(jsonString);
+            Iterator<String> JSONkeys = tempJSON.keys();
+
+            while (JSONkeys.hasNext()){
+                String key = JSONkeys.next();
+                parsedJSON.add(new BasicNameValuePair(key, tempJSON.get(key).toString()));
+            }
+
+            Log.i("HTTPService", "parsedJSON  " + parsedJSON.toString());
 
             HttpParams httpParams = new BasicHttpParams();
             HttpConnectionParams.setConnectionTimeout(httpParams, connectionTimeoutMilliseconds);
@@ -191,7 +208,8 @@ public class HTTPService extends IntentService {
             Log.i("HTTPService", "postJSON httpPost.getMethod: " + httpPost.getMethod());
 
             // Prepare JSON to send by setting the entity
-            httpPost.setEntity(new StringEntity(jsonString, "UTF-8"));
+            //httpPost.setEntity(new StringEntity(jsonString, "UTF-8"));
+            httpPost.setEntity(new UrlEncodedFormEntity(parsedJSON));
 
             // Set up the header types needed to properly transfer JSON
             //httpPost.setHeader("Content-Type", "application/json");
@@ -207,6 +225,10 @@ public class HTTPService extends IntentService {
             e.printStackTrace();
             Log.d("HTTPService postJSON", "HTTP Request Failed");
             response = BAD_RESPONSE.substring(0, BAD_RESPONSE.length()-1) + ",\"Message\":\"bad connection\"}";
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.d("HTTPService postJSON", "JSON Parsing Failed");
+            response = BAD_RESPONSE.substring(0, BAD_RESPONSE.length()-1) + ",\"Message\":\"bad JSON\"}";
         }
 
         return response;
